@@ -10,7 +10,7 @@ import pandas as pd
 import time
 import json
 
-with open('D:/College/S2/COMP30830/Project/authentication.txt') as f:
+with open('../authentication.txt') as f:
     auth=f.read().split('\n')
     
 Key=auth[0]
