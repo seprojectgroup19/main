@@ -34,8 +34,8 @@ def scrape_dynamic_data():
     bike_stands = Data['bike_stands']
     last_update = Data['last_update']
     number = Data['number']
-    status = Data['status']     
-
+    status = Data['status']
+    
     for i in range(Data.shape[0]):
 
         SQL = """
@@ -61,7 +61,9 @@ def scrape_dynamic_data():
 
         except Exception as e:
             print(e)
-            continue 
+            continue
+    
+        
 
 if __name__ == '__main__':
     
