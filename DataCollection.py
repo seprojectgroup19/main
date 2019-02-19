@@ -63,7 +63,13 @@ def scrape_dynamic_data():
             engine.execute(SQL)
 
         except Exception as e:
-            print(e)
+            
+            dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+            with open('Error_log.txt','r') as f:
+                f.write('Error detected at {}\n'.format(dtime))
+                f.write('=' * 10,'\n')
+                f.write(e,'\n')
+                f.write('=' * 10,'\n')
             continue
             
 def continuous_scrape():
