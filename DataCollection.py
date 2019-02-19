@@ -11,7 +11,7 @@ import requests as req
 import pandas as pd
 import time
 
-with open('authentication.txt') as f:
+with open('D:\College\S2\COMP30830\Project\authentication.txt') as f:
     auth=f.read().split('\n')
     
 Key=auth[0]
@@ -85,9 +85,6 @@ def continuous_scrape():
 
         # sleep for 1 minute
         time.sleep(60)
-        
-
-        
 
 if __name__ == '__main__':
     
