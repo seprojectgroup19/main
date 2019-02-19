@@ -89,8 +89,8 @@ def continuous_scrape():
         dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         print('Data written to DublinBikesDB.dynamic at {0}'.format(dtime))
 
-        # sleep for 5 mins - runtime
-        time.sleep(60-(E-S))
+        # sleep for 1 min
+        time.sleep(60)
         
 continuous_scrape()
         
