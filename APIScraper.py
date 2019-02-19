@@ -38,8 +38,6 @@ def scrape_dynamic_data():
     number = Data['number']
     status = Data['status']
     
-    print(Data.shape[0])
-    
     for i in range(Data.shape[0]):
 
         SQL = """
