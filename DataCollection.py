@@ -11,15 +11,18 @@ import requests as req
 import pandas as pd
 import time
 
-Key="92ded68b5bc1323a166df2a454415c5658b8f7af"
-Contract="Dublin"
+with open('authentication.txt') as f:
+    auth=f.read().split('\n')
+    
+Key=auth[0]
+Contract=auth[1]
+URL =auth[2]
+LOG =auth[3]
+PWD =auth[4]
+DB  =auth[5]
+TAB =auth[6]
+PORT=auth[7]
 
-URL ="dublinbikesdb.ckigaawhnr98.us-east-2.rds.amazonaws.com"
-LOG ="DBAdmin"
-PWD ="dublinbikesdatabase"
-DB  ="DublinBikesDB"
-TAB ="dynamic"
-PORT="3306"
 ENG ="mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(LOG,PWD,URL,PORT,DB)
 
 engine = sqla.create_engine(ENG,echo=False)
@@ -78,10 +81,12 @@ def continuous_scrape():
 
         # Print update message
         dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        print('Data written to DublinBikesDB.dynamic at '.format(dtime))
+        print('Data written to DublinBikesDB.dynamic at {0}'.format(dtime))
 
         # sleep for 5 mins - runtime
-        time.sleep(300-(E-S))
+        time.sleep(60-(E-S))
+        
+continuous_scrape()
         
 
 if __name__ == '__main__':
