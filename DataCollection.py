@@ -11,7 +11,7 @@ import requests as req
 import pandas as pd
 import time
 
-with open('D:\College\S2\COMP30830\Project\authentication.txt') as f:
+with open('D:/College/S2/COMP30830/Project/authentication.txt') as f:
     auth=f.read().split('\n')
     
 Key=auth[0]
@@ -65,11 +65,11 @@ def scrape_dynamic_data():
         except Exception as e:
             
             dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            with open('Error_log.txt','r') as f:
+            with open('Error_log.txt','w') as f:
                 f.write('Error detected at {}\n'.format(dtime))
-                f.write('=' * 10,'\n')
-                f.write(e,'\n')
-                f.write('=' * 10,'\n')
+                f.write('\n===================\n')
+                f.write(str(e))
+                f.write('\n===================\n')
             continue
             
 def continuous_scrape():
