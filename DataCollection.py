@@ -36,6 +36,33 @@ def scrape_dynamic_data():
     number = Data['number']
     status = Data['status']     
 
+    for i in range(Data.shape[0]):
+
+        SQL = """
+        INSERT INTO {0}.{1} (available_bike_stands,
+                   available_bikes,
+                   bike_stands,
+                   last_update,
+                   number,
+                   status)
+        VALUES ({2}, {3}, {4}, {5}, {6}, \"{7}\")
+        """.format(
+            DB,
+            TAB,
+            available_bike_stands[i],
+            available_bikes[i],
+            bike_stands[i],
+            last_update[i],
+            number[i],
+            status[i])
+
+        try: 
+            engine.execute(SQL)
+
+        except Exception as e:
+            print(e)
+            continue 
+
 if __name__ == '__main__':
     
     pass
