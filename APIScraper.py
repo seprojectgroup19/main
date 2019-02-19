@@ -65,8 +65,6 @@ def scrape_dynamic_data():
 
         except:
             pass
-            
-    return counter 
 
 def continuous_scrape():
     
