@@ -34,56 +34,8 @@ def scrape_dynamic_data():
     bike_stands = Data['bike_stands']
     last_update = Data['last_update']
     number = Data['number']
-    status = Data['status']
-    
-    for i in range(Data.shape[0]):
-
-        SQL = """
-        INSERT INTO {0}.{1} (available_bike_stands,
-                   available_bikes,
-                   bike_stands,
-                   last_update,
-                   number,
-                   status)
-        VALUES ({2}, {3}, {4}, {5}, {6}, \"{7}\")
-        """.format(
-            DB,
-            TAB,
-            available_bike_stands[i],
-            available_bikes[i],
-            bike_stands[i],
-            last_update[i],
-            number[i],
-            status[i])
-
-        try: 
-            engine.execute(SQL)
-
-        except Exception as e:
-            print(e)
-            continue
-            
-def continuous_scrape():
-    
-    while True:
-        
-        # start timer to time how long script takes
-        S = time.time()      
-
-        #scrape data and write to RDS DB
-        scrape_dynamic_data()
-
-        # end timer
-        E = time.time()
-
-        # Print update message
-        dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-        print('Data written to DublinBikesDB.dynamic at '.format(dtime))
-
-        # sleep for 5 mins - runtime
-        time.sleep(300-(E-S))
-        
+    status = Data['status']     
 
 if __name__ == '__main__':
-    print('Here')
+    
     pass
