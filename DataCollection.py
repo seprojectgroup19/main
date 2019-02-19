@@ -92,9 +92,9 @@ def continuous_scrape():
         # sleep for 1 min
         time.sleep(60)
         
-continuous_scrape()
+
         
 
 if __name__ == '__main__':
     
-    pass
+    continuous_scrape()
