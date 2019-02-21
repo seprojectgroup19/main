@@ -8,9 +8,8 @@ import sqlalchemy as sqla
 import requests as req
 import pandas as pd
 import time
-import json
 
-with open('../authentication.txt') as f:
+with open('D:/College/S2/COMP30830/Project/authentication.txt') as f:
     auth=f.read().split('\n')
     
 Key=auth[0]
@@ -60,11 +59,8 @@ def scrape_dynamic_data():
 
         try: 
             engine.execute(SQL)
-            dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            print('Data written to DublinBikesDB.dynamic at {}'.format(dtime))
 
-        except Exception as e:
-            print(e)
+        except:
             pass
 
 def continuous_scrape():
@@ -74,7 +70,9 @@ def continuous_scrape():
         #scrape data and write to RDS DB
         scrape_dynamic_data()
 
-        # sleep for 5 mins - runtime
+        dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
+        print('Data written to DublinBikesDB.dynamic at {}'.format(dtime))
+        
         time.sleep(60)
         
 continuous_scrape()

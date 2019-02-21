@@ -1,5 +1,0 @@
-Error detected at 2019-02-19 20:28:34
-
-===================
-(MySQLdb._exceptions.IntegrityError) (1062, "Duplicate entry '88-1550608019000' for key 'PRIMARY'") [SQL: '\n        INSERT INTO DublinBikesDB.dynamic (available_bike_stands,\n                   available_bikes,\n                   bike_stands,\n                   last_update,\n                   number,\n                   status)\n        VALUES (9, 21, 30, 1550608019000, 88, "OPEN")\n        '] (Background on this error at: http://sqlalche.me/e/gkpj)
-===================
