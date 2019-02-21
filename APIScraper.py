@@ -67,12 +67,15 @@ def continuous_scrape():
     
     while True:
         
+        S = time.time()
         #scrape data and write to RDS DB
         scrape_dynamic_data()
+
+        E = time.time()
 
         dtime=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         print('Data written to DublinBikesDB.dynamic at {}'.format(dtime))
         
-        time.sleep(60)
+        time.sleep(300-(S-E))
         
 continuous_scrape()
