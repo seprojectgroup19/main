@@ -23,6 +23,9 @@ PORT=auth[7]
 
 ENG ="mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(LOG,PWD,URL,PORT,DB)
 
+# Use the version below for EC2 instance with pymysql installed, 
+#ENG ="mysql+pymysql://{0}:{1}@{2}:{3}/{4}".format(LOG,PWD,URL,PORT,DB)
+
 engine = sqla.create_engine(ENG,echo=False)
 
 def scrape_dynamic_data(count, err):
