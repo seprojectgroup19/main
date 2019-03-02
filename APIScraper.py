@@ -8,6 +8,21 @@ import sqlalchemy as sqla
 import requests as req
 import pandas as pd
 import time
+import smtplib
+
+def notify(message):
+    
+    mail = smtplib.SMTP('smtp.gmail.com',587)
+    mail.ehlo()
+    
+    mail.starttls()
+    mail.login('barronciaran@gmail.com', '**************')
+    mail.sendmail('barronciaran@gmail.com','ciaran.barron1@ucdconnect.ie',message)
+    
+    mail.close()
+
+
+
 
 with open('../authentication.txt') as f:
     auth=f.read().split('\n')
@@ -89,4 +104,11 @@ def continuous_scrape():
 
         time.sleep(300-(E-S))
 
-continuous_scrape()
+try:
+    continuous_scrape()
+    
+except Exception as e:
+    
+    message = 'EC2 Bikes Scraper has stopped running. \n\n Error Message: ' + repr(e)
+    notify(message)
+    print('Scraper stopped. Error message sent')
