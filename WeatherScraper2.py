@@ -145,12 +145,12 @@ def notify(message):
     
     mail.close()
         
-#try:
-scrape_data()
+try:
+    scrape_data()
     
-# except Exception  as e:
+except Exception  as e:
 #     
-# #     message = 'EC2 Weather Scraper has stopped running. \n\n Error Message: ' + repr(e)
-# #     notify(message)
+    message = 'EC2 Weather Scraper has stopped running. \n\n Error Message: ' + repr(e)
+    notify(message)
 #     print(repr(e))
 #     print('Scraper stopped. Error message sent')
