@@ -58,6 +58,8 @@ def area_classifier(lat, lng):
 
 def weather_scrape(df, i):
     current_conditions = df['currently']
+
+    # Remove columns that aren't of use
     current_conditions.drop(['data', 'meteoalarm-license', 'nearest-station', 'sources', 'units'], inplace=True)
     sql = """INSERT INTO {0}.{1} (number,
                                 apparentTemperature,
@@ -82,13 +84,6 @@ def weather_scrape(df, i):
                                 VALUES ({2}, {3}, {4}, {5}, {6}, \"{7}\", {8}, {9}, {10}, {11}, {12}, {13}, \"{14}\", {15}, {16}, {17}, {18}, {19}, {20}, {21})
                                 """.format(DB, TAB, i[0], *current_conditions)
 
-    '''[0], current_conditions[1], current_conditions[2], current_conditions[3],
-               current_conditions[4], current_conditions[5],
-               current_conditions[6], current_conditions[7], current_conditions[8], current_conditions[9],
-               current_conditions[10], current_conditions[11],
-               current_conditions[12], current_conditions[13], current_conditions[14], current_conditions[15],
-               current_conditions[16], current_conditions[17],
-               current_conditions[18]'''
     try:
         engine.execute(sql)
     except:
@@ -97,6 +92,7 @@ def weather_scrape(df, i):
 
 def weather():
     while True:
+        # Begin a timer (only want to run every 5 minutes - execution time)
         start = time.time()
         response_a = r.get("https://api.darksky.net/forecast/{}/53.344743,-6.290209?units=si".format(darksky_key))
         response_b = r.get("https://api.darksky.net/forecast/{}/53.353709,-6.268752?units=si".format(darksky_key))
@@ -126,4 +122,5 @@ region_dict = {}
 for n in positions:
     region_dict[n[0]] = area_classifier(n[1], n[2])[0]
 
+# Leave running on server
 weather()
