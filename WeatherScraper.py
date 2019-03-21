@@ -12,7 +12,7 @@ darksky_key = auth[2]
 URL = auth[3]
 LOG = auth[4]
 PWD = auth[5]
-PORT = auth[6]
+PORT = auth[6]  
 DB = auth[7]
 TAB = auth[8]
 
