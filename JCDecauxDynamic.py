@@ -25,10 +25,13 @@ def dynamic_scraper():
     while True:
         # Start timer (only want to run function every 5 minutes - execution time)
         start = time.time()
+        # Connect to JCDecaux API
         response = r.get("https://api.jcdecaux.com/vls/v1/stations?contract={0}&apiKey={1}".format(contract, bikes_key))
         data = response.json()
         df = pd.DataFrame(data)
+        # Loop over rows in scraped data frame
         for i, row in df.iterrows():
+            # Insert values into table in SQL databse
             sql = """INSERT INTO {0}.{1}
                         (available_bike_stands,
                         available_bikes,
@@ -46,7 +49,6 @@ def dynamic_scraper():
                                row.number,
                                row.status)
             engine.execute(sql)
-
         end = time.time()
         time.sleep(300-(end-start))
 
