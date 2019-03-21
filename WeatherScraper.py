@@ -121,7 +121,7 @@ def weather():
         time.sleep(300-(end-start))
 
 
-# Select the positions of each station
+# Select the positions of each station from SQL database
 positions = engine.execute("SELECT number, latitude, longitude FROM static")
 # Create a dictionary to store which of the three regions each station belongs to
 region_dict = {}
