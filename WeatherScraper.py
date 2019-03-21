@@ -4,6 +4,7 @@ import pandas as pd
 import sqlalchemy as sqla
 import requests as r
 
+# Use an authentication file to store sensitive data
 with open("C:/Users/Daniel/Documents/MSc/Semester 2/Software Engineering Project/authentication.txt") as f:
     auth = f.read().split("\n")
 
@@ -17,15 +18,15 @@ PORT = auth[6]
 DB = auth[7]
 TAB = auth[8]
 
+# Connect to SQL database
 ENG = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(LOG, PWD, URL, PORT, DB)
 engine = sqla.create_engine(ENG, echo=False)
 
 
 def distance(x1, y1, x2, y2):
     """
-    Returns distance between two points
-    Assumes that locally (over <10 km) earth is flat,
-    otherwise would use haversine formula to calculate great-circle distance
+    Returns distance between two points. Assumes that locally (over <10 km) earth is flat, otherwise would use
+    haversine formula to calculate great-circle distance.
     :param x1: latitude of position 1
     :param y1: longitude of position 1
     :param x2: latitude of position 2
@@ -45,6 +46,7 @@ def area_classifier(lat, lng):
     :param lng: longitude of position
     :return: region
     """
+    # Split Dublin city into roughly 3 equally spaced regions
     region_a = [53.344743, -6.290209]
     region_b = [53.353709, -6.268752]
     region_c = [53.338747, -6.252959]
@@ -81,6 +83,7 @@ def weather_scrape(df, i):
     windSpeed)
     VALUES ({2}, {3}, {4}, {5}, {6}, \"{7}\", {8}, {9}, {10}, {11}, {12}, {13}, \"{14}\", {15}, {16}, {17}, {18}, {19}, {20}, {21})
     """.format(i[0], *current_conditions)
+
     '''[0], current_conditions[1], current_conditions[2], current_conditions[3],
                current_conditions[4], current_conditions[5],
                current_conditions[6], current_conditions[7], current_conditions[8], current_conditions[9],
@@ -92,12 +95,6 @@ def weather_scrape(df, i):
         engine.execute(sql)
     except:
         pass
-
-
-positions = engine.execute("SELECT number, latitude, longitude FROM static")
-region_dict = {}
-for n in positions:
-    region_dict[n[0]] = area_classifier(n[1], n[2])[0]
 
 
 def weather():
@@ -122,4 +119,13 @@ def weather():
                 weather_scrape(df_c, i)
         end = time.time()
         time.sleep(300-(end-start))
+
+
+# Select the positions of each station
+positions = engine.execute("SELECT number, latitude, longitude FROM static")
+# Create a dictionary to store which of the three regions each station belongs to
+region_dict = {}
+for n in positions:
+    region_dict[n[0]] = area_classifier(n[1], n[2])[0]
+
 weather()
