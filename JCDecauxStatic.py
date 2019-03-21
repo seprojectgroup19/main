@@ -5,6 +5,7 @@ import sqlalchemy as sqla
 with open("C:/Users/Daniel/Documents/MSc/Semester 2/Software Engineering Project/authentication.txt") as f:
     auth = f.read().split("\n")
 
+# Authentication data from file
 bikes_key = auth[0]
 contract = auth[1]
 URL = auth[3]
@@ -22,11 +23,13 @@ engine = sqla.create_engine(ENG, echo=False)
 def static_scraper():
     """
     Update static table in SQL database with data scraped from JCDecaux
-    :return:
     """
+    # Connect to JCDecaux
     response = r.get("https://api.jcdecaux.com/vls/v1/stations?contract={0}&apiKey={1}".format(contract, bikes_key))
     data = response.json()
     df = pd.DataFrame(data)
+
+    # Begin populating table
     for i, row in df.iterrows():
         sql = """UPDATE {0}.{1}
         SET contract_name='Dublin',
@@ -44,4 +47,6 @@ def static_scraper():
         """.format(DB, TAB, int(row[0]), row[1], row[2], float(row[3])), float(row[4])
         engine.execute(sql)
 
-static_scraper(df)
+
+# ONLY RUN ONCE
+static_scraper()
