@@ -8,8 +8,6 @@ import requests as r
 with open("C:/Users/Daniel/Documents/MSc/Semester 2/Software Engineering Project/authentication.txt") as f:
     auth = f.read().split("\n")
 
-bikes_key = auth[0]
-contract = auth[1]
 darksky_key = auth[2]
 URL = auth[3]
 LOG = auth[4]
@@ -62,27 +60,27 @@ def weather_scrape(df, i):
     current_conditions = df['currently']
     current_conditions.drop(['data', 'meteoalarm-license', 'nearest-station', 'sources', 'units'], inplace=True)
     sql = """INSERT INTO {0}.{1} (number,
-    apparentTemperature,
-    cloudCover,
-    dewPoint,
-    humidity,
-    icon,
-    nearestStormBearing,
-    nearestStormDistance,
-    ozone,
-    precipIntensity,
-    precipProbability,
-    pressure,
-    summary,
-    temperature,
-    time,
-    uvIndex,
-    visibility,
-    windBearing,
-    windGust,
-    windSpeed)
-    VALUES ({2}, {3}, {4}, {5}, {6}, \"{7}\", {8}, {9}, {10}, {11}, {12}, {13}, \"{14}\", {15}, {16}, {17}, {18}, {19}, {20}, {21})
-    """.format(i[0], *current_conditions)
+                                apparentTemperature,
+                                cloudCover,
+                                dewPoint,
+                                humidity,
+                                icon,
+                                nearestStormBearing,
+                                nearestStormDistance,
+                                ozone,
+                                precipIntensity,
+                                precipProbability,
+                                pressure,
+                                summary,
+                                temperature,
+                                time,
+                                uvIndex,
+                                visibility,
+                                windBearing,
+                                windGust,
+                                windSpeed)
+                                VALUES ({2}, {3}, {4}, {5}, {6}, \"{7}\", {8}, {9}, {10}, {11}, {12}, {13}, \"{14}\", {15}, {16}, {17}, {18}, {19}, {20}, {21})
+                                """.format(DB, TAB, i[0], *current_conditions)
 
     '''[0], current_conditions[1], current_conditions[2], current_conditions[3],
                current_conditions[4], current_conditions[5],
