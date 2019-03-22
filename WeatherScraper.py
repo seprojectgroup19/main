@@ -1,25 +1,8 @@
 import time
 import numpy as np
 import pandas as pd
-import sqlalchemy as sqla
 import requests as r
-
-# Use an authentication file to store sensitive data
-with open("C:/Users/Daniel/Documents/MSc/Semester 2/Software Engineering Project/authentication.txt") as f:
-    auth = f.read().split("\n")
-
-darksky_key = auth[2]
-URL = auth[3]
-LOG = auth[4]
-PWD = auth[5]
-PORT = auth[6]
-DB = auth[7]
-TAB = auth[8]
-
-# Connect to SQL database
-ENG = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(LOG, PWD, URL, PORT, DB)
-engine = sqla.create_engine(ENG, echo=False)
-
+from Authenticator import read_auth
 
 def distance(x1, y1, x2, y2):
     """
@@ -83,8 +66,8 @@ def weather_scrape(df, i):
                                 windSpeed)
                                 VALUES ({2}, {3}, {4}, {5}, {6}, \"{7}\", {8}, {9}, {10}, {11}, {12}, {13}, \"{14}\", {15}, {16}, {17}, {18}, {19}, {20}, {21})
                                 """.format(DB, TAB, i[0], *current_conditions)
-
     try:
+        pass
         engine.execute(sql)
     except:
         pass
@@ -114,11 +97,15 @@ def weather():
         end = time.time()
         time.sleep(300-(end-start))
 
+[darksky_key, DB, engine] = read_auth()[2:]
+TAB = "weather"
 
 # Select the positions of each station from SQL database
 positions = engine.execute("SELECT number, latitude, longitude FROM static")
+
 # Create a dictionary to store which of the three regions each station belongs to
 region_dict = {}
+
 for n in positions:
     region_dict[n[0]] = area_classifier(n[1], n[2])[0]
 
