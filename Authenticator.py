@@ -21,4 +21,4 @@ def read_auth():
     # Connect to SQL database
     eng = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(log, pwd, url, port, db)
     engine = sqla.create_engine(eng, echo=False)
-    return bikes_key, contract, engine
+    return bikes_key, contract, engine, db
