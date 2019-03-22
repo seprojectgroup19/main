@@ -28,7 +28,11 @@ def create_station_dictionary(*argv):
         for arg in argv:
 
             if type(arg) == int:
-                station_dict[arg] = station(arg)
+                if arg == 20:
+                    # Station 20 doesn't exist
+                    continue
+                else:
+                    station_dict[arg] = station(arg)
 
             elif type(arg) == range or type(arg) == list:
                 for item in list(arg):
@@ -36,7 +40,14 @@ def create_station_dictionary(*argv):
                         raise Exception(
                             f"{item} must be of type int."
                         )
+                    elif item == 20:
+                        # Station 20 doesn't exist
+                        continue
                     else:
+                        if not (2 <= item <= 115):
+                            raise Exception(
+                                f"{item} must be a station number in the range [2, 115]"
+                            )
                         station_dict[item] = station(item)
                 if type(arg) == range:
                     station_dict[arg[-1]+1] = station(arg[-1]+1)
@@ -51,6 +62,10 @@ def create_station_dictionary(*argv):
                     f"{arg} must be of type int."
                 )
             else:
+                if not (2 <= arg <= 115):
+                    raise Exception(
+                        f"{arg} must be a station number in the range [2, 115]"
+                    )
                 station_dict[arg] = station(arg)
 
     else:
