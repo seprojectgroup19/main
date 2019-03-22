@@ -36,6 +36,6 @@ def dynamic_scraper():
         time.sleep(300-(end-start))
 
 
-bikes_key, contract, engine, DB = read_auth()
+[bikes_key, contract], [DB, engine] = [read_auth()[:2], read_auth()[3:]]
 TAB = "dynamic"
 dynamic_scraper()
