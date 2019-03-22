@@ -6,7 +6,7 @@ def read_auth():
     Function to read authentication file to save time for each script
     :return: Key for JCDecaux, JCDecaux contract, engine for SQL database
     """
-    with open("C:/Users/Daniel/Documents/MSc/Semester 2/Software Engineering Project/authentication.txt") as f:
+    with open("../authentication.txt") as f:
         auth = f.read().split("\n")
 
     # Authentication data from file
