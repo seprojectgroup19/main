@@ -1,24 +1,7 @@
-import sqlalchemy as sqla
+from Authenticator import read_auth
 import time
 import requests as r
 import pandas as pd
-
-with open("C:/Users/Daniel/Documents/MSc/Semester 2/Software Engineering Project/authentication.txt") as f:
-    auth = f.read().split("\n")
-
-# Authentication data from file
-bikes_key = auth[0]
-contract = auth[1]
-URL = auth[3]
-LOG = auth[4]
-PWD = auth[5]
-PORT = auth[6]
-DB = auth[7]
-TAB = auth[10]
-
-# Connect to SQL database
-ENG = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(LOG, PWD, URL, PORT, DB)
-engine = sqla.create_engine(ENG, echo=False)
 
 
 def dynamic_scraper():
@@ -39,7 +22,7 @@ def dynamic_scraper():
                         last_update,
                         number,
                         status)
-                    VALUES ({2},{3],{4},{5},{6},{7})
+                    VALUES ({2},{3},{4},{5},{6},{7})
                     """.format(DB,
                                TAB,
                                row.available_bike_stands,
@@ -53,4 +36,6 @@ def dynamic_scraper():
         time.sleep(300-(end-start))
 
 
+bikes_key, contract, engine, DB = read_auth()
+TAB = "dynamic"
 dynamic_scraper()
