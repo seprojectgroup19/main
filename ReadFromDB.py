@@ -32,6 +32,10 @@ def create_station_dictionary(*argv):
                     # Station 20 doesn't exist
                     continue
                 else:
+                    if not (2 <= arg <= 115):
+                        raise Exception(
+                            f"{arg} must be a station number in the range [2, 115]"
+                        )
                     station_dict[arg] = station(arg)
 
             elif type(arg) == range or type(arg) == list:
