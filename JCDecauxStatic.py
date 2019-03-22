@@ -1,23 +1,6 @@
 import pandas as pd
 import requests as r
-import sqlalchemy as sqla
-
-with open("C:/Users/Daniel/Documents/MSc/Semester 2/Software Engineering Project/authentication.txt") as f:
-    auth = f.read().split("\n")
-
-# Authentication data from file
-bikes_key = auth[0]
-contract = auth[1]
-URL = auth[3]
-LOG = auth[4]
-PWD = auth[5]
-PORT = auth[6]
-DB = auth[7]
-TAB = auth[9]
-
-# Connect to SQL database
-ENG = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(LOG, PWD, URL, PORT, DB)
-engine = sqla.create_engine(ENG, echo=False)
+from Authenticator import read_auth
 
 
 def static_scraper():
@@ -47,6 +30,8 @@ def static_scraper():
         """.format(DB, TAB, int(row[0]), row[1], row[2], float(row[3])), float(row[4])
         engine.execute(sql)
 
+TAB = "static"
+[bikes_key, contract], [DB, engine] = read_auth()[:2], read_auth()[3:]
 
 # ONLY RUN ONCE
 static_scraper()
