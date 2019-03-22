@@ -22,11 +22,18 @@ def station(i):
 
 
 def create_station_dictionary(*argv):
-    station_dict = {}
+    """
+    Returns a dictionary of data pulled from SQL database.
 
+    Usage:
+    from ReadFromDB import create_station_dictionary as csd
+    stations = csd(x, y, z) OR stations = csd([x, y, z]) OR stations = csd(range(x, z)), where x, y, z are of type int
+    :param argv: tuple of ints, list or range of station numbers
+    :return: dictionary
+    """
+    station_dict = {}
     if len(argv) == 1:
         for arg in argv:
-
             if type(arg) == int:
                 if arg == 20:
                     # Station 20 doesn't exist
