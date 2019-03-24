@@ -16,7 +16,7 @@ def station(i):
                                     'bike_stands',
                                     'available_bike_stands',
                                     'available_bikes',
-                                    'last_updated',])
+                                    'last_updated', ])
     station.drop('number', axis=1, inplace=True)
     return station
 
@@ -61,7 +61,7 @@ def create_station_dictionary(*argv):
                             )
                         station_dict[item] = station(item)
                 if type(arg) == range:
-                    station_dict[arg[-1]+1] = station(arg[-1]+1)
+                    station_dict[arg[-1] + 1] = station(arg[-1] + 1)
             else:
                 raise Exception(
                     f"{arg} must be of type int, range or list."
@@ -83,3 +83,36 @@ def create_station_dictionary(*argv):
         raise Exception("Invalid number of arguments. Provide at least one argument.")
 
     return station_dict
+
+
+def station_dict_row(station_dict, *argv):
+    """
+
+    :param station_dict: dictionary containing a data frame of one or more stations
+    :param argv:
+    :return:
+    """
+    if len(argv) == 1:
+        row = argv[0]
+    elif len(argv) > 1:
+        raise Exception(
+            "Only one arguments allowed for row number."
+        )
+    else:
+        row = "all"
+
+    if len(station_dict.keys()) == 1:
+        for key in station_dict.keys():
+            station = station_dict[key]
+
+            if row == "last":
+                return station.iloc[station.shape[0] - 1]
+            elif row == "all":
+                return station
+            else:
+                if not (0 <= row <= station.shape[0]):
+                    raise Exception(
+                        "Row kwarg must be valid."
+                    )
+                else:
+                    return station.iloc[row]
