@@ -33,6 +33,7 @@ def create_station_dictionary(*argv):
     Usage:
     from ReadFromDB import create_station_dictionary as csd
     stations = csd(x, y, z) OR stations = csd([x, y, z]) OR stations = csd(range(x, z)), where x, y, z are of type int
+    
     :param argv: tuple of ints, list or range of station numbers
     :return: dictionary
     """
@@ -92,7 +93,12 @@ def create_station_dictionary(*argv):
 
 def station_dict_row(station_dict, *argv):
     """
-    Assumes station_dict is a dictionary of one or more data frames
+    Assumes station_dict is a dictionary of one or more data frames created using create_station_dictionary
+
+    Usage:
+    from ReadfromDB import station_dict_row as sdr
+    rows = sdr(station) OR sdr(station, x) OR sdr(station, "last"), where x is a valid row index
+
     :param station_dict: dictionary containing a data frame of one or more stations
     :param argv: which row to output, can be an integer or "last" or "all" or left blank (default to "all")
     :return: returns dictionary of the specified rows
