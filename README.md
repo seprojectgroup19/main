@@ -6,10 +6,10 @@ Some bash scripts for use on the EC2
 
 # Contents
 
-	- APIScraper.py
+	- Bikes-scraper.py
 		- Main bikes information scraper. Pulls data from JCDecaux. 
 
-	- WeatherScraper2.py
+	- Weather-scraper.py
 		- Pulls weather information from Darksky API
 
 	- rds_connect.sh
