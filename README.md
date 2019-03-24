@@ -4,10 +4,12 @@ The python files used for scraping required information.
 
 Some bash scripts for use on the EC2
 
+Passwords/authentication not included
+
 # Contents
 
 	- Bikes-scraper.py
-		- Main bikes information scraper. Pulls data from JCDecaux. 
+		- Main bikes information scraper. Pulls data from JCDecaux.
 
 	- Weather-scraper.py
 		- Pulls weather information from Darksky API
