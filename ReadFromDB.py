@@ -3,22 +3,27 @@ import pandas as pd
 
 
 def station(i):
-    [DB, engine] = read_auth()[3:]
-    TAB = "dynamic"
+    """
+    Pulls data from database for given station and stores in a data frame, dropping unnecessary columns.
+    :param i: station number
+    :return: returns data frame
+    """
+    [db, engine] = read_auth()[3:]
+    tab = "dynamic"
 
     sql = """SELECT * FROM {0}.{1}
           WHERE number = {2}
-          """.format(DB, TAB, i)
+          """.format(db, tab, i)
     result = engine.execute(sql)
-    station = pd.DataFrame(result,
+    station_df = pd.DataFrame(result,
                            columns=['number',
                                     'status',
                                     'bike_stands',
                                     'available_bike_stands',
                                     'available_bikes',
                                     'last_updated', ])
-    station.drop('number', axis=1, inplace=True)
-    return station
+    station_df.drop('number', axis=1, inplace=True)
+    return station_df
 
 
 def create_station_dictionary(*argv):
@@ -87,10 +92,10 @@ def create_station_dictionary(*argv):
 
 def station_dict_row(station_dict, *argv):
     """
-
+    Assumes station_dict is a dictionary of one or more data frames
     :param station_dict: dictionary containing a data frame of one or more stations
-    :param argv:
-    :return:
+    :param argv: which row to output, can be an integer or "last" or "all" or left blank (default to "all")
+    :return: returns dictionary of the specified rows
     """
     if len(argv) == 1:
         row = argv[0]
@@ -116,3 +121,21 @@ def station_dict_row(station_dict, *argv):
                     )
                 else:
                     return station.iloc[row]
+    elif len(station_dict.keys()) > 1:
+        row_dict = {}
+        for key in station_dict.keys():
+            station = station_dict[key]
+
+            if row == "last":
+                row_dict[key] = station.iloc[station.shape[0] - 1]
+            elif row == "all":
+                row_dict[key] = station
+            else:
+                if not (0 <= row <= station.shape[0]):
+                    raise Exception(
+                        "Row kwarg must be valid."
+                    )
+                else:
+                    row_dict[key] = station.iloc[row]
+
+        return row_dict
