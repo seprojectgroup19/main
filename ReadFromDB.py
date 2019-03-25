@@ -2,6 +2,37 @@ from Authenticator import read_auth
 import pandas as pd
 
 
+def read_weather(i):
+    [db, engine] = read_auth()[3:]
+    tab = "weather"
+
+    sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
+    result = engine.execute(sql)
+    weather_df = pd.DataFrame(result,
+                              columns=['number',
+                                       'apparentTemperature',
+                                       'cloudCover',
+                                       'dewPoint',
+                                       'humidity',
+                                       'icon',
+                                       'nearestStormBearing',
+                                       'nearestStormDistance',
+                                       'ozone',
+                                       'precipIntensity',
+                                       'precipProbability',
+                                       'pressure',
+                                       'summary',
+                                       'temperature',
+                                       'time',
+                                       'uvIndex',
+                                       'visibility',
+                                       'windBearing',
+                                       'windGust',
+                                       'windSpeed'])
+    weather_df.drop('number', axis=1, inplace=True)
+    return weather_df
+
+
 def station(i):
     """
     Pulls data from database for given station and stores in a data frame, dropping unnecessary columns.
@@ -11,9 +42,7 @@ def station(i):
     [db, engine] = read_auth()[3:]
     tab = "dynamic"
 
-    sql = """SELECT * FROM {0}.{1}
-          WHERE number = {2}
-          """.format(db, tab, i)
+    sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
     result = engine.execute(sql)
     station_df = pd.DataFrame(result,
                            columns=['number',
@@ -33,7 +62,7 @@ def create_station_dictionary(*argv):
     Usage:
     from ReadFromDB import create_station_dictionary as csd
     stations = csd(x, y, z) OR stations = csd([x, y, z]) OR stations = csd(range(x, z)), where x, y, z are of type int
-    
+
     :param argv: tuple of ints, list or range of station numbers
     :return: dictionary
     """
@@ -107,7 +136,7 @@ def station_dict_row(station_dict, *argv):
         row = argv[0]
     elif len(argv) > 1:
         raise Exception(
-            "Only one arguments allowed for row number."
+            "Only one argument allowed for row number."
         )
     else:
         row = "all"
