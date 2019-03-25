@@ -3,6 +3,11 @@ import pandas as pd
 
 
 def read_weather(i):
+    """
+    Read weather real time data
+    :param i: station number
+    :return: weather df
+    """
     [db, engine] = read_auth()[3:]
     tab = "weather"
 
@@ -173,4 +178,4 @@ def station_dict_row(station_dict, *argv):
                 else:
                     row_dict[key] = station.iloc[row]
 
-        return row_dict
+        return row_dic  t
