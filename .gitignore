@@ -1,0 +1,4 @@
+
+# ignore text/log files when commiting to github
+*.log
+*.txt
