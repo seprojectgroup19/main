@@ -1,3 +1,5 @@
 server_file_swap
 *.log
 *.txt
+.project
+.pydevproject
