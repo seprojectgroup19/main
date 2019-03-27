@@ -1,8 +1,45 @@
 from flask import render_template
+from flask import request
 from app import app
+import mysql.connector
+import os
+import requests as r
+import json
+
 @app.route('/')
 def index():
  returnDict = {}
  returnDict['user'] = 'Cormac' # Feel free to put your name here!
  returnDict['title'] = 'Home'
  return render_template("index.html", **returnDict)
+
+
+@app.route('/lookup', methods=["GET"])
+def lookup():
+    id = request.args.get('id')
+    val_list = []
+    validator = open("app/static/validation.txt", "r")
+    for line in validator:
+        val_list.append(line.rstrip())
+
+    mydb = mysql.connector.connect(
+      host=val_list[0],
+      user=val_list[1],
+      passwd=val_list[2],
+      database=val_list[3]
+    )
+
+    mycursor = mydb.cursor()
+    result_list = []
+
+    sql = "SELECT available_bike_stands, available_bikes, last_update FROM DublinBikesDB.dynamic WHERE number = '"+str(id)+"' ORDER BY last_update DESC LIMIT 1"
+    mycursor.execute(sql)
+
+    for (available_bike_stands,  available_bikes, last_update) in mycursor:
+        result_list.extend( [available_bike_stands,  available_bikes, last_update])
+
+    final_result = json.dumps(result_list)
+    return final_result
+
+
+

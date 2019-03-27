@@ -58,6 +58,6 @@ function standinfo(stand){
             document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
        }
         };
-    xmlhttp.open("GET","http://localhost:5000/lookup" + stand,true);
+    xmlhttp.open("GET","http://localhost:5000/lookup?id="+ stand ,true);
     xmlhttp.send();
 }
