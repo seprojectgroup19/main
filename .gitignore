@@ -4,6 +4,8 @@ dev/
 
 img/
 
+xampp/
+
 webalizer/
 
 applications.html
@@ -12,6 +14,6 @@ bitnami.css
 
 favicon.ico
 
-index.php
+oldindex.php
 
 app/templates/connecinfo.php
