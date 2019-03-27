@@ -48,7 +48,6 @@ function clickHandler(val){
     }
 }
 
-// Returns realtime info
 function standinfo(stand){
     xmlhttp = new XMLHttpRequest();
     xmlhttp.onreadystatechange = function() {
@@ -59,6 +58,6 @@ function standinfo(stand){
             document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
        }
         };
-    xmlhttp.open("GET","dataretrieval.php?id="+stand,true);
+    xmlhttp.open("GET","http://localhost:5000/lookup" + stand,true);
     xmlhttp.send();
 }
