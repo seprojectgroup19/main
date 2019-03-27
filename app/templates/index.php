@@ -43,11 +43,16 @@
               <h3>Status</h3>
               <p>Open/Closed</p>
               <hr style="width: 30%">
+<<<<<<< HEAD:app/templates/index.html
               <h3 id ="testbox" style= "display: inline-block; margin-bottom: 0;">Available  Bikes:</h3>
               <p style= "display: inline-block; margin-bottom: 0;">100</p>
+=======
+              <h3 style= "display: inline-block; margin-bottom: 0;">Available  Bikes:</h3>
+              <p id ="avbikes" style= "display: inline-block; margin-bottom: 0;">Loading...</p>
+>>>>>>> seprojectgroup19/SiteCode:app/templates/index.php
               <br>
               <h3 style= "display: inline-block; margin-top: 0;">Available Stands:</h3>
-              <p style= "display: inline-block; margin-bottom: 0;">100</p>
+              <p id ="avstands" style= "display: inline-block; margin-bottom: 0;">Loading...</p>
               <hr style="width: 30%">
               <h3 style ="margin-bottom: 10px;">Weather</h3>
               <img src="../static/images/sunnyicon.png" alt="Sunny" style="width:50px;height:50px;">
