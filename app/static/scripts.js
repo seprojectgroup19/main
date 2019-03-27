@@ -19,10 +19,12 @@ function initMap() {
 
     map.data.addListener('click', function(event) {
         var stationname = event.feature.getProperty("name");
+        var stationnumber = event.feature.getProperty("number");
         $("#map").css("width","50%");
         $("#infobox").css("width","49%");
         $("#infobox").css("visibility","visible");
         $("#station").text(stationname);
+        standinfo(stationnumber);
     });
 
 }
@@ -42,4 +44,17 @@ function clickHandler(val){
     else if (val == 3) {
         $("#station").text("UNDER CONSTRUCTION");
     }
+}
+
+// Returns realtime info
+function standinfo(stand){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+              //Writes query to HTML - allows for interactivity on page
+            document.getElementById("testbox").innerHTML = this.responseText;
+       }
+        };
+    xmlhttp.open("GET","dataretrieval.php?id="+stand,true);
+    xmlhttp.send();
 }

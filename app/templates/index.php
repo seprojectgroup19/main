@@ -28,7 +28,7 @@
         <div id="map"></div>
           <div id="infobox">
 
-            <div class="dropdown">              
+            <div class="dropdown">
               <button class="dropbtn" >Dropdown</button>
               <div class="dropdown-content">
                 <a href="#" onclick="clickHandler(1)">Close</a>
@@ -36,14 +36,14 @@
                 <a href="#" onclick="clickHandler(3)">Forecast Centre</a>
               </div><br>
             </div><br>
-            
+
             <div id="infoboxcontent">
               <h2 id="station">Dublin Bikes</h2>
               <hr style="width: 40%">
               <h3>Status</h3>
               <p>Open/Closed</p>
               <hr style="width: 30%">
-              <h3 style= "display: inline-block; margin-bottom: 0;">Available  Bikes:</h3>
+              <h3 id ="testbox" style= "display: inline-block; margin-bottom: 0;">Available  Bikes:</h3>
               <p style= "display: inline-block; margin-bottom: 0;">100</p>
               <br>
               <h3 style= "display: inline-block; margin-top: 0;">Available Stands:</h3>
