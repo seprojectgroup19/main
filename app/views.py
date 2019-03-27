@@ -13,7 +13,7 @@ def index():
  returnDict['title'] = 'Home'
  return render_template("index.html", **returnDict)
 
-
+@cross_origin(origins=['http://localhost:5000',"http://3.80.56.170:5000/"])
 @app.route('/lookup', methods=["GET"])
 def lookup():
     id = request.args.get('id')
