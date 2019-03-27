@@ -1,6 +1,6 @@
 from flask import render_template
 from flask import request
-from flask.ext.cors import CORS, cross_origin
+from flask_cors import CORS, cross_origin
 from app import app
 import mysql.connector
 import os
