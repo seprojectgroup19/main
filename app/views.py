@@ -5,6 +5,7 @@ import mysql.connector
 import os
 import requests as r
 import json
+from flask_cors import CORS
 
 @app.route('/')
 def index():
