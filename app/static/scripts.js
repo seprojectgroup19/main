@@ -9,8 +9,8 @@ function initMap() {
     infowindow = new google.maps.InfoWindow();
     geocoder = new google.maps.Geocoder;
     map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 12,
-        center: {lat: 53.349, lng: -6.2603},
+        zoom: 13.5,
+        center: {lat: 53.34481, lng:-6.266209},
         mapTypeId: 'terrain'
     });
     var script = document.createElement('script');
@@ -19,10 +19,14 @@ function initMap() {
 
     map.data.addListener('click', function(event) {
         var stationname = event.feature.getProperty("name");
+        var stationnumber = event.feature.getProperty("number");
         $("#map").css("width","50%");
         $("#infobox").css("width","49%");
         $("#infobox").css("visibility","visible");
         $("#station").text(stationname);
+        $("#avbikes").text("Loading...")
+        $("#avstands").text("Loading...")
+        standinfo(stationnumber);
     });
 
 }
@@ -42,4 +46,19 @@ function clickHandler(val){
     else if (val == 3) {
         $("#station").text("UNDER CONSTRUCTION");
     }
+}
+
+// Returns realtime info
+function standinfo(stand){
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+              //Writes query to HTML - allows for interactivity on page
+            console.log(this.responseText);
+            document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0]
+            document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
+       }
+        };
+    xmlhttp.open("GET","dataretrieval.php?id="+stand,true);
+    xmlhttp.send();
 }
