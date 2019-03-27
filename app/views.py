@@ -15,6 +15,7 @@ def index():
 
 
 @app.route('/lookup', methods=["GET"])
+@cross_origin(origin='localhost',headers=['Content- Type','Authorization'])
 def lookup():
     id = request.args.get('id')
     val_list = []
