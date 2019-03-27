@@ -1,6 +1,5 @@
 from flask import render_template
 from flask import request
-from flask_cors import CORS, cross_origin
 from app import app
 import mysql.connector
 import os
@@ -16,7 +15,6 @@ def index():
 
 
 @app.route('/lookup', methods=["GET"])
-@cross_origin(origin='*',headers=['Content-Type','Authorization'])
 def lookup():
     id = request.args.get('id')
     val_list = []
