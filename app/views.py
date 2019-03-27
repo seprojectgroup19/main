@@ -46,6 +46,7 @@ def lookup():
         result_list.extend( [icon])
 
     final_result = json.dumps(result_list)
+    final_result.response.headers.add('Access-Control-Allow-Origin', '*')
     return final_result
 
 
