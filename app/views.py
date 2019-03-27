@@ -76,7 +76,7 @@ def index():
 
 
 @app.route('/lookup', methods=["GET"])
-@crossdomain(origin='*')
+@crossdomain(origin='http://3.80.56.170:5000/')
 def lookup():
     id = request.args.get('id')
     val_list = []
