@@ -5,6 +5,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <link rel="stylesheet" type="text/css" href="../static/mainstyle.css">
     <script src="../static/scripts.js"></script>
+    <script src="../static/skycons.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_A2XKU-wVSr9dGPoYBxir0vI2ieENbCo&callback=initMap"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
@@ -50,8 +51,9 @@
               <p id ="avstands" style= "display: inline-block; margin-bottom: 0;">Loading...</p>
               <hr style="width: 30%">
               <h3 style ="margin-bottom: 10px;">Weather</h3>
-              <img src="../static/images/sunnyicon.png" alt="Sunny" style="width:50px;height:50px;">
-              <hr style="width: 10%">
+              <p style="margin-bottom: 8%"><canvas id = "weathericon" style = "margin-left: 48%; margin-right: 50%;" class="clear-day" width="50" height="50"></canvas></p>
+
+              <hr style="width: 10%; ">
             </div>
         </div>
       </div>

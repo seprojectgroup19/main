@@ -56,8 +56,32 @@ function standinfo(stand){
             console.log(this.responseText);
             document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0]
             document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
+            $("#weathericon").attr("class",JSON.parse(this.responseText)[3]);
+            SkyCon()
        }
         };
     xmlhttp.open("GET","http://localhost:5000/lookup?id="+ stand ,true);
     xmlhttp.send();
 }
+function SkyCon(){
+var icons = new Skycons({
+          "color": "#ffffff"
+        }),
+        list = [
+          "clear-day", "clear-night", "partly-cloudy-day",
+          "partly-cloudy-night", "cloudy", "rain", "sleet", "snow", "wind",
+          "fog"
+        ],
+        i;
+
+      for (i = list.length; i--;) {
+        var weatherType = list[i],
+          elements = document.getElementsByClassName(weatherType);
+        for (e = elements.length; e--;) {
+          icons.set(elements[e], weatherType);
+        }
+      }
+
+      icons.play();
+}
+SkyCon()

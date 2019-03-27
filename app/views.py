@@ -37,6 +37,13 @@ def lookup():
 
     for (available_bike_stands,  available_bikes, last_update) in mycursor:
         result_list.extend( [available_bike_stands,  available_bikes, last_update])
+    del sql
+    del mycursor
+    mycursor = mydb.cursor()
+    sql = "SELECT icon FROM DublinBikesDB.weather WHERE number = '"+str(id)+"' ORDER BY time DESC LIMIT 1;"
+    mycursor.execute(sql)
+    for (icon) in mycursor:
+        result_list.extend( [icon])
 
     final_result = json.dumps(result_list)
     return final_result
