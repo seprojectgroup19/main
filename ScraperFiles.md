@@ -15,7 +15,7 @@ Passwords/authentication not included
 		- Pulls weather information from Darksky API
 
 	- rds_connect.sh
-		- bash script to connect to the RDS database 
+		- bash script to connect to the RDS database.
 
 	- scraper_info.sh
 		- bash script to privid information on the scrapers. 
