@@ -60,7 +60,7 @@ function standinfo(stand){
             SkyCon()
        }
         };
-    xmlhttp.open("GET","https://3.80.56.170:5000/lookup?id="+ stand ,true);
+    xmlhttp.open("GET","/lookup?id="+ stand ,true);
     xmlhttp.send();
 }
 function SkyCon(){
