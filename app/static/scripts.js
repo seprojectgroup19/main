@@ -13,9 +13,10 @@ function initMap() {
         center: {lat: 53.34481, lng:-6.266209},
         mapTypeId: 'terrain'
     });
-    var script = document.createElement('script');
-    script.src = map.data.loadGeoJson('../static/localjson.json');
-    document.getElementsByTagName('head')[0].appendChild(script);
+
+    // loading map data from local json
+    var data = map.data.loadGeoJson('../static/localjson.json');
+    map.data.addGeoJson(data);
 
 
     map.data.setStyle(function(feature){
@@ -24,6 +25,10 @@ function initMap() {
         feature.setProperty("icon","/static/images/sunnyicon.jpg");
         }
     });
+
+
+
+
 
 
 
