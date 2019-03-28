@@ -17,6 +17,16 @@ function initMap() {
     script.src = map.data.loadGeoJson('../static/localjson.json');
     document.getElementsByTagName('head')[0].appendChild(script);
 
+
+    map.data.setStyle(function(feature){
+        if (parseInt(feature.getProperty("number")) > 50){
+            console.log(feature.getProperty("number"));
+        feature.setProperty("icon","/static/images/sunnyicon.jpg");
+        }
+    });
+
+
+
     map.data.addListener('click', function(event) {
         var stationname = event.feature.getProperty("name");
         var stationnumber = event.feature.getProperty("number");
