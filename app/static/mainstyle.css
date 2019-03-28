@@ -1,7 +1,7 @@
 /* Styles for index.html */ 
 
 #headerbox {
-    height: 10%;
+    height: 15%;
     width: 100%;
     padding-top: 4px;
     padding-bottom: 80px;
@@ -14,7 +14,7 @@
 }
 
 #footerbox {
-    height: 5%;
+    height: 1%;
     width: 100%;
     padding-top: 4px;
     padding-bottom: 80px;
@@ -30,7 +30,7 @@
 }
 
 #contentwindow {
-    height: 65%;
+    height: 70%;
     width: 100%;
     overflow: hidden;
 }
