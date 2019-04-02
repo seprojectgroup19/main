@@ -19,18 +19,16 @@ function initMap() {
     map.data.addGeoJson(data);
 
 
-    map.data.setStyle(function(feature){
+    map.data.setStyle(
+      function(feature){
         if (parseInt(feature.getProperty("number")) > 50){
-            console.log(feature.getProperty("number"));
-        feature.setProperty("icon","/static/images/sunnyicon.jpg");
+          console.log(feature.getProperty("number"));
+          var color = feature.getProperty("color");
+          console.log(color); 
         }
-    });
-
-
-
-
-
-
+        return {fillColor:'green'};
+      }
+    );
 
     map.data.addListener('click', function(event) {
         var stationname = event.feature.getProperty("name");
