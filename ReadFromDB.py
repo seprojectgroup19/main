@@ -1,6 +1,8 @@
 from Authenticator import read_auth
+from datetime import datetime
+import numpy as np
 import pandas as pd
-
+import matplotlib.pyplot as plt
 
 def read_weather(i):
     """
@@ -122,7 +124,7 @@ def create_station_dictionary(*argv):
     else:
         raise Exception("Invalid number of arguments. Provide at least one argument.")
 
-    return station_dict
+    return  station_dict
 
 
 def station_dict_row(station_dict, *argv):
@@ -178,4 +180,96 @@ def station_dict_row(station_dict, *argv):
                 else:
                     row_dict[key] = station.iloc[row]
 
-        return row_dic  t
+        return row_dict
+    
+    
+def add_times(df):
+    """
+    Converts column 'last_updated' from ms to s, adds columns for date/day/hour/min/sec. Adds a column specifying
+    if each row lies in the first or second 30 minutes of an hour.
+    """
+    make_timestamp = (lambda x: int(x / 1000))
+    df.last_updated = df.last_updated.apply(make_timestamp)
+    times = df.last_updated
+    length = len(times)
+    minute = list(np.zeros(length))
+    hour = list(np.zeros(length))
+    second = list(np.zeros(length))
+    day = list(np.zeros(length))
+    date = list(np.zeros(length))
+
+    for i in range(length):
+        date[i] = datetime.fromtimestamp(times[i]).strftime("%x")
+        day[i] = datetime.fromtimestamp(times[i]).strftime("%a")
+        hour[i] = int(datetime.fromtimestamp(times[i]).strftime("%H"))
+        minute[i] = int(datetime.fromtimestamp(times[i]).strftime("%M"))
+        second[i] = int(datetime.fromtimestamp(times[i]).strftime("%S"))
+
+    first_half = []
+    second_half = []
+
+    for m in minute:
+        if m < 30:
+            first_half.append(True)
+            second_half.append(False)
+        else:
+            first_half.append(False)
+            second_half.append(True)
+
+    df = df.assign(date=pd.Series(date, index=df.index),
+                   day=pd.Series(day, index=df.index),
+                   hour=pd.Series(hour, index=df.index),
+                   minute=pd.Series(minute, index=df.index),
+                   second=pd.Series(second, index=df.index),
+                   first_half_hour=pd.Series(first_half, index=df.index),
+                   second_half_hour=pd.Series(second_half, index=df.index))
+
+    return df
+
+
+def print_bikes_stands(df, number):
+    """
+    Returns subplots within figure showing the available bike stands and available stands at station[number]. Color
+    coded - green indicates availability > 50%, yellow indicates 50%> availability >20%, red indicates
+    availability < 20%`
+    """
+    available_bikes_avg = list()
+    available_stands_avg = list()
+    for i in range(24):
+        available_bikes_avg.append(np.mean(df[df.hour==i].available_bikes))
+        available_stands_avg.append(np.mean(df[df.hour==i].available_bike_stands))
+
+    total_stands = max(df.bike_stands)
+    width = 0.5
+    idx = np.asarray([i for i in range(24)])
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(20,8))
+    ax1.set_title("Station " + str(number), fontsize=26)
+    bars1 = ax1.bar(idx, available_bikes_avg, alpha=0.5, label='Available Bikes', width=width)
+    ax1.set_ylim([0, total_stands])
+    ax1.set_xticks(idx)
+    ax1.set_xlabel('Hour', fontsize=16)
+    ax1.set_ylabel('Available Bikes', fontsize=16)
+
+    for bar in bars1:
+        if bar.get_height()<total_stands*0.2:
+            bar.set_color('red')
+        elif bar.get_height()<total_stands*0.5:
+            bar.set_color('yellow')
+        else:
+            bar.set_color('green')
+
+    bars2 = ax2.bar(idx, available_stands_avg, alpha=0.5, label='Available Stands', width=width)
+    ax2.set_ylim([0, max(df.bike_stands)])
+    ax2.set_xticks(idx)
+    ax2.set_xlabel('Hour', fontsize=16)
+    ax2.set_ylabel('Available Stands', fontsize=16)
+
+    for bar in bars2:
+        if bar.get_height()<total_stands*0.2:
+            bar.set_color('red')
+        elif bar.get_height()<total_stands*0.5:
+            bar.set_color('yellow')
+        else:
+            bar.set_color('green')
+
+    plt.show()
