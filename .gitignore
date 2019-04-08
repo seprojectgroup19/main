@@ -2,3 +2,4 @@
 # ignore text/log files when commiting to github
 *.log
 *.txt
+model/TimeSeriesAnalysisWithPython-master/
