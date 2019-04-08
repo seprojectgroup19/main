@@ -1,13 +1,19 @@
-from flask import render_template
-from flask import request, make_response,current_app
-from app import app
-from functools import update_wrapper
-from datetime import timedelta
-import mysql.connector
 import os
-import requests as r
-import json
+import sys
+sys.path.insert(0, sys.path[0] + '/app/static/DB')
 
+from flask import request, make_response,current_app
+from functools import update_wrapper
+from flask import render_template
+from datetime import timedelta
+
+# python file to execute sql query
+import execute_query as eq
+
+import mysql.connector
+import requests as r
+from app import app
+import json
 
 @app.route('/')
 def index():
@@ -55,5 +61,7 @@ def lookup():
 @app.route('/testpage')
 def testpage():
     
-    return render_template("testpage.html")
+    result = eq.execute_sql("SELECT COUNT(*) FROM DublinBikesDB.dynamic;")
+    
+    return render_template("testpage.html", **{'result':result[0][0]})
 

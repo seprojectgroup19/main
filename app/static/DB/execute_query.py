@@ -2,12 +2,12 @@
 Script to execute a given sql query for the database
 
 Author: Ciaran
-Date: 08.04.2019
+Date: 08.03.2019
 """
 
 import sqlalchemy as sqla
 
-with open("authentication.txt") as f:
+with open("app/static/DB/authentication.txt") as f:
     auth = f.read().split("\n")
 
 # Authentication data from file
@@ -22,7 +22,7 @@ eng = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(log, pwd, url, port, db)
 engine = sqla.create_engine(eng, echo=False)
 
 
-def execute(query):
+def execute_sql(query):
 
     # Attempt to connect to the database (return 0 if false)
     try:
@@ -42,4 +42,5 @@ def execute(query):
     # Close connection to the database
     connection.close()
 
-    return result
+    # return result of the query
+    return result.fetchall()
