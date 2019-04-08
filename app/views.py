@@ -21,6 +21,7 @@ def index():
 def lookup():
     id = request.args.get('id')
     val_list = []
+   
     validator = open("app/static/validation.txt", "r")
     for line in validator:
         val_list.append(line.rstrip())
@@ -51,5 +52,8 @@ def lookup():
     final_result = json.dumps(result_list)
     return final_result
 
-
+@app.route('/testpage')
+def testpage():
+    
+    return render_template("testpage.html")
 
