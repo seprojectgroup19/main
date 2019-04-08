@@ -41,6 +41,10 @@ def lookup():
 
     return json.dumps(result)
 
+@app.route('/heatmap', methods=["GET"])
+def heatmap():
+    return 0
+
 @app.route('/testpage')
 def testpage():
     
