@@ -1,5 +1,31 @@
-from Authenticator import read_auth
+import sqlalchemy as sqla
 import pandas as pd
+
+def read_auth():
+    """
+    Function to read authentication file to save time for each script
+    :return: API key for JCDecaux, JCDecaux contract, API key for darksky, SQL database name, engine for SQL database
+    """
+    with open("authentication.txt") as f:
+        auth = f.read().split("\n")
+
+    # Authentication data from file
+    bikes_key = auth[0]
+    contract = auth[1]
+    darksky_key = auth[2]
+    url = auth[3]
+    log = auth[4]
+    pwd = auth[5]
+    port = auth[6]
+    db = auth[7]
+
+    # Connect to SQL database
+    # dialect+driver://username:password@host:port/database
+    eng = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(log, pwd, url, port, db)
+    engine = sqla.create_engine(eng, echo=False)
+    return [bikes_key, contract, darksky_key, db, engine]
+
+[db, engine] = read_auth()[3:]
 
 def get_static_data():
     """
@@ -9,7 +35,6 @@ def get_static_data():
     (dataframe) all static data
     """
 
-    [db, engine] = read_auth()[3:]
     tab = "static"
     sql = "SELECT * FROM {0}.{1};".format(db,tab)
     
@@ -28,7 +53,6 @@ def read_weather(i):
     :param i: station number
     :return: weather df
     """
-    [db, engine] = read_auth()[3:]
     tab = "weather"
 
     sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
@@ -63,7 +87,6 @@ def station(i):
     :param i: station number
     :return: returns data frame
     """
-    [db, engine] = read_auth()[3:]
     tab = "dynamic"
 
     sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
