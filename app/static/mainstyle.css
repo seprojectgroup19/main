@@ -7,7 +7,7 @@
     padding-bottom: 80px;
     border-bottom: 10px solid white;
     text-align: center;
-    background: #114b56;
+    background: #084c55;
     color: white;
     font-size: 25px;
     font-family: Arial
@@ -20,7 +20,7 @@
     padding-bottom: 80px;
     border-top: 10px solid white;
     text-align: center;
-    background: #114b56;
+    background: #084c55;
     color: white;
     font-size: 25px;
     font-family: Arial;
@@ -113,18 +113,18 @@ html, body {
 
 /* SKYCONS */
 canvas {
-        display: block;
-        float: left;
-        margin-left: 8px;
-        margin-top: 8px;
-      }
-      pre {
-        font: 77.8%/1.5em "Lucida Sans Typewriter", "Lucida Console", "Monaco", "Bitstream Vera Sans Mono", monospace;
-        margin: 3.375em 1.6875em;
-      }
-      a, pre span.comment {
-        color: royalblue;
-      }
-      a:visited, pre span.constant {
-        color: indianred;
-      }
+    display: block;
+    float: left;
+    margin-left: 8px;
+    margin-top: 8px;
+}
+pre {
+    font: 77.8%/1.5em "Lucida Sans Typewriter", "Lucida Console", "Monaco", "Bitstream Vera Sans Mono", monospace;
+    margin: 3.375em 1.6875em;
+}
+a, pre span.comment {
+    color: royalblue;
+}
+a:visited, pre span.constant {
+    color: indianred;
+}
