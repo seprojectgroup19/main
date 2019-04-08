@@ -4,13 +4,36 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+[db, engine] = read_auth()[3:]
+
+
+def get_static_data():
+    """
+    Generate a dataframe containing all the static bikes data
+
+    return:
+    (dataframe) all static data
+    """
+
+    tab = "static"
+    sql = "SELECT * FROM {0}.{1};".format(db, tab)
+
+    cols = ['number', 'contract_name', 'name', 'address',
+            'latitude', 'longitude', 'banking', 'bonus']
+
+    static_data = pd.DataFrame(engine.execute(sql), columns=cols)
+
+    static_data.drop(['contract_name', 'banking', 'bonus'], axis=1, inplace=True)
+
+    return static_data
+
+
 def read_weather(i):
     """
     Read weather real time data
     :param i: station number
     :return: weather df
     """
-    [db, engine] = read_auth()[3:]
     tab = "weather"
 
     sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
@@ -46,7 +69,7 @@ def station(i):
     :param i: station number
     :return: returns data frame
     """
-    [db, engine] = read_auth()[3:]
+
     tab = "dynamic"
 
     sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
@@ -124,7 +147,7 @@ def create_station_dictionary(*argv):
     else:
         raise Exception("Invalid number of arguments. Provide at least one argument.")
 
-    return  station_dict
+    return station_dict
 
 
 def station_dict_row(station_dict, *argv):
@@ -302,7 +325,7 @@ def get_hourly_average(df, day, hour, type, **kwargs):
     :param hour: hour of interest (integer from 0 - 23)
     :param type: specify "bikes" or "stands" to return just bikes/stands, any other input returns both
     :param kwargs: include which half of the hour you want to return
-    
+
     E.g.: get_hourly_average(df, "Mon", 9, "bikes", "first") will return the average number of available bikes
     for 9:00am - 9:30am on Monday at the given station.
     """
@@ -314,10 +337,10 @@ def get_hourly_average(df, day, hour, type, **kwargs):
 
     if half == "first":
         hourly_bikes_avg = np.mean(df[df.hour == hour][df.day == str(day)][df.first_half_hour].available_bikes)
-        hourly_stands_avg = np.mean(df[df.hour == hour][df.day == str(day)][df.first_half_hour].available_bikes)
+        hourly_stands_avg = np.mean(df[df.hour == hour][df.day == str(day)][df.first_half_hour].available_bike_stands)
     elif half == "second":
         hourly_bikes_avg = np.mean(df[df.hour == hour][df.day == str(day)][df.second_half_hour].available_bikes)
-        hourly_stands_avg = np.mean(df[df.hour == hour][df.day == str(day)][df.second_half_hour].available_bikes)
+        hourly_stands_avg = np.mean(df[df.hour == hour][df.day == str(day)][df.second_half_hour].available_bike_stands)
     else:
         hourly_bikes_avg = np.mean(df[df.hour == hour][df.day == str(day)].available_bikes)
         hourly_stands_avg= np.mean(df[df.hour == hour][df.day == str(day)].available_bike_stands)
