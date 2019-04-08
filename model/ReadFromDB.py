@@ -1,14 +1,58 @@
-from Authenticator import read_auth
+import sqlalchemy as sqla
 import pandas as pd
 
+def read_auth():
+    """
+    Function to read authentication file to save time for each script
+    :return: API key for JCDecaux, JCDecaux contract, API key for darksky, SQL database name, engine for SQL database
+    """
+    with open("authentication.txt") as f:
+        auth = f.read().split("\n")
+
+    # Authentication data from file
+    bikes_key = auth[0]
+    contract = auth[1]
+    darksky_key = auth[2]
+    url = auth[3]
+    log = auth[4]
+    pwd = auth[5]
+    port = auth[6]
+    db = auth[7]
+
+    # Connect to SQL database
+    # dialect+driver://username:password@host:port/database
+    eng = "mysql+mysqldb://{0}:{1}@{2}:{3}/{4}".format(log, pwd, url, port, db)
+    engine = sqla.create_engine(eng, echo=False)
+    return [bikes_key, contract, darksky_key, db, engine]
+
+[db, engine] = read_auth()[3:]
+
+def get_static_data():
+    """
+    Generate a dataframe containing all the static bikes data
+    
+    return:
+    (dataframe) all static data
+    """
+
+    tab = "static"
+    sql = "SELECT * FROM {0}.{1};".format(db,tab)
+    
+    cols = ['number', 'contract_name', 'name', 'address', 
+            'latitude', 'longitude', 'banking', 'bonus']
+    
+    static_data = pd.DataFrame(engine.execute(sql), columns=cols)
+    
+    static_data.drop(['contract_name','banking','bonus'], axis=1, inplace=True)
+    
+    return static_data
 
 def read_weather(i):
     """
-    Read weather real time data
+    Read weather real time (stored data not real time) data
     :param i: station number
     :return: weather df
     """
-    [db, engine] = read_auth()[3:]
     tab = "weather"
 
     sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
@@ -37,14 +81,12 @@ def read_weather(i):
     weather_df.drop('number', axis=1, inplace=True)
     return weather_df
 
-
 def station(i):
     """
     Pulls data from database for given station and stores in a data frame, dropping unnecessary columns.
     :param i: station number
     :return: returns data frame
     """
-    [db, engine] = read_auth()[3:]
     tab = "dynamic"
 
     sql = """SELECT * FROM {0}.{1} WHERE number = {2}""".format(db, tab, i)
@@ -58,7 +100,6 @@ def station(i):
                                     'last_updated', ])
     station_df.drop('number', axis=1, inplace=True)
     return station_df
-
 
 def create_station_dictionary(*argv):
     """
@@ -124,7 +165,6 @@ def create_station_dictionary(*argv):
 
     return station_dict
 
-
 def station_dict_row(station_dict, *argv):
     """
     Assumes station_dict is a dictionary of one or more data frames created using create_station_dictionary
@@ -178,4 +218,5 @@ def station_dict_row(station_dict, *argv):
                 else:
                     row_dict[key] = station.iloc[row]
 
-        return row_dic  t
+        return row_dict
+        
