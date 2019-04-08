@@ -6,11 +6,7 @@ from flask import request, make_response,current_app
 from functools import update_wrapper
 from flask import render_template
 from datetime import timedelta
-
-# python file to execute sql query
 import execute_query as eq
-
-import mysql.connector
 import requests as r
 from app import app
 import json
