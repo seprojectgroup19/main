@@ -3,3 +3,5 @@ server_file_swap
 *.txt
 .project
 .pydevproject
+
+# ignore text/log files when commiting to github
