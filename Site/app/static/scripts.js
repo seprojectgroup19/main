@@ -52,8 +52,6 @@ function initMap() {
                             $("#avstands").text("Loading...");
                             map.panBy(0, 0);
                             standinfo(stationnumber);
-                            var person = prompt("Please enter your name", "Harry Potter");
-                            allMarkers[person].icon.url ="http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
                         });
                 }
                 console.log(allMarkers)
