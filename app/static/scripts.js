@@ -94,15 +94,17 @@ function standinfo(stand) {
 }
 
 function SkyCon() {
+  var i; 
+  
   var icons = new Skycons({
       "color": "#ffffff"
-    }),
-    list = [
+    });
+  
+  var list = [
       "clear-day", "clear-night", "partly-cloudy-day",
       "partly-cloudy-night", "cloudy", "rain", "sleet", "snow", "wind",
       "fog"
-    ],
-    i;
+    ]
 
   for (i = list.length; i--;) {
     var weatherType = list[i],
@@ -183,7 +185,6 @@ function getPoints() {
   ];
 }
 
-
 function populate_station_number_dropdown(){
   
   drpdwn = document.getElementById('station_number_find');
@@ -197,11 +198,24 @@ function populate_station_number_dropdown(){
         option.textContent=station_number;
         option.value=station_number;
         drpdwn.appendChild(option);
-        console.log(station_number);
-
       }
     }
   );
+}
+
+function split_window_info(stationname, stationnumber) {
+          
+  $("#map").css("width","50%");
+  $("#infobox").css("width","49.5%");
+  $("#infobox").css("visibility","visible");
+  
+  $("#station").text(stationname);
+  $("#avbikes").text("Loading...");
+  $("#avstands").text("Loading...");
+
+  marker.icon.url ="http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+  map.panBy(0, 0);
+  standinfo(stationnumber);
 }
 
 
@@ -209,8 +223,10 @@ function find_by_number(){
   // find station by number from localjson
 
   sn = document.getElementById("station_number_find").value;
-  console.log(sn);
-  console.log(typeof(sn));
+  
+  // bring up information on the stations. (activate click event)
+  standinfo(sn);
+
   if (sn=='default'){
     initMap();
   }
@@ -222,13 +238,16 @@ function find_by_number(){
 
           var lng = data.features[i].geometry.coordinates[0];
           var lat = data.features[i].geometry.coordinates[1];
+          var stationname = data.features[i].properties.name;
           var station_number = data.features[i].properties.number;
 
           if (station_number == sn) {
             
             map.panTo(new google.maps.LatLng(lat, lng));
-            map.setZoom(18);
+            map.setZoom(17);
 
+            split_window_info(stationname, station_number);
+            
           }
         }
       }
