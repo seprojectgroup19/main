@@ -31,7 +31,6 @@ function initMap() {
                 data = data["features"]
                 var allMarkers = [];
                 for (x in data){
-                    console.log(data[x].properties.number);
                     var y = data[x].properties.number
                     allMarkers[y] = new google.maps.Marker({
                     position : {lat : data[x]["geometry"]["coordinates"]["1"],
@@ -41,9 +40,10 @@ function initMap() {
                     number : data[x]["properties"]["number"],
                     icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
                                            });
+
                     allMarkers[y].addListener("click", function() {
-                            var stationname = allMarkers[y]["name"];
-                            var stationnumber = allMarkers[y]["number"];
+                            var stationname = this["name"];
+                            var stationnumber = this["number"];
                             $("#map").css("width","50%");
                             $("#infobox").css("width","49%");
                             $("#infobox").css("visibility","visible");
@@ -52,6 +52,7 @@ function initMap() {
                             $("#avstands").text("Loading...");
                             map.panBy(0, 0);
                             standinfo(stationnumber);
+                            console.log(allMarkers[stationnumber]);
                         });
                 }
                 console.log(allMarkers)
@@ -75,17 +76,20 @@ function clickHandler(val) {
 
 function standinfo(stand) {
   xmlhttp = new XMLHttpRequest();
+  var avbikes
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       //Writes query to HTML - allows for interactivity on page
       document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0]
-      document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
+      avbikes = JSON.parse(this.responseText)[1];
+      document.getElementById("avbikes").innerHTML = avbikes;
       $("#weathericon").attr("class", JSON.parse(this.responseText)[3]);
       SkyCon()
     }
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
   xmlhttp.send();
+  return avbikes;
 }
 
 function SkyCon() {
