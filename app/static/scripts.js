@@ -26,7 +26,9 @@ function initMap() {
                 data = data["features"]
                 var allMarkers = [];
                 for (x in data){
-                    allMarkers[x] = new google.maps.Marker({
+                    console.log(data[x].properties.number);
+                    var y = data[x].properties.number
+                    allMarkers[y] = new google.maps.Marker({
                     position : {lat : data[x]["geometry"]["coordinates"]["1"],
                     lng : data[x]["geometry"]["coordinates"]["0"]},
                     map : map,
@@ -34,9 +36,9 @@ function initMap() {
                     number : data[x]["properties"]["number"],
                     icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
                                            });
-                    allMarkers[x].addListener("click", function() {
-                            var stationname = allMarkers[x]["name"];
-                            var stationnumber = allMarkers[x]["number"];
+                    allMarkers[y].addListener("click", function() {
+                            var stationname = allMarkers[y]["name"];
+                            var stationnumber = allMarkers[y]["number"];
                             $("#map").css("width","50%");
                             $("#infobox").css("width","49%");
                             $("#infobox").css("visibility","visible");
