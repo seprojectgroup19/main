@@ -1,5 +1,7 @@
-
-# ignore text/log files when commiting to github
+server_file_swap
 *.log
 *.txt
-model/TimeSeriesAnalysisWithPython-master/
+.project
+.pydevproject
+
+# ignore text/log files when commiting to github
