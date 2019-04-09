@@ -23,8 +23,10 @@
         </h1>
         <hr style="width: 20%;margin-top:0%;margin-bottom: 0%">
         <p>
-          <button style="background-color:#084c55; color:white; border-radius:5px;" onclick=heatmap(1)>Heatmap ON</button>
-          <button style="background-color:#084c55; color:white; border-radius:5px;" onclick=heatmap(0)>Heatmap OFF</button>
+          <select id="station_number_find" onchange=find_by_number()>
+            <option value='default'>None</option>
+          </select>
+          <script>populate_station_number_dropdown();</script>
         </p>
         
       </header>

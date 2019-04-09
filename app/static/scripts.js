@@ -2,17 +2,21 @@
 var map;
 var geocoder;
 var infowindow
+var map_center = {
+  lat: 53.34481,
+  lng: -6.266209
+};
+var zoom_level = 13.5;
+
 
 function initMap() {
 
   infowindow = new google.maps.InfoWindow();
   geocoder = new google.maps.Geocoder;
+
   map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 13.5,
-    center: {
-      lat: 53.34481,
-      lng: -6.266209
-    },
+    zoom: zoom_level,
+    center: map_center,
     mapTypeId: 'terrain'
   });
 
@@ -24,9 +28,7 @@ function initMap() {
   map.data.setStyle(
     function (feature) {
       if (parseInt(feature.getProperty("number")) > 50) {
-        console.log(feature.getProperty("number"));
         var color = feature.getProperty("color");
-        console.log(color);
       }
       return {
         fillColor: 'green'
@@ -68,7 +70,6 @@ function standinfo(stand) {
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       //Writes query to HTML - allows for interactivity on page
-      console.log(this.responseText);
       document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0]
       document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
       $("#weathericon").attr("class", JSON.parse(this.responseText)[3]);
@@ -119,10 +120,10 @@ function heatmap(state) {
       });
       
       var heatmap = new google.maps.visualization.HeatmapLayer({
-        data: new google.maps.LatLng(53.34481,-6.266209),//get_points(),
+        data: getPoints(),
         map : map
       });
-
+      console.log(getPoints());
       heatmap.setMap(map);
 
   } else {
@@ -132,7 +133,7 @@ function heatmap(state) {
 
 }
 
-function get_points(){
+function get_Points(){
 
   var map_data = [];
   var file="../static/localjson.json";
@@ -142,12 +143,13 @@ function get_points(){
 
       for (var i=0; i<data.features.length; i++){
 
-        var lat = data.features[i].geometry.coordinates[0];
-        var lng = data.features[i].geometry.coordinates[1];
+        var lng = data.features[i].geometry.coordinates[0];
+        var lat = data.features[i].geometry.coordinates[1];
         var station_number = data.features[i].properties.number;
 
         // add data to array for sending to heatmap. replace station number with n_bikes.
         // var str_ = new google.maps.LatLng(lat, lng);
+        console.log(lat); console.log(53.782745);
         map_data.push(new google.maps.LatLng(parseFloat(lat), parseFloat(lng)));
       }
 
@@ -157,13 +159,65 @@ function get_points(){
   });
 };
 
-// function current_bikes(station_number) {
-//   xmlhttp = new XMLHttpRequest();
-//   xmlhttp.onreadystatechange = function () {
-//     if (this.readyState == 4 && this.status == 200) {
-//       return nbikes;
-//     }
-//   };
-//   xmlhttp.open("GET", "/lookup?id=" + stand, true);
-//   xmlhttp.send();
-// }
+function getPoints() {
+  return [
+    new google.maps.LatLng(53.782745, -6.444586),
+    new google.maps.LatLng(53.782842, -6.443688),
+    new google.maps.LatLng(53.782919, -6.442815),
+    new google.maps.LatLng(53.782551, -6.445368),
+    new google.maps.LatLng(53.782992, -6.442112),
+    new google.maps.LatLng(53.783100, -6.441461)
+  ];
+}
+
+
+function populate_station_number_dropdown(){
+  
+  drpdwn = document.getElementById('station_number_find');
+
+  $.getJSON("../static/localjson.json", function(data){
+
+      for (var i=0; i<data.features.length; i++){
+        var station_number = data.features[i].properties.number;
+        
+        var option = document.createElement("OPTION");
+        option.textContent=station_number;
+        option.value=station_number;
+        drpdwn.appendChild(option);
+
+      }
+    }
+  );
+}
+
+
+function find_by_number(){
+  // find station by number from localjson
+
+  sn = document.getElementById("station_number_find").value;
+  console.log(sn);
+  console.log(typeof(sn));
+  if (sn=='default'){
+    initMap();
+  }
+  else {
+    $.getJSON("../static/localjson.json", 
+      function(data){
+
+        for (var i=0; i<data.features.length; i++){
+
+          var lng = data.features[i].geometry.coordinates[0];
+          var lat = data.features[i].geometry.coordinates[1];
+          var station_number = data.features[i].properties.number;
+
+          if (station_number == sn) {
+            
+            map.panTo(new google.maps.LatLng(lat, lng));
+            map.setZoom(18);
+
+          }
+        }
+      }
+    );
+  }
+}
