@@ -184,6 +184,7 @@ function populate_station_number_dropdown(){
         option.textContent=station_number;
         option.value=station_number;
         drpdwn.appendChild(option);
+        console.log(station_number);
 
       }
     }
