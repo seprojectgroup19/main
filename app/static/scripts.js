@@ -26,41 +26,42 @@ function initMap() {
 
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
-            console.log("1")
-            var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
-            $.getJSON('../static/localjson.json', null, function(data) {
-                data = data["features"]
-                console.log("2")
-                for (x in data){
-                    console.log("3")
-                    var marker = new google.maps.Marker({
-                    position : {lat : data[x]["geometry"]["coordinates"]["1"],
-                    lng : data[x]["geometry"]["coordinates"]["0"]},
-                    map : map,
-                    name : data[x]["properties"]["name"],
-                    number : data[x]["properties"]["number"],
-                    icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
-                                            });
-                    marker.addListener("click", function() {
-                            console.log("4");
-                            var stationname = marker["name"];
-                            var stationnumber = marker["number"];
-                            $("#map").css("width","50%");
-                            $("#infobox").css("width","49%");
-                            $("#infobox").css("visibility","visible");
-                            $("#station").text(stationname);
-                            $("#avbikes").text("Loading...");
-                            $("#avstands").text("Loading...");
-                            console.log(marker["icon"]);
-                            marker.icon.url ="http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
-                            console.log(marker["icon"]);
-                            map.panBy(0, 0);
-                            standinfo(stationnumber);
-                        });
-                }
+  var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+  $.getJSON('../static/localjson.json', null, function(data) {
+      
+    data = data["features"]
+    
+    for (x in data){
 
-            });
+      var marker = new google.maps.Marker({
+        position : {lat : data[x]["geometry"]["coordinates"]["1"],
+        lng : data[x]["geometry"]["coordinates"]["0"]},
+        map : map,
+        name : data[x]["properties"]["name"],
+        number : data[x]["properties"]["number"],
+        icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
         }
+      );
+      marker.addListener("click", function() {
+              
+              var stationname = marker["name"];
+              var stationnumber = marker["number"];
+              
+              $("#map").css("width","50%");
+              $("#infobox").css("width","49%");
+              $("#infobox").css("visibility","visible");
+              $("#station").text(stationname);
+              $("#avbikes").text("Loading...");
+              $("#avstands").text("Loading...");
+              marker.icon.url ="http://maps.google.com/mapfiles/ms/icons/blue-dot.png";
+              map.panBy(0, 0);
+              standinfo(stationnumber);
+          }
+        );
+      }
+    }
+  );
+}
 
 // handles dropdown menu
 function clickHandler(val) {
