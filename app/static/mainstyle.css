@@ -5,7 +5,7 @@
     width: 100%;
     padding-top: 4px;
     padding-bottom: 80px;
-    border-bottom: 10px solid white;
+    border-bottom: 1px solid white;
     text-align: center;
     background: #084c55;
     color: white;
@@ -18,7 +18,7 @@
     width: 100%;
     padding-top: 4px;
     padding-bottom: 80px;
-    border-top: 10px solid white;
+    border-top: 1px solid white;
     text-align: center;
     background: #084c55;
     color: white;
@@ -54,6 +54,17 @@
     font-size: 20px;
     font-family: Arial;
     visibility:hidden;
+}
+
+#information-table{
+    width:100%;
+}
+
+#weathericon{
+
+    margin-left:auto;
+    margin-right:auto;
+    display:block;
 }
 
 html, body {
@@ -113,10 +124,9 @@ html, body {
 
 /* SKYCONS */
 canvas {
-    display: block;
-    float: left;
-    margin-left: 8px;
-    margin-top: 8px;
+    margin-left:auto;
+    margin-right:auto;
+    display:block;
 }
 pre {
     font: 77.8%/1.5em "Lucida Sans Typewriter", "Lucida Console", "Monaco", "Bitstream Vera Sans Mono", monospace;
@@ -127,4 +137,8 @@ a, pre span.comment {
 }
 a:visited, pre span.constant {
     color: indianred;
+}
+
+table>tbody>tr>td {
+    width:33%;
 }
