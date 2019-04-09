@@ -1,2 +1,12 @@
+<<<<<<< HEAD
 /app/static/validation.txt
 /app/validation.txt
+=======
+server_file_swap
+*.log
+*.txt
+.project
+.pydevproject
+
+# ignore text/log files when commiting to github
+>>>>>>> master

@@ -1,8 +1,0 @@
-7c52645b8cca52c38e4ae474ca4ea8897b512281
-Dublin
-bdad3a845436438e4e6342babd20e131
-dublinbikesdb.ckigaawhnr98.us-east-2.rds.amazonaws.com
-DBAdmin
-dublinbikesdatabase
-3306
-DublinBikesDB
