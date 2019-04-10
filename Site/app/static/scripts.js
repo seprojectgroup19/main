@@ -30,6 +30,7 @@ function initMap() {
             $.getJSON('../static/localjson.json', null, function(data) {
                 data = data["features"]
                 var allMarkers = [];
+                rackdata = fulllookup();
                 for (x in data){
                     var y = data[x].properties.number
                     allMarkers[y] = new google.maps.Marker({
@@ -38,8 +39,24 @@ function initMap() {
                     map : map,
                     name : data[x]["properties"]["name"],
                     number : data[x]["properties"]["number"],
+
                     icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
                                            });
+
+
+                    for (p in allMarkers){
+                        if (rackdata[p].bikes < 5){
+                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                        }
+                        else if (rackdata[p].bikes < 10){
+                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                        }
+                        else{
+                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                        }
+
+                    }
+
 
                     allMarkers[y].addListener("click", function() {
                             var stationname = this["name"];
@@ -52,10 +69,8 @@ function initMap() {
                             $("#avstands").text("Loading...");
                             map.panBy(0, 0);
                             standinfo(stationnumber);
-                            console.log(allMarkers[stationnumber]);
                         });
                 }
-                console.log(allMarkers)
             });
 }
 
@@ -76,21 +91,42 @@ function clickHandler(val) {
 
 function standinfo(stand) {
   xmlhttp = new XMLHttpRequest();
-  var avbikes
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       //Writes query to HTML - allows for interactivity on page
-      document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0]
-      avbikes = JSON.parse(this.responseText)[1];
-      document.getElementById("avbikes").innerHTML = avbikes;
+      document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0];
+      document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
       $("#weathericon").attr("class", JSON.parse(this.responseText)[3]);
       SkyCon()
     }
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
   xmlhttp.send();
-  return avbikes;
 }
+
+function fulllookup(){
+        var fullinfo
+      xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            testvar = JSON.parse(this.responseText)
+            $("#contentwindow").css("visibility","visible");
+            $("#loadingwindow").css("visibility","hidden");
+            $("#loadingwindow").css("height","0%");
+            $("#loadingwindow").css("width","0%");
+            $("#contentwindow").css("height","70%");
+            $("#contentwindow").css("width","100%");
+            return testvar;
+
+        }
+  };
+
+  xmlhttp.open("GET", "/fulllookup", false);
+  xmlhttp.send();
+    return xmlhttp.onreadystatechange();
+}
+
+
 
 function SkyCon() {
   var i;
