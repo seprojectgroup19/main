@@ -10,7 +10,8 @@ var zoom_level = 13.5;
 
 
 function initMap() {
-
+    directionsService = new google.maps.DirectionsService();
+    directionsDisplay = new google.maps.DirectionsRenderer();
     infowindow = new google.maps.InfoWindow();
     geocoder = new google.maps.Geocoder;
     var latlng = new google.maps.LatLng(53.34481, -6.266209);
@@ -19,7 +20,7 @@ function initMap() {
         center: latlng,
         mapTypeId: 'terrain'
     });
-
+    directionsDisplay.setMap(map);
     showStationMarkers();
 
 }
@@ -45,11 +46,11 @@ function initMap() {
 
 
                     for (p in allMarkers){
-                        if (rackdata[p].bikes < 5){
+                        if (rackdata[p].bikes == 0){
                             allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
                         }
                         else if (rackdata[p].bikes < 10){
-                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
                         }
                         else{
                             allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
@@ -71,6 +72,11 @@ function initMap() {
                             document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
                             document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
                             document.getElementById("status").innerHTML = rackdata[stationnumber].status
+                            $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
+                            SkyCon();
+                            var destination = toString(this.position.lat()) +"," +toString(this.position.lng())
+                            calcRoute(1,destination);
+                            console.log(this,this.position.lat(),this.position.lng());
                         });
                 }
             });
@@ -104,6 +110,19 @@ function standinfo(stand) {
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
   xmlhttp.send();
+}
+
+function calcRoute(start, end) {
+  var request = {
+    origin: "Dublin, IE",
+    destination: end,
+    travelMode: 'WALKING'
+  };
+  directionsService.route(request, function(result, status) {
+    if (status == 'OK') {
+      directionsDisplay.setDirections(result);
+    }
+  });
 }
 
 function fulllookup(){
