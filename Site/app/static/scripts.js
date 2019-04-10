@@ -74,9 +74,9 @@ function initMap() {
                             document.getElementById("status").innerHTML = rackdata[stationnumber].status
                             $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
                             SkyCon();
-                            var destination = toString(this.position.lat()) +"," +toString(this.position.lng())
-                            calcRoute(1,destination);
-                            console.log(this,this.position.lat(),this.position.lng());
+                            var destination = this.position.lat() +"," +this.position.lng();
+                            getPosition(destination);
+
                         });
                 }
             });
@@ -114,7 +114,7 @@ function standinfo(stand) {
 
 function calcRoute(start, end) {
   var request = {
-    origin: "Dublin, IE",
+    origin: start,
     destination: end,
     travelMode: 'WALKING'
   };
@@ -123,6 +123,19 @@ function calcRoute(start, end) {
       directionsDisplay.setDirections(result);
     }
   });
+}
+
+
+function getPosition(ending) {
+    navigator.geolocation.getCurrentPosition(
+        function success(position) {
+     // for when getting location is a success
+     var userlocation = (position.coords.latitude + "," + position.coords.longitude);
+            calcRoute(userlocation,ending);
+        console.log(userlocation)
+     return userlocation;
+   }
+    )
 }
 
 function fulllookup(){
