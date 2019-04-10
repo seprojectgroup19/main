@@ -31,7 +31,7 @@ function initMap() {
                 data = data["features"]
                 var allMarkers = [];
                 for (x in data){
-                    console.log(data[x].properties.number);
+                    // console.log(data[x].properties.number);
                     var y = data[x].properties.number
                     allMarkers[y] = new google.maps.Marker({
                     position : {lat : data[x]["geometry"]["coordinates"]["1"],
@@ -44,8 +44,8 @@ function initMap() {
                     allMarkers[y].addListener("click", function() {
                             var stationname = allMarkers[y]["name"];
                             var stationnumber = allMarkers[y]["number"];
-                            $("#map").css("width","50%");
-                            $("#infobox").css("width","49%");
+                            $("#map").css("width","60%");
+                            $("#infobox").css("width","40%");
                             $("#infobox").css("visibility","visible");
                             $("#station").text(stationname);
                             $("#avbikes").text("Loading...");
@@ -54,7 +54,7 @@ function initMap() {
                             standinfo(stationnumber);
                         });
                 }
-                console.log(allMarkers)
+                // console.log(allMarkers)
             });
 }
 
@@ -200,8 +200,8 @@ function populate_station_number_dropdown(){
 
 function split_window_info(stationname, stationnumber) {
 
-  $("#map").css("width","50%");
-  $("#infobox").css("width","49.5%");
+  $("#map").css("width","60%");
+  $("#infobox").css("width","40%");
   $("#infobox").css("visibility","visible");
 
   $("#station").text(stationname);
