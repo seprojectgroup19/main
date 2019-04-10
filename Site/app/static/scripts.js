@@ -30,8 +30,8 @@ function initMap() {
             $.getJSON('../static/localjson.json', null, function(data) {
                 data = data["features"]
                 var allMarkers = [];
+                rackdata = fulllookup();
                 for (x in data){
-                    // console.log(data[x].properties.number);
                     var y = data[x].properties.number
                     allMarkers[y] = new google.maps.Marker({
                     position : {lat : data[x]["geometry"]["coordinates"]["1"],
@@ -39,13 +39,30 @@ function initMap() {
                     map : map,
                     name : data[x]["properties"]["name"],
                     number : data[x]["properties"]["number"],
+
                     icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
                                            });
+
+
+                    for (p in allMarkers){
+                        if (rackdata[p].bikes < 5){
+                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                        }
+                        else if (rackdata[p].bikes < 10){
+                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
+                        }
+                        else{
+                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                        }
+
+                    }
+
+
                     allMarkers[y].addListener("click", function() {
-                            var stationname = allMarkers[y]["name"];
-                            var stationnumber = allMarkers[y]["number"];
-                            $("#map").css("width","60%");
-                            $("#infobox").css("width","40%");
+                            var stationname = this["name"];
+                            var stationnumber = this["number"];
+                            $("#map").css("width","65%");
+                            $("#infobox").css("width","35%");
                             $("#infobox").css("visibility","visible");
                             $("#station").text(stationname);
                             $("#avbikes").text("Loading...");
@@ -54,7 +71,6 @@ function initMap() {
                             standinfo(stationnumber);
                         });
                 }
-                // console.log(allMarkers)
             });
 }
 
@@ -78,7 +94,7 @@ function standinfo(stand) {
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       //Writes query to HTML - allows for interactivity on page
-      document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0]
+      document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0];
       document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
       $("#weathericon").attr("class", JSON.parse(this.responseText)[3]);
       SkyCon()
@@ -87,6 +103,30 @@ function standinfo(stand) {
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
   xmlhttp.send();
 }
+
+function fulllookup(){
+        var fullinfo
+      xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            testvar = JSON.parse(this.responseText)
+            $("#contentwindow").css("visibility","visible");
+            $("#loadingwindow").css("visibility","hidden");
+            $("#loadingwindow").css("height","0%");
+            $("#loadingwindow").css("width","0%");
+            $("#contentwindow").css("height","70%");
+            $("#contentwindow").css("width","100%");
+            return testvar;
+
+        }
+  };
+
+  xmlhttp.open("GET", "/fulllookup", false);
+  xmlhttp.send();
+    return xmlhttp.onreadystatechange();
+}
+
+
 
 function SkyCon() {
   var i;
