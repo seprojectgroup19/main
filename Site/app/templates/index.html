@@ -31,14 +31,25 @@
 
       </header>
       <div style="clear:both;"></div>
+
       <!-- Main Body: Map and interactive info window -->
       <div id="loadingwindow" >
           <div class="loader"></div>
       </div>
       <div id="contentwindow">
-        <div id="map"></div>
-          <div id="infobox">
 
+        <div id="sidenav_wrapper">
+          <div id="sidenav">
+
+          </div>
+        </div>
+
+        <div id="map_container">
+          <div id="map">
+          <!-- This is empty for the map to be placed in -->
+          </div>
+
+          <div id="infobox">
             <div class="dropdown">
               <button class="dropbtn" >Dropdown</button>
               <div class="dropdown-content">
@@ -49,58 +60,102 @@
             </div><br>
 
             <div id="infoboxcontent">
-
+              <!-- Information Table: Contains info on bikes and weather -->
               <table id="information-table">
-                <thead>
-                    <h2 id="station">Dublin Bikes</h2>
-                    <hr style="width: 40%">
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><h3 style ="margin-bottom: 10px;">Weather</h3></td>
-                    <td><h3>Status:</h3></td>
-                    <td><p id="status">Open</p></td>
-                  </tr>
-                  <tr>
-                    <td rowspan="2">
-                        <p>
-                            <canvas id = "weathericon" class="clear-day" width="50" height="50">
-                            </canvas>
-                        </p>
-                    </td>
-                    <td><h3>Available Bikes:</h3></td>
-                    <td><p id ="avbikes">Loading...</p></td>
-                  </tr>
-                  <tr>
-                    <td><h3>Available Stands</h3></td>
-                    <td><p id ="avstands">Loading...</p></td>
-                  </tr>
-                </tbody>
+
+              <thead>
+                  <h2 id="station">Dublin Bikes</h2>
+                  <hr style="width: 40%">
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <h3 style ="margin-bottom: 10px;">
+                      Weather
+                    </h3>
+                  </td>
+                  <td>
+                    <h3>
+                      Status:
+                    </h3>
+                  </td>
+                  <td>
+                    <p id="status">
+                      Open
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td rowspan="2">
+                      <p>
+                        <canvas id = "weathericon" class="clear-day" width="50" height="50"></canvas>
+                      </p>
+                  </td>
+                  <td>
+                    <h3>
+                      Available Bikes:
+                    </h3>
+                  </td>
+                  <td>
+                    <p id ="avbikes">
+                      Loading...
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <h3>
+                      Available Stands
+                    </h3>
+                  </td>
+                  <td>
+                    <p id ="avstands">
+                      Loading...
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
               </table>
+            <hr style="width: 30%; ">
 
-
-              <!-- <h2 id="station">Dublin Bikes</h2>
-
-              <h3>Status</h3>
-              <p>Open/Closed</p>
-              <hr style="width: 30%">
-              <h3>Available  Bikes:</h3>
-              <p id ="avbikes" style= "display: inline-block; margin-bottom: 0;">Loading...</p>
-              <br>
-              <h3>Available Stands:</h3>
-              <p id ="avstands" style= "display: inline-block; margin-bottom: 0;">Loading...</p> -->
-              <!-- <hr style="width: 30%">
-              <h3 style ="margin-bottom: 10px;">Weather</h3>
-              <p style="margin-bottom: 12%"><canvas id = "weathericon" style = "margin-left: 48%; margin-right: 50%;" class="clear-day" width="50" height="50"></canvas></p> -->
-
-              <hr style="width: 30%; ">
             </div>
+          </div>
         </div>
       </div>
 
       <!-- Footer -->
       <footer id=footerbox>
-        <h3>Dublin Bikes</h3>
+        <!-- Place Toggle Options Here -->
+        <ul id="toggle_list">
+          <li>
+            Weather:
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+          </li>
+          <li>
+            Station colors:
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+          </li>
+          <li>
+            Hide Empty:
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+          </li>
+          <li>
+            Heatmap:
+            <label class="switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+          </li>
+        </ul>
       </footer>
 
   </body>

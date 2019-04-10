@@ -62,8 +62,8 @@ function initMap() {
                     allMarkers[y].addListener("click", function() {
                             var stationname = this["name"];
                             var stationnumber = this["number"];
-                            $("#map").css("width","50%");
-                            $("#infobox").css("width","49%");
+                            $("#map").css("width","65%");
+                            $("#infobox").css("width","35%");
                             $("#infobox").css("visibility","visible");
                             $("#station").text(stationname);
                             $("#avbikes").text("Loading...");
@@ -261,8 +261,8 @@ function populate_station_number_dropdown(){
 
 function split_window_info(stationname, stationnumber) {
 
-  $("#map").css("width","50%");
-  $("#infobox").css("width","49.5%");
+  $("#map").css("width","60%");
+  $("#infobox").css("width","40%");
   $("#infobox").css("visibility","visible");
 
   $("#station").text(stationname);
