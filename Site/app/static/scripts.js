@@ -68,7 +68,9 @@ function initMap() {
                             $("#avbikes").text("Loading...");
                             $("#avstands").text("Loading...");
                             map.panBy(0, 0);
-                            standinfo(stationnumber);
+                            document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
+                            document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
+                            document.getElementById("status").innerHTML = rackdata[stationnumber].status
                         });
                 }
             });
