@@ -67,10 +67,9 @@ def fulllookup():
         ON first.number = second.number
     """
 
-
     result = list(eq.execute_sql(fulldata))
     resultdictionary = {}
-    p = 0
+
     for i in result:
         resultdictionary[str(i[0])] = {}
         resultdictionary[str(i[0])]["status"] = i[1]
