@@ -30,15 +30,56 @@
 }
 
 #contentwindow {
+    height: 0%;
+    width: 0%;
+    overflow: hidden;
+    visibility: hidden;
+}
+
+#loadingwindow{
     height: 70%;
     width: 100%;
-    overflow: hidden;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.loader {
+    margin-top: 12%;
+    margin-left: 45%;
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#sidenav{
+    height:100%;
+    width:10%;
+    float:left;
+    background-color: #084c55;
+}
+
+#map_container {
+    height:100%;
+    width:90%;
+    display:block;
+    float:right;
+    position:relative;
 }
 
 #map {
     height:100%;
     width: 100%;
-    display: inline-block;
+    display: block;
+    float:right;
     position: relative;
 }
 
@@ -62,15 +103,34 @@
 
 #weathericon{
 
-    margin-left:auto; 
-    margin-right:auto; 
+    margin-left:auto;
+    margin-right:auto;
     display:block;
+}
+
+#toggle_list{
+    list-style-type: none;
+    font-size: 12pt;
+}
+
+#toggle_list>ul{
+    align-content: center;
+    text-align:center;
+}
+
+#toggle_list>li {
+    /* float:left; */
+    display: inline-block;
+    padding:0;
+    margin-left:10px;
+    margin-right:10px;
 }
 
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
+    background: #084c55;
 }
 
 /* Following is placeholder dropdown css */
@@ -122,10 +182,65 @@ html, body {
     background-color: #114b57;
 }
 
+/* Switch settings for bottom of page */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 22px;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+    border-radius:20px;
+  }
+
+.slider {
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    position: absolute;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 15px;
+    width: 15px;
+    left: 4px;
+    bottom: 4px;
+    border-radius:20px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(36.5px);
+    -ms-transform: translateX(36.5px);
+    transform: translateX(36.5px);
+}
+
 /* SKYCONS */
 canvas {
-    margin-left:auto; 
-    margin-right:auto; 
+    margin-left:auto;
+    margin-right:auto;
     display:block;
 }
 pre {

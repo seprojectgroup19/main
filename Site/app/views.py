@@ -41,6 +41,45 @@ def lookup():
 
     return json.dumps(result)
 
+@app.route('/fulllookup', methods=["GET"])
+def fulllookup():
+
+    fulldata = f"""
+        SELECT first.number, first.status, first.available_bike_stands, first.available_bikes, second.icon
+        FROM
+        (SELECT bikes.number, bikes.status, bikes.available_bike_stands, bikes.available_bikes
+        FROM DublinBikesDB.dynamic  bikes
+        INNER JOIN
+            (SELECT number, MAX(last_update) AS MaxDateTime
+            FROM DublinBikesDB.dynamic
+            GROUP BY number) groupedbikes
+        ON bikes.number = groupedbikes.number
+        AND bikes.last_update = groupedbikes.MaxDateTime) first
+        INNER JOIN
+        (SELECT weather.number, weather.icon
+        FROM DublinBikesDB.weather  weather
+        INNER JOIN
+            (SELECT number, icon, MAX(time) AS MaxDateTime
+            FROM DublinBikesDB.weather
+            GROUP BY number) groupedweather
+        ON weather.number = groupedweather.number
+        AND weather.time = groupedweather.MaxDateTime) second
+        ON first.number = second.number
+    """
+
+
+    result = list(eq.execute_sql(fulldata))
+    resultdictionary = {}
+    p = 0
+    for i in result:
+        resultdictionary[str(i[0])] = {}
+        resultdictionary[str(i[0])]["status"] = i[1]
+        resultdictionary[str(i[0])]["stands"] = i[2]
+        resultdictionary[str(i[0])]["bikes"] = i[3]
+        resultdictionary[str(i[0])]["weather_icon"] = i[4]
+
+    return json.dumps(resultdictionary)
+
 @app.route('/heatmap', methods=["GET"])
 def heatmap():
     return 0
