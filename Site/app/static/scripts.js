@@ -65,7 +65,7 @@ var table_info_content = `
 </table>
 `
 var find_station_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px;"> 
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
 Find Station 
 </h3><br>
 <hr style="width:30%;margin-top:0;margin-bottom:0;">
@@ -76,6 +76,27 @@ Station Number:
 </select>
 <script>populate_station_number_dropdown();</script>
 </p>
+`;
+
+var Forecast_content_inner_html = `
+<div id="Forecast_content_inner_html">
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
+Sample Content
+</h3><br>
+
+<img src="../static/images/WeekendAverage.png" alt="Weekend Average">
+
+<img src="../static/images/WeekdayAverage.png" alt="Weekend Average">
+
+</div>
+
+`;
+
+
+var graph_content_inner_html = `
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
+Under Construction
+</h3><br>
 `;
 
 function initMap() {
@@ -159,7 +180,6 @@ function clickHandler(val) {
 
     if ($("#menu_item_1").text()=="Close"){
       $("#menu_item_1").text("Find Station");
-      
       $("#map").css("width", "100%");
       $("#infobox").css("width", "0%");
       $("#infobox").css("visibility", "hidden");
@@ -167,19 +187,25 @@ function clickHandler(val) {
       
     } else {
       $("#menu_item_1").text("Close");
-      
-      $("#map").css("width", "60%");
-      $("#infobox").css("width", "40%");
+      $("#map").css("width", "70%");
+      $("#infobox").css("width", "30%");
       $("#infobox").css("visibility", "visible");
-
       $("#infoboxcontent").html(find_station_inner_html)
-      
     }
-  } else if (val == 2) {
-    $("#station").text("UNDER CONSTRUCTION");
-
-  } else if (val == 3) {
-    $("#station").text("UNDER CONSTRUCTION");
+  } 
+  else if (val == 2) {
+    $("#menu_item_1").text("Close");
+    $("#map").css("width", "70%");
+    $("#infobox").css("width", "30%");
+    $("#infobox").css("visibility", "visible");
+    $("#infoboxcontent").html(graph_content_inner_html);
+  } 
+  else if (val == 3) {
+    $("#menu_item_1").text("Close");
+    $("#map").css("width", "70%");
+    $("#infobox").css("width", "30%");
+    $("#infobox").css("visibility", "visible");
+    $("#infoboxcontent").html(Forecast_content_inner_html);
   }
 }
 
@@ -360,8 +386,8 @@ function populate_station_number_dropdown(){
 
 function split_window_info(stationname, stationnumber) {
 
-  $("#map").css("width","60%");
-  $("#infobox").css("width","40%");
+  $("#map").css("width","70%");
+  $("#infobox").css("width","30%");
   $("#infobox").css("visibility","visible");
 
   $("#station").text(stationname);
