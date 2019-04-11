@@ -66,16 +66,25 @@ var table_info_content = `
 `
 var find_station_inner_html = `
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
-Find Station 
+  Find Station 
 </h3><br>
 <hr style="width:30%;margin-top:0;margin-bottom:0;">
 <p>
 Station Number:
 <select id="station_number_find" onchange=find_by_number()>
-<option value='default'>All</option>
+  <option value='default'>All</option>
 </select>
 <script>populate_station_number_dropdown();</script>
 </p>
+<br>
+<br>
+<p>
+Address:
+<select id="station_name_find" onchange=find_by_name()>
+  <option value='default'>Search</option>
+</select>
+</p>
+<script>populate_station_name_dropdown();</script>
 `;
 
 var Forecast_content_inner_html = `
@@ -378,6 +387,25 @@ function populate_station_number_dropdown(){
         var option = document.createElement("OPTION");
         option.textContent=station_number;
         option.value=station_number;
+        drpdwn.appendChild(option);
+      }
+    }
+  );
+}
+
+function populate_station_name_dropdown(){
+
+  drpdwn = document.getElementById('station_name_find');
+
+  $.getJSON("../static/localjson.json", function(data){
+
+      for (var i=0; i<data.features.length; i++){
+        
+        var name = data.features[i].properties.name;
+
+        var option = document.createElement("OPTION");
+        option.textContent=name;
+        option.value=name;
         drpdwn.appendChild(option);
       }
     }
