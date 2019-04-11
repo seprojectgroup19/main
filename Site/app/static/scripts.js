@@ -65,24 +65,23 @@ var table_info_content = `
 </table>
 `
 var find_station_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:10px;padding-bottom:0;"> 
   Find Station 
 </h3><br>
-<hr style="width:30%;margin-top:0;margin-bottom:0;">
+<hr style="width:40%;margin-top:0;margin-bottom:0;">
 <p>
-Station Number:
-<select id="station_number_find" onchange=find_by_number()>
-  <option value='default'>All</option>
-</select>
-<script>populate_station_number_dropdown();</script>
+  Station Number:<br>
+  <select id="station_number_find" onchange=find_by_number()>
+    <option value='default'>All</option>
+  </select>
+  <script>populate_station_number_dropdown();</script>
 </p>
 <br>
-<br>
 <p>
-Address:
-<select id="station_name_find" onchange=find_by_name()>
-  <option value='default'>Search</option>
-</select>
+  Station Address:<br>
+  <select id="station_name_find" onchange=find_by_name()>
+    <option value='default'>Search</option>
+  </select>
 </p>
 <script>populate_station_name_dropdown();</script>
 `;
@@ -395,7 +394,7 @@ function populate_station_number_dropdown(){
 
 function populate_station_name_dropdown(){
 
-  drpdwn = document.getElementById('station_name_find');
+  name_drpdwn = document.getElementById('station_name_find');
 
   $.getJSON("../static/localjson.json", function(data){
 
@@ -403,10 +402,10 @@ function populate_station_name_dropdown(){
         
         var name = data.features[i].properties.name;
 
-        var option = document.createElement("OPTION");
-        option.textContent=name;
-        option.value=name;
-        drpdwn.appendChild(option);
+        var name_option = document.createElement("OPTION");
+        name_option.textContent=name;
+        name_option.value=name;
+        name_drpdwn.appendChild(name_option);
       }
     }
   );
@@ -434,7 +433,7 @@ function find_by_number(){
   sn = document.getElementById("station_number_find").value;
 
   // bring up information on the stations. (activate click event)
-  standinfo(sn);
+  // standinfo(sn);
 
   if (sn=='default'){
     initMap();
@@ -456,6 +455,38 @@ function find_by_number(){
             map.setZoom(17);
 
             split_window_info(stationname, station_number);
+            
+            // need to minimise the search window here. !important.
+          }
+        }
+      }
+    );
+  }
+}
+
+function find_by_name() {
+
+  sname = document.getElementById("station_name_find").value;
+  sn = document.getElementById("station_number_find");
+
+  if (sname=='default'){
+    initMap();
+  }
+  else {
+    $.getJSON("../static/localjson.json",
+      function(data){
+
+        // loop thorugh data to find correct station number then set number of station and call find by number.
+
+        for (var i=0; i<data.features.length; i++){
+          var stationname = data.features[i].properties.name;
+          var station_number = data.features[i].properties.number;
+
+          if (stationname == sname){
+
+            sn.value=station_number;
+            $("station_number_find").text(station_number);
+            find_by_number();
 
           }
         }

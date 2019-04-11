@@ -97,7 +97,7 @@
 }
 
 #station_number_find {
-    width:100px;
+    width:100%;
     border-radius:20px;
     height:25px;
     font-size: 12pt;
@@ -105,10 +105,20 @@
     top:0;
 }
 
+#station_name_find {
+    width:100%;
+    border-radius:20px;
+    height:25px;
+    font-size: 12pt;
+    bottom:0;
+    top:5;
+}
+
 select {
     /* text-align-last:right; */
-    padding-left: 30px;
+    padding-left: 20px;
     font-size:15pt;
+    font-weight:2em;
     /* direction: rtl; */
 }
 
@@ -130,6 +140,14 @@ select {
     font-size: 20px;
     font-family: Arial;
     visibility:hidden;
+}
+
+#infoboxcontent p {
+    padding:35px;
+    text-align:left;
+    padding-top:10px;
+    padding-bottom:10px;
+    margin:0;
 }
 
 #information-table{
