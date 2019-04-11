@@ -255,15 +255,14 @@ function calcRoute(start, end) {
 }
 
 function getPosition(ending) {
-    navigator.geolocation.getCurrentPosition(
-      function success(position) {
-      // for when getting location is a success
-      var userlocation = (position.coords.latitude + "," + position.coords.longitude);
-      calcRoute(userlocation,ending);
-      console.log(userlocation)
-    return userlocation;
-    }
-  );
+  navigator.geolocation.getCurrentPosition(
+    function success(position) {
+    // for when getting location is a success
+    var userlocation = (position.coords.latitude + "," + position.coords.longitude);
+    calcRoute(userlocation,ending);
+    console.log(userlocation)
+  return userlocation;
+  });
 }
 
 function fulllookup(){
@@ -506,9 +505,37 @@ function find_by_name() {
 }
 
 function find_nearest_station() {
+  
+  var minlat, minlng;
+  var mindist=10000000000.0;
+  var x = navigator.geolocation.getCurrentPosition(
+    function success(position) {
 
+    var lat1 = position.coords.latitude;
+    var lng1 = position.coords.longitude;
 
+    $.getJSON("../static/localjson.json",
+      function(data){
 
+        for (var i=0; i<data.features.length; i++){
+
+          var lng2 = data.features[i].geometry.coordinates[0];
+          var lat2 = data.features[i].geometry.coordinates[1];
+          var dist = distance_between_latlng (lat1,lat2,lng1,lng2);
+
+          if (dist < mindist) {
+            mindist = dist;
+            minlat = lat2;
+            minlng = lng2;
+          }
+        }
+        console.log(mindist,minlng,minlat);
+        var pos1 = (lat1 + "," + lng1);
+        var pos2 = (lat2 + "," + lng2);
+        calcRoute(pos1, pos2);
+      }
+    );
+  });
 }
 
 function distance_between_latlng (lat1, lat2, lng1, lng2) {
@@ -516,6 +543,7 @@ function distance_between_latlng (lat1, lat2, lng1, lng2) {
   dx = lat1 - lat2;
   dy = lng1 - lng2;
 
-  return Math.sqrt((dx*dx) + (dy*dy));
+  distance =  Math.sqrt((dx*dx) + (dy*dy));
 
+  return distance;
 }
