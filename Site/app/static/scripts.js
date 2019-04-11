@@ -65,10 +65,10 @@ var table_info_content = `
 </table>
 `
 var find_station_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:10px;padding-bottom:0;"> 
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
   Find Station 
 </h3><br>
-<hr style="width:40%;margin-top:0;margin-bottom:0;">
+<hr style="width:50%;margin-top:0;margin-bottom:30px;">
 <p>
   Station Number:<br>
   <select id="station_number_find" onchange=find_by_number()>
@@ -84,6 +84,8 @@ var find_station_inner_html = `
   </select>
 </p>
 <script>populate_station_name_dropdown();</script>
+
+<button id="find_nearest_station_button">Find Nearest Station</button>
 `;
 
 var Forecast_content_inner_html = `
@@ -411,6 +413,7 @@ function populate_station_name_dropdown(){
   );
 }
 
+// Redefine this function to make a popup info box over the marker on pan to center.
 function split_window_info(stationname, stationnumber) {
 
   $("#map").css("width","70%");
@@ -430,13 +433,15 @@ function split_window_info(stationname, stationnumber) {
 function find_by_number(){
   // find station by number from localjson
 
-  sn = document.getElementById("station_number_find").value;
-
+  var sn = document.getElementById("station_number_find").value;
+  var sname = document.getElementById("station_name_find")
   // bring up information on the stations. (activate click event)
   // standinfo(sn);
 
   if (sn=='default'){
     initMap();
+    sname.text='Search';
+    sname.value='default';
   }
   else {
     $.getJSON("../static/localjson.json",
@@ -454,7 +459,9 @@ function find_by_number(){
             map.panTo(new google.maps.LatLng(lat, lng));
             map.setZoom(17);
 
-            split_window_info(stationname, station_number);
+            // split_window_info(stationname, station_number);
+            sname.value = stationname;
+            sname.text = stationname;
             
             // need to minimise the search window here. !important.
           }
