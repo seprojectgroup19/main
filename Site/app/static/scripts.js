@@ -8,6 +8,75 @@ var map_center = {
 };
 var zoom_level = 13.5;
 
+var table_info_content = `
+<table id="information-table">
+<thead>
+    <h2 id="station">Dublin Bikes</h2>
+    <hr style="width: 40%">
+</thead>
+<tbody>
+  <tr>
+    <td>
+      <h3 style ="margin-bottom: 10px;">
+        Weather
+      </h3>
+    </td>
+    <td>
+      <h3>
+        Status:
+      </h3>
+    </td>
+    <td>
+      <p id="status">
+        Open
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="2">
+        <p>
+          <canvas id = "weathericon" class="clear-day" width="50" height="50"></canvas>
+        </p>
+    </td>
+    <td>
+      <h3>
+        Available Bikes:
+      </h3>
+    </td>
+    <td>
+      <p id ="avbikes">
+        Loading...
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h3>
+        Available Stands
+      </h3>
+    </td>
+    <td>
+      <p id ="avstands">
+        Loading...
+      </p>
+    </td>
+  </tr>
+</tbody>
+</table>
+`
+var find_station_inner_html = `
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px;"> 
+Find Station 
+</h3><br>
+<hr style="width:30%;margin-top:0;margin-bottom:0;">
+<p>
+Station Number:
+<select id="station_number_find" onchange=find_by_number()>
+<option value='default'>All</option>
+</select>
+<script>populate_station_number_dropdown();</script>
+</p>
+`;
 
 function initMap() {
     directionsService = new google.maps.DirectionsService();
@@ -62,12 +131,14 @@ function initMap() {
                     allMarkers[y].addListener("click", function() {
                             var stationname = this["name"];
                             var stationnumber = this["number"];
+                            $("#infoboxcontent").html(table_info_content);
                             $("#map").css("width","65%");
                             $("#infobox").css("width","35%");
                             $("#infobox").css("visibility","visible");
                             $("#station").text(stationname);
                             $("#avbikes").text("Loading...");
                             $("#avstands").text("Loading...");
+                            $("#menu_item_1").text("Close");
                             map.panBy(0, 0);
                             document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
                             document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
@@ -85,10 +156,25 @@ function initMap() {
 // handles dropdown menu
 function clickHandler(val) {
   if (val == 1) {
-    $("#map").css("width", "100%");
-    $("#infobox").css("width", "0%");
-    $("#infobox").css("visibility", "hidden");
-    document.documentElement.scrollTop = 0;
+
+    if ($("#menu_item_1").text()=="Close"){
+      $("#menu_item_1").text("Find Station");
+      
+      $("#map").css("width", "100%");
+      $("#infobox").css("width", "0%");
+      $("#infobox").css("visibility", "hidden");
+      document.documentElement.scrollTop = 0;
+      
+    } else {
+      $("#menu_item_1").text("Close");
+      
+      $("#map").css("width", "60%");
+      $("#infobox").css("width", "40%");
+      $("#infobox").css("visibility", "visible");
+
+      $("#infoboxcontent").html(find_station_inner_html)
+      
+    }
   } else if (val == 2) {
     $("#station").text("UNDER CONSTRUCTION");
 
