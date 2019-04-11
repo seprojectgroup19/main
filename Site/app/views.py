@@ -7,6 +7,7 @@ from functools import update_wrapper
 from flask import render_template
 from datetime import timedelta
 import execute_query as eq
+import xgboost as xgb
 import requests as r
 from app import app
 import json
@@ -78,9 +79,18 @@ def fulllookup():
 
     return json.dumps(resultdictionary)
 
-@app.route('/heatmap', methods=["GET"])
-def heatmap():
-    return 0
+@app.route('/model', methods=["GET"])
+def model():
+
+    station_number = request.args.get('station_number')
+
+    model = xgb.Booster()
+    model.load_model(f'station_{station_number}.model')
+
+    data = xgb.DMatrix(inputs)
+    predictions = model.predict(data)
+
+    return predictions
 
 @app.route('/testpage')
 def testpage():
