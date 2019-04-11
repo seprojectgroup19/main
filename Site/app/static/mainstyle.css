@@ -61,10 +61,13 @@
 }
 
 #sidenav{
+    background-color: #084c55;
+    min-width: 160px;
     height:100%;
     width:10%;
+    z-index:1;
     float:left;
-    background-color: #084c55;
+    position:fixed;
 }
 
 #map_container {
@@ -179,12 +182,13 @@ html, body {
 
 .dropdown {
     position: relative;
+    height:100%;
 }
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
     /* display: none; */
-    position: absolute;
+    position: relative;
     background-color: #084c55;
     min-width: 160px;
     /* box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); */
