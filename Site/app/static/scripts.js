@@ -144,9 +144,7 @@ function initMap() {
     var allMarkers = [];
     rackdata = fulllookup();
     for (x in data){
-      
-      var y = data[x].properties.number;
-
+      var y = data[x].properties.number
       allMarkers[y] = new google.maps.Marker({
         position : {lat : data[x]["geometry"]["coordinates"]["1"],
         lng : data[x]["geometry"]["coordinates"]["0"]},
@@ -274,59 +272,51 @@ function getPosition(ending) {
 }
 
 function fulllookup(){
-        var fullinfo
-      xmlhttp = new XMLHttpRequest();
-      xmlhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            testvar = JSON.parse(this.responseText)
-            $("#contentwindow").css("visibility","visible");
-            $("#loadingwindow").css("visibility","hidden");
-            $("#loadingwindow").css("height","0%");
-            $("#loadingwindow").css("width","0%");
-            $("#contentwindow").css("height","70%");
-            $("#contentwindow").css("width","100%");
-            return testvar;
+  var fullinfo
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+        testvar = JSON.parse(this.responseText)
+        $("#contentwindow").css("visibility","visible");
+        $("#loadingwindow").css("visibility","hidden");
+        $("#loadingwindow").css("height","0%");
+        $("#loadingwindow").css("width","0%");
+        $("#contentwindow").css("height","70%");
+        $("#contentwindow").css("width","100%");
+        return testvar;
 
-        }
+    }
   };
 
   xmlhttp.open("GET", "/fulllookup", false);
   xmlhttp.send();
-    return xmlhttp.onreadystatechange();
+  return xmlhttp.onreadystatechange();
 }
 
 function SkyCon() {
   var i;
-
   var icons = new Skycons({
       "color": "#ffffff"
     });
-
   var list = [
       "clear-day", "clear-night", "partly-cloudy-day",
       "partly-cloudy-night", "cloudy", "rain", "sleet", "snow", "wind",
       "fog"
     ]
-
   for (i = list.length; i--;) {
-    var weatherType = list[i],
-      elements = document.getElementsByClassName(weatherType);
+    var weatherType = list[i];
+    var elements = document.getElementsByClassName(weatherType);
     for (e = elements.length; e--;) {
       icons.set(elements[e], weatherType);
     }
   }
-
   icons.play();
 }
 SkyCon()
 
 function heatmap(state) {
-
-  console.log(state);
-
   if (state == 1) {
       // turn on heatmap
-
       map = new google.maps.Map(document.getElementById('map'), {
         center: {
           lat: 53.34481,
@@ -335,43 +325,32 @@ function heatmap(state) {
         zoom: 13.5,
         mapTypeId: 'satellite'
       });
-
       var heatmap = new google.maps.visualization.HeatmapLayer({
         data: getPoints(),
         map : map
       });
       console.log(getPoints());
       heatmap.setMap(map);
-
   } else {
     // redraw original map
     initMap();
   }
-
 }
 
 function get_Points(){
-
   var map_data = [];
   var file="../static/localjson.json";
-
   $.getJSON(file,
     function(data){
-
       for (var i=0; i<data.features.length; i++){
-
         var lng = data.features[i].geometry.coordinates[0];
         var lat = data.features[i].geometry.coordinates[1];
         var station_number = data.features[i].properties.number;
-
         // add data to array for sending to heatmap. replace station number with n_bikes.
         // var str_ = new google.maps.LatLng(lat, lng);
         console.log(lat); console.log(53.782745);
         map_data.push(new google.maps.LatLng(parseFloat(lat), parseFloat(lng)));
       }
-
-    console.log(map_data);
-
     return map_data[0];
   });
 };
@@ -388,14 +367,10 @@ function getPoints() {
 }
 
 function populate_station_number_dropdown(){
-
   drpdwn = document.getElementById('station_number_find');
-
   $.getJSON("../static/localjson.json", function(data){
-
       for (var i=0; i<data.features.length; i++){
         var station_number = data.features[i].properties.number;
-
         var option = document.createElement("OPTION");
         option.textContent=station_number;
         option.value=station_number;
@@ -458,7 +433,7 @@ function find_by_number(){
       function(data){
 
         for (var i=0; i<data.features.length; i++){
-
+          
           var lng = data.features[i].geometry.coordinates[0];
           var lat = data.features[i].geometry.coordinates[1];
           var stationname = data.features[i].properties.name;
