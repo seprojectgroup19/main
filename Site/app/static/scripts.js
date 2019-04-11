@@ -7,6 +7,8 @@ var map_center = {
   lng: -6.266209
 };
 var zoom_level = 13.5;
+var toggle_markers=1;
+var toggle_heatmap=0;
 
 var table_info_content = `
 <table id="information-table">
@@ -85,7 +87,7 @@ var find_station_inner_html = `
 </p>
 <script>populate_station_name_dropdown();</script>
 
-<button id="find_nearest_station_button">Find Nearest Station</button>
+<button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
 `;
 
 var Forecast_content_inner_html = `
@@ -95,11 +97,9 @@ Sample Content
 </h3><br>
 
 <img src="../static/images/WeekendAverage.png" alt="Weekend Average">
-
 <img src="../static/images/WeekdayAverage.png" alt="Weekend Average">
 
 </div>
-
 `;
 
 
@@ -121,67 +121,74 @@ function initMap() {
         mapTypeId: 'terrain'
     });
     directionsDisplay.setMap(map);
-    showStationMarkers();
+
+    if (toggle_markers==1) {
+      showStationMarkers();
+    }
+    else if (toggle_heatmap) {
+      console.log("HEATMAP")
+    }
+    else {
+      console.log("NO MARKERS")
+    }
 
 }
 
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
-            var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
-            $.getJSON('../static/localjson.json', null, function(data) {
-                data = data["features"]
-                var allMarkers = [];
-                rackdata = fulllookup();
-                for (x in data){
-                    var y = data[x].properties.number
-                    allMarkers[y] = new google.maps.Marker({
-                    position : {lat : data[x]["geometry"]["coordinates"]["1"],
-                    lng : data[x]["geometry"]["coordinates"]["0"]},
-                    map : map,
-                    name : data[x]["properties"]["name"],
-                    number : data[x]["properties"]["number"],
+  var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+  $.getJSON('../static/localjson.json', null, function(data) {
+    data = data["features"]
+    var allMarkers = [];
+    rackdata = fulllookup();
+    for (x in data){
+      
+      var y = data[x].properties.number;
 
-                    icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
-                                           });
+      allMarkers[y] = new google.maps.Marker({
+        position : {lat : data[x]["geometry"]["coordinates"]["1"],
+        lng : data[x]["geometry"]["coordinates"]["0"]},
+        map : map,
+        name : data[x]["properties"]["name"],
+        number : data[x]["properties"]["number"],
+        icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
+      });
 
+      for (p in allMarkers){
+          if (rackdata[p].bikes == 0){
+              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+          }
+          else if (rackdata[p].bikes < 10){
+              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+          }
+          else{
+              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+          }
+      }
 
-                    for (p in allMarkers){
-                        if (rackdata[p].bikes == 0){
-                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-                        }
-                        else if (rackdata[p].bikes < 10){
-                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
-                        }
-                        else{
-                            allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
-                        }
+      allMarkers[y].addListener("click", function() {
+        var stationname = this["name"];
+        var stationnumber = this["number"];
+        $("#infoboxcontent").html(table_info_content);
+        $("#map").css("width","65%");
+        $("#infobox").css("width","35%");
+        $("#infobox").css("visibility","visible");
+        $("#station").text(stationname);
+        $("#avbikes").text("Loading...");
+        $("#avstands").text("Loading...");
+        $("#menu_item_1").text("Close");
+        map.panBy(0, 0);
+        document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
+        document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
+        document.getElementById("status").innerHTML = rackdata[stationnumber].status
+        $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
+        SkyCon();
+        var destination = this.position.lat() +"," +this.position.lng();
+        getPosition(destination);
 
-                    }
-
-
-                    allMarkers[y].addListener("click", function() {
-                            var stationname = this["name"];
-                            var stationnumber = this["number"];
-                            $("#infoboxcontent").html(table_info_content);
-                            $("#map").css("width","65%");
-                            $("#infobox").css("width","35%");
-                            $("#infobox").css("visibility","visible");
-                            $("#station").text(stationname);
-                            $("#avbikes").text("Loading...");
-                            $("#avstands").text("Loading...");
-                            $("#menu_item_1").text("Close");
-                            map.panBy(0, 0);
-                            document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
-                            document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
-                            document.getElementById("status").innerHTML = rackdata[stationnumber].status
-                            $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
-                            SkyCon();
-                            var destination = this.position.lat() +"," +this.position.lng();
-                            getPosition(destination);
-
-                        });
-                }
-            });
+      });
+    }
+  });
 }
 
 // handles dropdown menu
@@ -247,17 +254,16 @@ function calcRoute(start, end) {
   });
 }
 
-
 function getPosition(ending) {
     navigator.geolocation.getCurrentPosition(
-        function success(position) {
-     // for when getting location is a success
-     var userlocation = (position.coords.latitude + "," + position.coords.longitude);
-            calcRoute(userlocation,ending);
-        console.log(userlocation)
-     return userlocation;
-   }
-    )
+      function success(position) {
+      // for when getting location is a success
+      var userlocation = (position.coords.latitude + "," + position.coords.longitude);
+      calcRoute(userlocation,ending);
+      console.log(userlocation)
+    return userlocation;
+    }
+  );
 }
 
 function fulllookup(){
@@ -281,8 +287,6 @@ function fulllookup(){
   xmlhttp.send();
     return xmlhttp.onreadystatechange();
 }
-
-
 
 function SkyCon() {
   var i;
@@ -429,7 +433,6 @@ function split_window_info(stationname, stationnumber) {
   standinfo(stationnumber);
 }
 
-
 function find_by_number(){
   // find station by number from localjson
 
@@ -500,4 +503,19 @@ function find_by_name() {
       }
     );
   }
+}
+
+function find_nearest_station() {
+
+
+
+}
+
+function distance_between_latlng (lat1, lat2, lng1, lng2) {
+
+  dx = lat1 - lat2;
+  dy = lng1 - lng2;
+
+  return Math.sqrt((dx*dx) + (dy*dy));
+
 }
