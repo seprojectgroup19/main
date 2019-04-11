@@ -21,100 +21,36 @@
           <img src="../static/images/Dublin_Bikes_logo.jpg">
         </h1>
         <hr style="width: 20%;margin-top:0%;margin-bottom: 0%">
-        <p>
-          Station Number:
-          <select id="station_number_find" onchange=find_by_number()>
-            <option value='default'>All</option>
-          </select>
-          <script>populate_station_number_dropdown();</script>
-        </p>
-
       </header>
       <div style="clear:both;"></div>
-      
+
       <!-- Main Body: Map and interactive info window -->
       <div id="loadingwindow" >
           <div class="loader"></div>
       </div>
       <div id="contentwindow">
 
-        <div id="sidenav_wrapper">
-          <div id="sidenav">
-            
-          </div>
+        <div id="sidenav">
+          <!-- <div class="dropdown"> -->
+              <div class="dropdown-content">
+                <a href="#" id="menu_item_1" onclick="clickHandler(1)">Find Station</a>
+                <a href="#" id="menu_item_2" onclick="clickHandler(2)">Forecasts</a>
+                <a href="#" id="menu_item_3" onclick="clickHandler(3)">Graphs</a>
+                <a href="#" id="menu_weather" style="height:100%;">Weather</a>
+              </div><br>
+          <!-- </div><br> -->
         </div>
+      
 
         <div id="map_container">
           <div id="map">
           <!-- This is empty for the map to be placed in -->
           </div>
-        
+          
           <div id="infobox">
-            <div class="dropdown">
-              <button class="dropbtn" >Dropdown</button>
-              <div class="dropdown-content">
-                <a href="#" onclick="clickHandler(1)">Close</a>
-                <a href="#" onclick="clickHandler(2)">Graphs</a>
-                <a href="#" onclick="clickHandler(3)">Forecasts</a>
-              </div><br>
-            </div><br>
-
             <div id="infoboxcontent">
               <!-- Information Table: Contains info on bikes and weather -->
-              <table id="information-table">
-              <thead>
-                  <h2 id="station">Dublin Bikes</h2>
-                  <hr style="width: 40%">
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <h3 style ="margin-bottom: 10px;">
-                      Weather
-                    </h3>
-                  </td>
-                  <td>
-                    <h3>
-                      Status:
-                    </h3>
-                  </td>
-                  <td>
-                    <p>
-                      Open
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td rowspan="2">
-                      <p>
-                        <canvas id = "weathericon" class="clear-day" width="50" height="50"></canvas>
-                      </p>
-                  </td>
-                  <td>
-                    <h3>
-                      Available Bikes:
-                    </h3>
-                  </td>
-                  <td>
-                    <p id ="avbikes">
-                      Loading...
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td>
-                    <h3>
-                      Available Stands
-                    </h3>
-                  </td>
-                  <td>
-                    <p id ="avstands">
-                      Loading...
-                    </p>
-                  </td>
-                </tr>
-              </tbody>
-              </table>
+              
             <hr style="width: 30%; ">
 
             </div>
@@ -127,29 +63,29 @@
         <!-- Place Toggle Options Here -->
         <ul id="toggle_list">
           <li>
-            Weather:
-            <label class="switch">
+            Toggle Markers:
+            <label class="switch" id="toggle_markers_switch">
                 <input type="checkbox">
                 <span class="slider"></span>
             </label>
           </li>
           <li>
             Station colors:
-            <label class="switch">
+            <label class="switch" id="toggle_station_colours_switch" onchange="toggle_map_colours();">
                 <input type="checkbox">
                 <span class="slider"></span>
             </label>
           </li>
           <li>
             Hide Empty:
-            <label class="switch">
+            <label class="switch" id="toggle_hide_empty_switch">
                 <input type="checkbox">
                 <span class="slider"></span>
             </label>
           </li>
           <li>
             Heatmap:
-            <label class="switch">
+            <label class="switch" id="toggle_heatmap_switch">
                 <input type="checkbox">
                 <span class="slider"></span>
             </label>

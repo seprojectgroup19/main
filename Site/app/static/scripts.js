@@ -7,10 +7,113 @@ var map_center = {
   lng: -6.266209
 };
 var zoom_level = 13.5;
+var toggle_markers=1;
+var toggle_heatmap=0;
+var toggle_marker_color=1;
+var toggle_empty_marker=0;
 
+var table_info_content = `
+<table id="information-table">
+<thead>
+    <h2 id="station">Dublin Bikes</h2>
+    <hr style="width: 40%">
+</thead>
+<tbody>
+  <tr>
+    <td>
+      <h3 style ="margin-bottom: 10px;">
+        Weather
+      </h3>
+    </td>
+    <td>
+      <h3>
+        Status:
+      </h3>
+    </td>
+    <td>
+      <p id="status">
+        Open
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="2">
+        <p>
+          <canvas id = "weathericon" class="clear-day" width="50" height="50"></canvas>
+        </p>
+    </td>
+    <td>
+      <h3>
+        Available Bikes:
+      </h3>
+    </td>
+    <td>
+      <p id ="avbikes">
+        Loading...
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <h3>
+        Available Stands
+      </h3>
+    </td>
+    <td>
+      <p id ="avstands">
+        Loading...
+      </p>
+    </td>
+  </tr>
+</tbody>
+</table>
+`
+var find_station_inner_html = `
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
+  Find Station 
+</h3><br>
+<hr style="width:50%;margin-top:0;margin-bottom:30px;">
+<p>
+  Station Number:<br>
+  <select id="station_number_find" onchange=find_by_number()>
+    <option value='default'>All</option>
+  </select>
+  <script>populate_station_number_dropdown();</script>
+</p>
+<br>
+<p>
+  Station Address:<br>
+  <select id="station_name_find" onchange=find_by_name()>
+    <option value='default'>Search</option>
+  </select>
+</p>
+<script>populate_station_name_dropdown();</script>
+
+<button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
+`;
+
+var Forecast_content_inner_html = `
+<div id="Forecast_content_inner_html">
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
+Sample Content
+</h3><br>
+
+<img src="../static/images/WeekendAverage.png" alt="Weekend Average">
+<img src="../static/images/WeekdayAverage.png" alt="Weekend Average">
+
+</div>
+`;
+
+
+var graph_content_inner_html = `
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
+Under Construction
+</h3><br>
+`;
 
 function initMap() {
-
+    directionsService = new google.maps.DirectionsService();
+    directionsDisplay = new google.maps.DirectionsRenderer();
     infowindow = new google.maps.InfoWindow();
     geocoder = new google.maps.Geocoder;
     var latlng = new google.maps.LatLng(53.34481, -6.266209);
@@ -19,8 +122,17 @@ function initMap() {
         center: latlng,
         mapTypeId: 'terrain'
     });
+    directionsDisplay.setMap(map);
 
-    showStationMarkers();
+    if (toggle_markers==1) {
+      showStationMarkers();
+    }
+    else if (toggle_heatmap) {
+      console.log("HEATMAP")
+    }
+    else {
+      console.log("NO MARKERS")
+    }
 
 }
 
@@ -39,33 +151,47 @@ function initMap() {
         map : map,
         name : data[x]["properties"]["name"],
         number : data[x]["properties"]["number"],
-
         icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
       });
 
-      for (p in allMarkers){
-          if (rackdata[p].bikes < 5){
-              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-          }
-          else if (rackdata[p].bikes < 10){
-              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-          }
-          else{
-              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
-          }
-      };
+      if (toggle_marker_color==1) {
+        for (p in allMarkers){
+            if (rackdata[p].bikes == 0){
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+            }
+            else if (rackdata[p].bikes < 10){
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+            }
+            else{
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+            }
+        } 
+      }else{
+        for (p in allMarkers){
+          allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+        }
+      }
 
       allMarkers[y].addListener("click", function() {
         var stationname = this["name"];
         var stationnumber = this["number"];
+        $("#infoboxcontent").html(table_info_content);
         $("#map").css("width","65%");
         $("#infobox").css("width","35%");
         $("#infobox").css("visibility","visible");
         $("#station").text(stationname);
         $("#avbikes").text("Loading...");
         $("#avstands").text("Loading...");
+        $("#menu_item_1").text("Close");
         map.panBy(0, 0);
-        standinfo(stationnumber);
+        document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
+        document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
+        document.getElementById("status").innerHTML = rackdata[stationnumber].status
+        $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
+        SkyCon();
+        var destination = this.position.lat() +"," +this.position.lng();
+        getPosition(destination);
+
       });
     }
   });
@@ -74,15 +200,35 @@ function initMap() {
 // handles dropdown menu
 function clickHandler(val) {
   if (val == 1) {
-    $("#map").css("width", "100%");
-    $("#infobox").css("width", "0%");
-    $("#infobox").css("visibility", "hidden");
-    document.documentElement.scrollTop = 0;
-  } else if (val == 2) {
-    $("#station").text("UNDER CONSTRUCTION");
 
-  } else if (val == 3) {
-    $("#station").text("UNDER CONSTRUCTION");
+    if ($("#menu_item_1").text()=="Close"){
+      $("#menu_item_1").text("Find Station");
+      $("#map").css("width", "100%");
+      $("#infobox").css("width", "0%");
+      $("#infobox").css("visibility", "hidden");
+      document.documentElement.scrollTop = 0;
+      
+    } else {
+      $("#menu_item_1").text("Close");
+      $("#map").css("width", "70%");
+      $("#infobox").css("width", "30%");
+      $("#infobox").css("visibility", "visible");
+      $("#infoboxcontent").html(find_station_inner_html)
+    }
+  } 
+  else if (val == 2) {
+    $("#menu_item_1").text("Close");
+    $("#map").css("width", "70%");
+    $("#infobox").css("width", "30%");
+    $("#infobox").css("visibility", "visible");
+    $("#infoboxcontent").html(graph_content_inner_html);
+  } 
+  else if (val == 3) {
+    $("#menu_item_1").text("Close");
+    $("#map").css("width", "70%");
+    $("#infobox").css("width", "30%");
+    $("#infobox").css("visibility", "visible");
+    $("#infoboxcontent").html(Forecast_content_inner_html);
   }
 }
 
@@ -99,6 +245,30 @@ function standinfo(stand) {
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
   xmlhttp.send();
+}
+
+function calcRoute(start, end) {
+  var request = {
+    origin: start,
+    destination: end,
+    travelMode: 'WALKING'
+  };
+  directionsService.route(request, function(result, status) {
+    if (status == 'OK') {
+      directionsDisplay.setDirections(result);
+    }
+  });
+}
+
+function getPosition(ending) {
+  navigator.geolocation.getCurrentPosition(
+    function success(position) {
+    // for when getting location is a success
+    var userlocation = (position.coords.latitude + "," + position.coords.longitude);
+    calcRoute(userlocation,ending);
+    console.log(userlocation)
+  return userlocation;
+  });
 }
 
 function fulllookup(){
@@ -210,10 +380,30 @@ function populate_station_number_dropdown(){
   );
 }
 
+function populate_station_name_dropdown(){
+
+  name_drpdwn = document.getElementById('station_name_find');
+
+  $.getJSON("../static/localjson.json", function(data){
+
+      for (var i=0; i<data.features.length; i++){
+        
+        var name = data.features[i].properties.name;
+
+        var name_option = document.createElement("OPTION");
+        name_option.textContent=name;
+        name_option.value=name;
+        name_drpdwn.appendChild(name_option);
+      }
+    }
+  );
+}
+
+// Redefine this function to make a popup info box over the marker on pan to center.
 function split_window_info(stationname, stationnumber) {
 
-  $("#map").css("width","65%");
-  $("#infobox").css("width","35%");
+  $("#map").css("width","70%");
+  $("#infobox").css("width","30%");
   $("#infobox").css("visibility","visible");
 
   $("#station").text(stationname);
@@ -228,14 +418,15 @@ function split_window_info(stationname, stationnumber) {
 function find_by_number(){
   // find station by number from localjson
 
-  // get value of select.
-  sn = document.getElementById("station_number_find").value;
-
+  var sn = document.getElementById("station_number_find").value;
+  var sname = document.getElementById("station_name_find")
   // bring up information on the stations. (activate click event)
-  standinfo(sn);
+  // standinfo(sn);
 
   if (sn=='default'){
     initMap();
+    sname.text='Search';
+    sname.value='default';
   }
   else {
     $.getJSON("../static/localjson.json",
@@ -253,10 +444,92 @@ function find_by_number(){
             map.panTo(new google.maps.LatLng(lat, lng));
             map.setZoom(17);
 
-            split_window_info(stationname, station_number);
+            // split_window_info(stationname, station_number);
+            sname.value = stationname;
+            sname.text = stationname;
+            
+            // need to minimise the search window here. !important.
           }
         }
       }
     );
+  }
+}
+
+function find_by_name() {
+
+  sname = document.getElementById("station_name_find").value;
+  sn = document.getElementById("station_number_find");
+
+  if (sname=='default'){
+    initMap();
+  }
+  else {
+    $.getJSON("../static/localjson.json",
+      function(data){
+
+        // loop thorugh data to find correct station number then set number of station and call find by number.
+
+        for (var i=0; i<data.features.length; i++){
+          var stationname = data.features[i].properties.name;
+          var station_number = data.features[i].properties.number;
+
+          if (stationname == sname){
+
+            sn.value=station_number;
+            $("station_number_find").text(station_number);
+            find_by_number();
+
+          }
+        }
+      }
+    );
+  }
+}
+
+function find_nearest_station() {
+  
+  var minlat, minlng;
+  var mindist=10000000000.0;
+  var x = navigator.geolocation.getCurrentPosition(
+    function success(position) {
+
+    var lat1 = position.coords.latitude;
+    var lng1 = position.coords.longitude;
+
+    $.getJSON("../static/localjson.json",
+      function(data){
+
+        for (var i=0; i<data.features.length; i++){
+
+          var lng2 = data.features[i].geometry.coordinates[0];
+          var lat2 = data.features[i].geometry.coordinates[1];
+          var dx = lat1 - lat2;
+          var dy = lng1 - lng2;
+          var dist =  Math.sqrt((dx*dx) + (dy*dy));
+
+          if (dist < mindist) {
+            mindist = dist;
+            minlat = lat2;
+            minlng = lng2;
+          }
+        }
+        console.log(mindist,minlng,minlat);
+        var pos1 = (lat1 + "," + lng1);
+        var pos2 = (minlat + "," + minlng);
+        calcRoute(pos1, pos2);
+      }
+    );
+  });
+}
+
+function toggle_map_colours(){
+  if (toggle_marker_color==0) {
+    // change marker colour here.    
+    toggle_marker_color=1;
+    initMap();
+  }else{
+    toggle_marker_color=0;
+    initMap();
   }
 }
