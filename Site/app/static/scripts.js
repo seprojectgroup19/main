@@ -9,6 +9,8 @@ var map_center = {
 var zoom_level = 13.5;
 var toggle_markers=1;
 var toggle_heatmap=0;
+var toggle_marker_color=1;
+var toggle_empty_marker=0;
 
 var table_info_content = `
 <table id="information-table">
@@ -154,16 +156,22 @@ function initMap() {
         icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
       });
 
-      for (p in allMarkers){
-          if (rackdata[p].bikes == 0){
-              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
-          }
-          else if (rackdata[p].bikes < 10){
-              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
-          }
-          else{
-              allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
-          }
+      if (toggle_marker_color==1) {
+        for (p in allMarkers){
+            if (rackdata[p].bikes == 0){
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+            }
+            else if (rackdata[p].bikes < 10){
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+            }
+            else{
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+            }
+        } 
+      }else{
+        for (p in allMarkers){
+          allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+        }
       }
 
       allMarkers[y].addListener("click", function() {
@@ -538,4 +546,15 @@ function find_nearest_station() {
       }
     );
   });
+}
+
+function toggle_map_colours(){
+  if (toggle_marker_color==0) {
+    // change marker colour here.    
+    toggle_marker_color=1;
+    initMap();
+  }else{
+    toggle_marker_color=0;
+    initMap();
+  }
 }
