@@ -521,7 +521,9 @@ function find_nearest_station() {
 
           var lng2 = data.features[i].geometry.coordinates[0];
           var lat2 = data.features[i].geometry.coordinates[1];
-          var dist = distance_between_latlng (lat1,lat2,lng1,lng2);
+          var dx = lat1 - lat2;
+          var dy = lng1 - lng2;
+          var dist =  Math.sqrt((dx*dx) + (dy*dy));
 
           if (dist < mindist) {
             mindist = dist;
@@ -531,19 +533,9 @@ function find_nearest_station() {
         }
         console.log(mindist,minlng,minlat);
         var pos1 = (lat1 + "," + lng1);
-        var pos2 = (lat2 + "," + lng2);
+        var pos2 = (minlat + "," + minlng);
         calcRoute(pos1, pos2);
       }
     );
   });
-}
-
-function distance_between_latlng (lat1, lat2, lng1, lng2) {
-
-  dx = lat1 - lat2;
-  dy = lng1 - lng2;
-
-  distance =  Math.sqrt((dx*dx) + (dy*dy));
-
-  return distance;
 }
