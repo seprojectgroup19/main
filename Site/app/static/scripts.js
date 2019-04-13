@@ -193,15 +193,16 @@ function weather_update() {
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       var data = JSON.parse(this.responseText)[0];
-      console.log(data);
+      var last_update_time = new Date(data[14] * 1000);
+
       $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
       $("#Conditions").text(data[12]);
-      // $("#Temperature").text(data[13] + " &#8451;" +"C");
       $('#Temperature').unbind().append(data[13] + ' &#8451;');
       $("#WindSpeed").text(data[19] + " km/h");
       $("#Humidity").text(data[4] + " %");
       $("#Precipitation").text(data[9] + " %");
-      $("#UpdateTime").text(data[14]);
+      $("#UpdateTime").text(last_update_time.getHours() + ":" + last_update_time.getMinutes());
+
       SkyCon();
     }
   };

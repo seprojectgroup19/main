@@ -31,6 +31,7 @@ def get_weather_update():
         ORDER BY time DESC LIMIT 1;
     """
     results = [tuple(eq.execute_sql(weather)[0])]
+    
     return json.dumps(results)
 
 @app.route('/lookup', methods=["GET"])
