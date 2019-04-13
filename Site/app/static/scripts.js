@@ -195,12 +195,13 @@ function weather_update() {
       var data = JSON.parse(this.responseText)[0];
       console.log(data);
       $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
-      $("#Conditions").text(data[5]);
-      $("#Temperature").text(data[1]);
-      $("#WindSpeed").text(data[2]);
-      $("#Humidity").text(data[3]);
-      $("#Precipitation").text(data[4]);
-      $("#UpdateTime").text(data[7]);
+      $("#Conditions").text(data[12]);
+      // $("#Temperature").text(data[13] + " &#8451;" +"C");
+      $('#Temperature').unbind().append(data[13] + ' &#8451;');
+      $("#WindSpeed").text(data[19] + " km/h");
+      $("#Humidity").text(data[4] + " %");
+      $("#Precipitation").text(data[9] + " %");
+      $("#UpdateTime").text(data[14]);
       SkyCon();
     }
   };
