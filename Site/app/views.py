@@ -14,11 +14,7 @@ import json
 
 @app.route('/')
 def index():
- returnDict = {}
- returnDict['user'] = 'Cormac' # Feel free to put your name here!
- returnDict['title'] = 'Home'
- return render_template("index.html", **returnDict)
-
+ return render_template("index.html")
 
 @app.route("/get_weather_update", methods=["GET"])
 def get_weather_update():

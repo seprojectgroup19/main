@@ -13,52 +13,52 @@ var toggle_marker_color=1;
 var toggle_empty_marker=0;
 
 var table_info_content = `
+  <table id="information-table">
+      <thead>
+          <h2 id="station">Dublin Bikes</h2>
+          <hr style="width: 40%">
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="3">
+            <h3>
+              Status:
+            </h3>
+          </td>
+          <td>
+            <p id="status">
+              Open
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <h3>
+              Available Bikes:
+            </h3>
+          </td>
+          <td>
+            <p id ="avbikes">
+              Loading...
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <h3>
+              Available Stands
+            </h3>
+          </td>
+          <td>
+            <p id ="avstands">
+              Loading...
+            </p>
+          </td>
+        </tr>
+      </tbody>
+      </table>
+  `;
 
-<table id="information-table">
-    <thead>
-        <h2 id="station">Dublin Bikes</h2>
-        <hr style="width: 40%">
-    </thead>
-    <tbody>
-      <tr>
-        <td colspan="3">
-          <h3>
-            Status:
-          </h3>
-        </td>
-        <td>
-          <p id="status">
-            Open
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3">
-          <h3>
-            Available Bikes:
-          </h3>
-        </td>
-        <td>
-          <p id ="avbikes">
-            Loading...
-          </p>
-        </td>
-      </tr>
-      <tr>
-        <td colspan="3">
-          <h3>
-            Available Stands
-          </h3>
-        </td>
-        <td>
-          <p id ="avstands">
-            Loading...
-          </p>
-        </td>
-      </tr>
-    </tbody>
-    </table>
-`
 var find_station_inner_html = `
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
   Find Station 
@@ -83,7 +83,7 @@ var find_station_inner_html = `
 <button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
 `;
 
-var Forecast_content_inner_html = `
+var graph_content_inner_html = `
 <div id="Forecast_content_inner_html">
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
 Sample Content
@@ -96,7 +96,7 @@ Sample Content
 `;
 
 
-var graph_content_inner_html = `
+var Forecast_content_inner_html = `
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
 Under Construction
 </h3><br>
@@ -192,8 +192,10 @@ function weather_update() {
   xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
+      
       var data = JSON.parse(this.responseText)[0];
       var last_update_time = new Date(data[14] * 1000);
+      console.log("Updated Weather Information");
 
       $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
       $("#Conditions").text(data[12]);
@@ -201,15 +203,23 @@ function weather_update() {
       $("#WindSpeed").text(data[19] + " km/h");
       $("#Humidity").text(data[4] + " %");
       $("#Precipitation").text(data[9] + " %");
-      $("#UpdateTime").text(last_update_time.getHours() + ":" + last_update_time.getMinutes());
+
+      // Formatting output string. 
+      var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
+      var minutes = ((last_update_time.getMinutes()<10) ? "0" : "") + last_update_time.getMinutes();  
+
+      $("#UpdateTime").text(hours + ":" + minutes);
 
       SkyCon();
     }
   };
   xmlhttp.open("GET", "/get_weather_update", true);
   xmlhttp.send();
+
+  // sleep 5 mins then update again. 
+  setTimeout(weather_update,300000);
 }
-setInterval(weather_update(), (10*60*1000));
+weather_update();
 
 // handles dropdown menu
 function clickHandler(val) {
