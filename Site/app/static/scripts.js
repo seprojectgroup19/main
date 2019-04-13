@@ -13,60 +13,51 @@ var toggle_marker_color=1;
 var toggle_empty_marker=0;
 
 var table_info_content = `
+
 <table id="information-table">
-<thead>
-    <h2 id="station">Dublin Bikes</h2>
-    <hr style="width: 40%">
-</thead>
-<tbody>
-  <tr>
-    <td>
-      <h3 style ="margin-bottom: 10px;">
-        Weather
-      </h3>
-    </td>
-    <td>
-      <h3>
-        Status:
-      </h3>
-    </td>
-    <td>
-      <p id="status">
-        Open
-      </p>
-    </td>
-  </tr>
-  <tr>
-    <td rowspan="2">
-        <p>
-          <canvas id = "weathericon" class="clear-day" width="50" height="50"></canvas>
-        </p>
-    </td>
-    <td>
-      <h3>
-        Available Bikes:
-      </h3>
-    </td>
-    <td>
-      <p id ="avbikes">
-        Loading...
-      </p>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <h3>
-        Available Stands
-      </h3>
-    </td>
-    <td>
-      <p id ="avstands">
-        Loading...
-      </p>
-    </td>
-  </tr>
-</tbody>
-</table>
+    <thead>
+        <h2 id="station">Dublin Bikes</h2>
+        <hr style="width: 40%">
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="3">
+          <h3>
+            Status:
+          </h3>
+        </td>
+        <td>
+          <p id="status">
+            Open
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <h3>
+            Available Bikes:
+          </h3>
+        </td>
+        <td>
+          <p id ="avbikes">
+            Loading...
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <h3>
+            Available Stands
+          </h3>
+        </td>
+        <td>
+          <p id ="avstands">
+            Loading...
+          </p>
+        </td>
+      </tr>
+    </tbody>
+    </table>
 `
 var find_station_inner_html = `
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
@@ -187,8 +178,7 @@ function initMap() {
         document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
         document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
         document.getElementById("status").innerHTML = rackdata[stationnumber].status
-        $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
-        SkyCon();
+      
         var destination = this.position.lat() +"," +this.position.lng();
         getPosition(destination);
 
@@ -196,6 +186,28 @@ function initMap() {
     }
   });
 }
+
+function weather_update() {
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      var data = JSON.parse(this.responseText)[0];
+      console.log(data);
+      $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
+      $("#Conditions").text(data[5]);
+      $("#Temperature").text(data[1]);
+      $("#WindSpeed").text(data[2]);
+      $("#Humidity").text(data[3]);
+      $("#Precipitation").text(data[4]);
+      $("#UpdateTime").text(data[7]);
+      SkyCon();
+    }
+  };
+  xmlhttp.open("GET", "/get_weather_update", true);
+  xmlhttp.send();
+}
+setInterval(weather_update(), (10*60*1000));
 
 // handles dropdown menu
 function clickHandler(val) {
@@ -239,8 +251,6 @@ function standinfo(stand) {
       //Writes query to HTML - allows for interactivity on page
       document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0];
       document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
-      $("#weathericon").attr("class", JSON.parse(this.responseText)[3]);
-      SkyCon()
     }
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
@@ -266,13 +276,12 @@ function getPosition(ending) {
     // for when getting location is a success
     var userlocation = (position.coords.latitude + "," + position.coords.longitude);
     calcRoute(userlocation,ending);
-    console.log(userlocation)
   return userlocation;
   });
 }
 
 function fulllookup(){
-  var fullinfo
+  var fullinfo;
   xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
@@ -491,6 +500,8 @@ function find_nearest_station() {
   
   var minlat, minlng;
   var mindist=10000000000.0;
+  var station_no;
+
   var x = navigator.geolocation.getCurrentPosition(
     function success(position) {
 
@@ -504,6 +515,8 @@ function find_nearest_station() {
 
           var lng2 = data.features[i].geometry.coordinates[0];
           var lat2 = data.features[i].geometry.coordinates[1];
+          station_no = data.features[i].properties.number;
+
           var dx = lat1 - lat2;
           var dy = lng1 - lng2;
           var dist =  Math.sqrt((dx*dx) + (dy*dy));
@@ -514,10 +527,13 @@ function find_nearest_station() {
             minlng = lng2;
           }
         }
-        console.log(mindist,minlng,minlat);
         var pos1 = (lat1 + "," + lng1);
         var pos2 = (minlat + "," + minlng);
         calcRoute(pos1, pos2);
+
+        document.getElementById("station_number_find").value=station_no;
+        $("station_number_find").text(station_no);
+        find_by_number();
       }
     );
   });
@@ -531,5 +547,29 @@ function toggle_map_colours(){
   }else{
     toggle_marker_color=0;
     initMap();
+  }
+}
+
+var arrow_direction=0;
+function flip_menu() {
+  if (arrow_direction==0){
+    $("#menu_arrow").css({
+      "width":"10px",
+      "height":"15px",
+      "transform":"rotate(270deg)"
+    });
+    arrow_direction=1;
+    $(".dropdown-content").css("height", "0%");
+    $(".dropdown-content").css("visibility", "hidden");
+  }
+  else {
+    $("#menu_arrow").css({
+      "width":"10px",
+      "height":"15px",     
+      "transform":"rotate(90deg)"
+    });
+    arrow_direction=0;
+    $(".dropdown-content").css("height", "140px");
+    $(".dropdown-content").css("visibility", "visible");
   }
 }

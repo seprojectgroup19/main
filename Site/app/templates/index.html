@@ -32,13 +32,41 @@
 
         <div id="sidenav">
           <!-- <div class="dropdown"> -->
-              <div class="dropdown-content">
-                <a href="#" id="menu_item_1" onclick="clickHandler(1)">Find Station</a>
-                <a href="#" id="menu_item_2" onclick="clickHandler(2)">Forecasts</a>
-                <a href="#" id="menu_item_3" onclick="clickHandler(3)">Graphs</a>
-                <a href="#" id="menu_weather" style="height:100%;">Weather</a>
-              </div><br>
-          <!-- </div><br> -->
+          <div id="menu_headbar" onclick="flip_menu()"> 
+            <img src="../static/images/menu.png" style="height:35px; width:40px;float:left;" >
+            <p>Menu</p>
+            <div style="float:left;padding:0; padding-top:10px;margin:0;">
+              <img id="menu_arrow" src="../static/images/arrow.png">
+            </div>
+          </div>
+          
+          <div style="clear:both"></div>
+          
+          <div class="dropdown-content">
+            <a href="#" id="menu_item_1" onclick="clickHandler(1)">Find Station</a>
+            <a href="#" id="menu_item_2" onclick="clickHandler(2)">Forecasts</a>
+            <a href="#" id="menu_item_3" onclick="clickHandler(3)">Graphs</a>
+          </div>
+          
+          <hr style="color:white; width:100; margin:0;padding:0;">
+
+          <div> <!-- container for weather information -->
+            <div>
+              <h4>Weather Information</h4>
+            </div>
+            <p>
+                <canvas id="weathericon" class="clear-day" width="50" height="50"></canvas>
+            </p>
+            <!-- <hr style="color:white; width:60%; position:relative; margin:0;padding:0;"> -->
+            <ul id="WeatherInfolist">
+              <li id="Conditions">Conditions:</li>
+              <li id="Temperature">Temperature:</li>
+              <li id="WindSpeed">Wind speed:</li>
+              <li id="Humidity">Humidity:</li>
+              <li id="Precipitation">Precipitation:</li>
+              <li id="UpdateTime">Time of update:</li>
+            </ul>
+          </div>
         </div>
       
 

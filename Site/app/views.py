@@ -20,6 +20,19 @@ def index():
  return render_template("index.html", **returnDict)
 
 
+@app.route("/get_weather_update", methods=["GET"])
+def get_weather_update():
+
+    # Using the O'Connell street stations latest weather report as city wide weather
+    weather = """
+        SELECT *
+        FROM DublinBikesDB.weather 
+        WHERE number = 33
+        ORDER BY time DESC LIMIT 1;
+    """
+    results = [tuple(eq.execute_sql(weather)[0])]
+    return json.dumps(results)
+
 @app.route('/lookup', methods=["GET"])
 def lookup():
 
@@ -31,14 +44,8 @@ def lookup():
         WHERE number = {str(id)} 
         ORDER BY last_update DESC LIMIT 1;
     """
-    weather = f"""
-        SELECT icon 
-        FROM DublinBikesDB.weather 
-        WHERE number = {str(id)}
-        ORDER BY time DESC LIMIT 1;
-    """
+    
     result = list(eq.execute_sql(bikes)[0])
-    result += [tuple(eq.execute_sql(weather)[0])]
 
     return json.dumps(result)
 
