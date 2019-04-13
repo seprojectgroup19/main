@@ -84,7 +84,7 @@ var find_station_inner_html = `
 `;
 
 var graph_content_inner_html = `
-<div id="Forecast_content_inner_html">
+<div id="Forecas_content_inner_html">
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
 Sample Content
 </h3><br>

@@ -91,6 +91,9 @@ def model():
     model = xgb.Booster()
     model.load_model(f'station_{station_number}.model')
 
+    # What is the format of the inputs ?
+    
+
     data = xgb.DMatrix(inputs)
     predictions = model.predict(data)
 
