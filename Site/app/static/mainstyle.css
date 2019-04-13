@@ -195,7 +195,8 @@ select {
 }
 
 #information-table{
-    width:100%;
+    width:80%;
+    margin:auto;
 }
 
 #weathericon{
@@ -223,7 +224,24 @@ select {
     margin-right:10px;
 }
 
-#Weatheri
+#WeatherInfolist {
+    width:90%;
+    margin:auto;
+    color:white;
+}
+
+#WeatherInfolist p {
+    width:100%;
+    text-align:left;
+    margin:0;
+    margin-top:5px;
+}
+
+/* #WeatherInfolist p {
+    width:50%;
+    margin:0;
+    padding:0;
+} */
 
 html, body {
     height: 100%;
