@@ -51,12 +51,16 @@
                 <option value="22">22</option>
                 <option value="23">23</option>
             </select><br><br>
+
+            Select station number <br><br>
+
             <button id="submit" onclick="Forecast()">Get Prediction</button>
             <br><br><hr><br><br>
             <div id="predictionblock">
                 Predictions in here
             </div>
         </div>
+        {{ WeatherForecast }}
     </div>
 
 <script>
@@ -72,18 +76,19 @@
             //  only need to send it a day and hour.
 
 
-            var data = JSON.parse(this.responseText)[0];
+            var data = JSON.parse(this.responseText);
 
+            console.log(data);
             // Formatting output string.
-            var last_update_time = new Date(data[14] * 1000);
-            var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
-            var minutes = ((last_update_time.getMinutes()<10) ? "0" : "") + last_update_time.getMinutes();
+            // var last_update_time = new Date(data[14] * 1000);
+            // var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
+            // var minutes = ((last_update_time.getMinutes()<10) ? "0" : "") + last_update_time.getMinutes();
         }
     };
 
     // send the day and time. 
     var day = document.getElementById("time_pred").value;
-    var time = document.getElementById("fukthis").value;
+    var hour = document.getElementById("fukthis").value;
 
     console.log("/model?Day="+day+"&Time="+hour);
 

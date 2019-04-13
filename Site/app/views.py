@@ -86,21 +86,31 @@ def fulllookup():
 @app.route('/model', methods=["GET"])
 def model():
 
-    D,H = request.args.get('Day', 'Time')
-
+    D = request.args.get('Day')
+    H = request.args.get('Time')
     # generate list of 1s and 0s for building input to model
     dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
     for index, day in enumerate(dayslist):
-        if day = D:
+        if day == D:
             dayslist[index] = 1
         else:
             dayslist[index] = 0
 
+    with open("./static/DB/authentication.txt") as f:
+        auth = f.read().split('\n')
+    darksky_key = auth[2]
 
+    # Query the darksy api here. for the relevant information
+    # A Forecast Request returns the current weather conditions, 
+    # a minute-by-minute forecast for the next hour (where available), 
+    # an hour-by-hour forecast for the next 48 hours, 
+    # and a day-by-day forecast for the next week.
+
+    weatherforecast = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
     
-    station_number = request.args.get('station_number')
-
     model = xgb.Booster()
+
+    station_number = request.args.get('station_number')
     model.load_model(f'station_{station_number}.model')
 
     # What is the format of the inputs ?
@@ -114,5 +124,18 @@ def model():
 @app.route('/testpage')
 def testpage():
     
-    return render_template("testpage.html", **{'result': 5})
+    with open("./app/static/DB/authentication.txt") as f:
+        auth = f.read().split('\n')
+    
+    darksky_key = auth[2]
+
+    # Query the darksy api here. for the relevant information
+    # A Forecast Request returns the current weather conditions, 
+    # a minute-by-minute forecast for the next hour (where available), 
+    # an hour-by-hour forecast for the next 48 hours, 
+    # and a day-by-day forecast for the next week.
+
+    weatherforecast = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
+
+    return render_template("testpage.html", **{'WeatherForecast': weatherforecast})
 
