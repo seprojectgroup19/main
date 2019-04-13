@@ -10,6 +10,7 @@ import execute_query as eq
 import xgboost as xgb
 import requests as r
 from app import app
+import datetime
 import json
 
 @app.route('/')
@@ -88,6 +89,9 @@ def model():
 
     D = request.args.get('Day')
     H = request.args.get('Time')
+
+    # store the day "today"
+
     # generate list of 1s and 0s for building input to model
     dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
     for index, day in enumerate(dayslist):
@@ -106,8 +110,10 @@ def model():
     # an hour-by-hour forecast for the next 48 hours, 
     # and a day-by-day forecast for the next week.
 
-    weatherforecast = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
-    
+    wresponse = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
+    weatherforecast = wresponse.json()
+
+
     model = xgb.Booster()
 
     station_number = request.args.get('station_number')
@@ -135,7 +141,14 @@ def testpage():
     # an hour-by-hour forecast for the next 48 hours, 
     # and a day-by-day forecast for the next week.
 
-    weatherforecast = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
+    # using the coordinates for the centre of the city.
+    weatherforecast = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?units=si")
 
-    return render_template("testpage.html", **{'WeatherForecast': weatherforecast})
+    t = weatherforecast.json()
+    data = []
+    for i in list(t.keys()):
+        data.append(t[i])
+
+    return render_template("testpage.html", **{'WeatherForecast': t, 'res':data})
+
 

@@ -58,9 +58,15 @@
             <br><br><hr><br><br>
             <div id="predictionblock">
                 Predictions in here
+                {{ WeatherForecast }}
             </div>
         </div>
-        {{ WeatherForecast }}
+        
+    </div>
+    <div style="color:white; width:80%;">
+        {% for i in res%}
+        <pre>{{i}}</pre>
+        {%endfor%}
     </div>
 
 <script>
