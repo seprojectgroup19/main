@@ -25,7 +25,7 @@
                 <option value="Sun">Sunday</option>
             </select><br>
             Select a time (to nearest Hour)<br>
-            <select name="urmom" id="UrMom">
+            <select id="fukthis">
                 <option value="0">0</option>
                 <option value="1">1</option>
                 <option value="2">2</option>
@@ -83,9 +83,11 @@
 
     // send the day and time. 
     var day = document.getElementById("time_pred").value;
-    var time = document.getElementById("UrMom").value;
+    var time = document.getElementById("fukthis").value;
 
-    xmlhttp.open("GET", "/model?Day=day&Time=hour", true);
+    console.log("/model?Day="+day+"&Time="+hour);
+
+    xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour, true);
     xmlhttp.send();
     }
 

@@ -86,13 +86,25 @@ def fulllookup():
 @app.route('/model', methods=["GET"])
 def model():
 
+    D,H = request.args.get('Day', 'Time')
+
+    # generate list of 1s and 0s for building input to model
+    dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    for index, day in enumerate(dayslist):
+        if day = D:
+            dayslist[index] = 1
+        else:
+            dayslist[index] = 0
+
+
+    
     station_number = request.args.get('station_number')
 
     model = xgb.Booster()
     model.load_model(f'station_{station_number}.model')
 
     # What is the format of the inputs ?
-    
+
 
     data = xgb.DMatrix(inputs)
     predictions = model.predict(data)
