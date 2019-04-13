@@ -91,14 +91,35 @@ def model():
     H = request.args.get('Time')
 
     # store the day "today"
+    current_day  = datetime.datetime.today().weekday()
+    current_hour = datetime.datetime.today().hour()
+
+    # determine the gap in hours between now and the prediction time. (weather forecast data bedomes daily after 48.)
+    time_diff = 0
+
+    if H > current_hour:
+        time_diff += H - current_hour
+    else:
+        time_diff += 24 - H - current_hour
 
     # generate list of 1s and 0s for building input to model
     dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    
     for index, day in enumerate(dayslist):
+        
         if day == D:
             dayslist[index] = 1
+
+            # hours between now and the prediction (havent accounted for time yet)
+            if (current_day - (index+1) < 0):
+                time_diff += (7*24) - 24*(current_day-index+1)
+            else:
+                time_diff += 24*(current_day-(index+1))
+
         else:
             dayslist[index] = 0
+
+
 
     with open("./static/DB/authentication.txt") as f:
         auth = f.read().split('\n')
