@@ -260,8 +260,8 @@ def model():
 
     return predictions
 
-@app.route('/testpage')S
-def testpage():S
+@app.route('/testpage')
+def testpage():
     return render_template("testpage.html")
 
 
