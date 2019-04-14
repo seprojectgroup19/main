@@ -162,6 +162,22 @@ select {
     margin-top:250px;
     font-weight:3em;
     border: none;
+}
+
+#submit {
+
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    color: #084c55;
+    background-color: whitesmoke;
+    padding: 14px 28px;
+    border-radius:5px;
+    font-size: 18px;
+    margin: auto;
+    margin-top:20px;
+    font-weight:3em;
+    border: none;
 
 }
 

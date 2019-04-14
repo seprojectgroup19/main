@@ -95,7 +95,7 @@ def model():
     station_number = request.args.get('Station')
 
     # generate list of 1s and 0s for building input to model
-    dayslist = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+    dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
     inputs = {
         'Mon':0.0,
@@ -159,7 +159,7 @@ def model():
     inputs['hour_x'] = H
 
     # get authentication information (api-key)
-    with open("./static/DB/authentication.txt") as f:
+    with open("./app/static/DB/authentication.txt") as f:
         auth = f.read().split('\n')
     darksky_key = auth[2]
     
@@ -176,31 +176,32 @@ def model():
     daily_data = weatherforecast['hourly']['data']
 
     # store the day "today"
-    current_day  = datetime.datetime.today().weekday()
-    current_hour = datetime.datetime.today().hour()
+    now = datetime.datetime.now()
+    current_day  = int(now.weekday())
+    current_hour = int(now.hour)
 
     # determine the gap in hours between now and the prediction time. (weather forecast data bedomes daily after 48.)
     time_diff = 0
 
-    if H > current_hour:
-        time_diff += H - current_hour
+    H = int(H)
+    if H >= current_hour:
+        time_diff += H - current_hour 
     else:
-        time_diff += 24 - H - current_hour
+        time_diff -= current_hour - H # minus as add to the day later.
 
-    for index, day in enumerate(dayslist):
-        if day == D:
-            dayslist[index] = 1
-
-            # hours between now and the prediction (havent accounted for time yet)
-            if (current_day - index < 0):
-                time_diff += (7*24) - 24*(current_day-index)
-            else:
-                time_diff += 24*(current_day-index)
+    dayslist_index_predict_day = dayslist.index(D)
+    
+    if ((current_day != dayslist_index_predict_day) or (H < current_hour)):
+        if current_day < dayslist_index_predict_day: 
+            time_diff += (dayslist_index_predict_day - current_day)*24
         else:
-            dayslist[index] = 0
+            time_diff += (7*24) + (dayslist_index_predict_day - current_day)*24
 
     mid = calendar.timegm(datetime.date.today().timetuple())
+
     
+    return json.dumps(tuple([mid, time_diff, current_day]))
+
     if time_diff > 48:        
         # find the time at midnight tonight and add the number of days to it. 
         # Account for time zone difference. 
@@ -211,20 +212,23 @@ def model():
 
         for dayrow in data:
             if dayrow['time']==mid:
-                data = dayrow
+                ndata = dayrow
 
-        # construct input from data
-        if data['icon'] in icons:
-            inputs[data['icon']] = 1.0
+        ################## test
+        return json.dumps(mid)
+
+        # construct input from data (data[2] is the 'icon')
+        if ndata['icon'] in icons:
+            inputs[ndata['icon']] = 1.0
 
         # input does not match up with daily data.
         for col in wcols:
-            if col in data:
-                inputs[col] = data[col]
+            if col in ndata:
+                inputs[col] = ndata[col]
         
         # dont match on temperature or apparent temperature
-        inputs['apparentTemperature'] = data['apparentTemperatureHigh']
-        inputs['temperature'] = data['temperatureHigh']
+        inputs['apparentTemperature'] = ndata['apparentTemperatureHigh']
+        inputs['temperature'] = ndata['temperatureHigh']
 
     else:
         mid += 86400 * (time_diff//24) 
@@ -235,15 +239,18 @@ def model():
 
         for hourrow in data:
             if hourrow['time']==mid:
-                data = hourrow
+                ndata = hourrow
         
+        ############### test
+        # return json.dumps(hourrow)
+
         # construct input from data
-        if data['icon'] in icons:
-            inputs[data['icon']] = 1.0
+        if ndata['icon'] in icons:
+            inputs[ndata['icon']] = 1.0
 
         # inputs matches up with the hourly data
         for col in wcols:
-            inputs[col] = data[col]
+            inputs[col] = ndata[col]
 
     # dataframe of information ready for model application.
     inputs = pd.DataFrame(inputs, index=[0])
@@ -258,10 +265,32 @@ def model():
     data = xgb.DMatrix(inputs)
     predictions = model.predict(data)
 
-    return predictions
+    return json.dumps(predictions)
 
 @app.route('/testpage')
 def testpage():
-    return render_template("testpage.html")
+
+    # get authentication information (api-key)
+    with open("./app/static/DB/authentication.txt") as f:
+        auth = f.read().split('\n')
+    darksky_key = auth[2]
+    
+    #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
+    wresponse = r.get(f"""
+                        https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
+                        units=si&
+                        exclude=currently,flags,alerts,minutely
+                        """)
+    
+    weatherforecast = wresponse.json()
+
+    hourly_data = weatherforecast['hourly']['data']
+    daily_data = weatherforecast['hourly']['data']
+
+    returndict = {
+        'test': daily_data[0]
+    }
+    	
+    return render_template("testpage.html", **returndict)
 
 

@@ -126,12 +126,40 @@ var Forecast_content_inner_html = `
       <select id="station_number_forecast_options">
         <option value='default'>Station</option>
       </select><br>
-
+      
+      <!-- populate options -->
+      <script>populate_forecast_options()</script>
+      
       <button id="submit" onclick="Forecast()">Get Prediction</button>
   </div>
-  <script>populate_forecast_options()</script>
+  
 </div>
 `;
+
+function Forecast() {
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      
+      var data = JSON.parse(this.responseText);
+      
+      
+      console.log(data);
+    }
+  };
+
+  // send the day and time. 
+  var day = document.getElementById("time_pred").value;
+  var hour = document.getElementById("hour_forecast_options").value;
+  var snum = document.getElementById("station_number_forecast_options").value;
+
+  console.log("/model?Day="+day+"&Time="+hour+"&Station="+snum);
+
+  xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour+"&Station="+snum, true);
+  xmlhttp.send();
+  }
+
 
 function initMap() {
     directionsService = new google.maps.DirectionsService();
