@@ -11,6 +11,7 @@ import xgboost as xgb
 import requests as r
 from app import app
 import datetime
+import calendar
 import json
 
 @app.route('/')
@@ -87,8 +88,23 @@ def fulllookup():
 @app.route('/model', methods=["GET"])
 def model():
 
+    with open("./static/DB/authentication.txt") as f:
+        auth = f.read().split('\n')
+    darksky_key = auth[2]
+
+    # Query the darksy api here. for the relevant information
+    # A Forecast Request returns the current weather conditions, 
+    # a minute-by-minute forecast for the next hour (where available), 
+    # an hour-by-hour forecast for the next 48 hours, 
+    # and a day-by-day forecast for the next week.
+
+    wresponse = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
+    weatherforecast = wresponse.json()
+
+    # Required forecast day and hour and station to choose model. One for each station.
     D = request.args.get('Day')
     H = request.args.get('Time')
+    station_number = request.args.get('Station')
 
     # store the day "today"
     current_day  = datetime.datetime.today().weekday()
@@ -103,7 +119,7 @@ def model():
         time_diff += 24 - H - current_hour
 
     # generate list of 1s and 0s for building input to model
-    dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    dayslist = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
     
     for index, day in enumerate(dayslist):
         
@@ -111,28 +127,27 @@ def model():
             dayslist[index] = 1
 
             # hours between now and the prediction (havent accounted for time yet)
-            if (current_day - (index+1) < 0):
-                time_diff += (7*24) - 24*(current_day-index+1)
+            if (current_day - index < 0):
+                time_diff += (7*24) - 24*(current_day-index)
             else:
-                time_diff += 24*(current_day-(index+1))
+                time_diff += 24*(current_day-index)
 
         else:
             dayslist[index] = 0
 
+    if time_diff > 48:
+        # use daily data
+        weatherdata = weatherforecast['daily']
+
+        # find the time at midnight tonight and add the number of days to it. 
+        mid = calendar.timegm(datetime.date.today().timetuple())
+        mid += 86400*(time_diff/24)
+
+    else:
+        # use hourly data
+        weatherdata = weatherforecast['hourly']
 
 
-    with open("./static/DB/authentication.txt") as f:
-        auth = f.read().split('\n')
-    darksky_key = auth[2]
-
-    # Query the darksy api here. for the relevant information
-    # A Forecast Request returns the current weather conditions, 
-    # a minute-by-minute forecast for the next hour (where available), 
-    # an hour-by-hour forecast for the next 48 hours, 
-    # and a day-by-day forecast for the next week.
-
-    wresponse = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
-    weatherforecast = wresponse.json()
 
 
     model = xgb.Booster()
@@ -170,6 +185,6 @@ def testpage():
     for i in list(t.keys()):
         data.append(t[i])
 
-    return render_template("testpage.html", **{'WeatherForecast': t, 'res':data})
+    return render_template("testpage.html", **{'WeatherForecast': t.keys(), 'res':data})
 
 
