@@ -129,6 +129,31 @@ def model():
         'visibility':0.0
     }
 
+    icons = [
+        'partly-cloudy-day',
+        'partly-cloudy-night',
+        'clear-night',
+        'clear-day',
+        'fog',
+        'wind',
+        'cloudy',
+        'rain']
+
+    wcols = [
+        'apparentTemperature',
+        'cloudCover',
+        'dewPoint',
+        'humidity',
+        'precipIntensity',
+        'precipProbability',
+        'pressure',
+        'temperature',
+        'windBearing',
+        'windGust',
+        'windSpeed',
+        'uvIndex',
+        'visibility']
+
     # set day and hour.
     inputs[D] = 1.0
     inputs['hour_x'] = H
@@ -192,6 +217,17 @@ def model():
                 data = dayrow
 
         # construct input from data
+        if data['icon'] in icons:
+            inputs[data['icon']] = 1.0
+
+        # input does not match up with daily data.
+        for col in wcols:
+            if col in data:
+                inputs[col] = data[col]
+        
+        # dont match on temperature or apparent temperature
+        inputs['apparentTemperature'] = data['apparentTemperatureHigh']
+        inputs['temperature'] = data['temperatureHigh']
 
     else:
         mid += 86400 * (time_diff//24) 
@@ -205,12 +241,15 @@ def model():
                 data = hourrow
         
         # construct input from data
+        if data['icon'] in icons:
+            inputs[data['icon']] = 1.0
+
+        # inputs matches up with the hourly data
+        for col in wcols:
+            inputs[col] = data[col]
 
 
-
-
-
-
+    #=================================== Model application ===============================#
 
 
     model = xgb.Booster()
@@ -246,7 +285,7 @@ def testpage():
 
     t = weatherforecast.json()
     
-    test = list(t['hourly']['data'][0].keys())
+    test = list(t['daily']['data'][0].keys())
     
     test2 = {
         'Mon':0.0,
