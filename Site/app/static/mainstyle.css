@@ -181,8 +181,13 @@ select {
 
 }
 
-#Forecasts_message {
+#forecasts_message {
     display:none;
+    color:red;
+    font-size:14pt;
+    margin-top: 20px;
+    text-align:left;
+    font-family: 'Times New Roman', Times, serif; 
 }
 
 #Forecast_Content {
