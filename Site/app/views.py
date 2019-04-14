@@ -308,15 +308,32 @@ def model():
 @app.route('/testpage')
 def testpage():
 
-    sql = f"""
-    SELECT bike_stands
-    FROM DublinBikesDB.dynamic
-    WHERE number={3}
-    LIMIT 1;
-    """
-    stands = int(eq.execute_sql(sql)[0][0])
+    days = 7
+    station = 5
+    limit = 288*days
 
-    returndict={'res':stands}
+    sql = f"""
+    SELECT *
+    FROM DublinBikesDB.dynamic
+    WHERE number={station}
+    LIMIT {limit};
+    """
+    stands = eq.execute_sql(sql)
+    avail_bikes = []
+    avail_stands= []
+    times = []
+
+    for stand in stands:
+        avail_bikes.append(stand[3])
+        avail_stands.append(stand[5])
+        times.append(stand[-1])
+
+    # convert = (lambda x : datetime.datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
+    # times = list(map(convert,times))
+    # times = pd.to_datetime(times)
+
+    sample = [avail_bikes, avail_stands, times]
+    returndict={'res':sample}
 
     return render_template("testpage.html", **returndict)
 
