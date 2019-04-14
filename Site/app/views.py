@@ -162,11 +162,8 @@ def model():
     with open("./static/DB/authentication.txt") as f:
         auth = f.read().split('\n')
     darksky_key = auth[2]
-
-    # Query the darksy api here. for the relevant information. A Forecast Request returns the current weather conditions, 
-    # a minute-by-minute forecast for the next hour (where available), an hour-by-hour forecast for the next 48 hours, 
-    # and a day-by-day forecast for the next week.
-
+    
+    #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
     wresponse = r.get(f"""
                         https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
                         units=si&
@@ -248,14 +245,13 @@ def model():
         for col in wcols:
             inputs[col] = data[col]
 
+    # dataframe of information ready for model application.
+    inputs = pd.DataFrame(inputs, index=[0])
 
     #=================================== Model application ===============================#
 
-
     model = xgb.Booster()
-
-    station_number = request.args.get('station_number')
-    model.load_model(f'station_{station_number}.model')
+    model.load_model(f'./app/static/Model/station_{station_number}.model')
 
     # What is the format of the inputs ?
 
@@ -272,12 +268,6 @@ def testpage():
     
     darksky_key = auth[2]
 
-    # Query the darksy api here. for the relevant information
-    # A Forecast Request returns the current weather conditions, 
-    # a minute-by-minute forecast for the next hour (where available), 
-    # an hour-by-hour forecast for the next 48 hours, 
-    # and a day-by-day forecast for the next week.
-
     # using the coordinates for the centre of the city.
     weatherforecast = r.get(f"""https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
                             units=si&
@@ -285,7 +275,7 @@ def testpage():
 
     t = weatherforecast.json()
     
-    test = list(t['daily']['data'][0].keys())
+    test = t['daily']['data'][0]
     
     test2 = {
         'Mon':0.0,
@@ -318,6 +308,8 @@ def testpage():
         'uvIndex':0.0,
         'visibility':0.0
     }
+
+    test2 = xgb.DMatrix(pd.DataFrame(test2, index=[0]))
 
     return render_template("testpage.html", **{'WeatherForecast': test, 'res':test2})
 
