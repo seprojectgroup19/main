@@ -10,6 +10,7 @@ import execute_query as eq
 import xgboost as xgb
 import requests as r
 from app import app
+import pandas as pd
 import datetime
 import calendar
 import json
@@ -87,24 +88,70 @@ def fulllookup():
 
 @app.route('/model', methods=["GET"])
 def model():
-
-    with open("./static/DB/authentication.txt") as f:
-        auth = f.read().split('\n')
-    darksky_key = auth[2]
-
-    # Query the darksy api here. for the relevant information
-    # A Forecast Request returns the current weather conditions, 
-    # a minute-by-minute forecast for the next hour (where available), 
-    # an hour-by-hour forecast for the next 48 hours, 
-    # and a day-by-day forecast for the next week.
-
-    wresponse = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.344743,-6.290209?units=si")
-    weatherforecast = wresponse.json()
-
+    
     # Required forecast day and hour and station to choose model. One for each station.
     D = request.args.get('Day')
     H = request.args.get('Time')
     station_number = request.args.get('Station')
+
+    # generate list of 1s and 0s for building input to model
+    dayslist = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+
+    inputs = {
+        'Mon':0.0,
+        'Tue':0.0,
+        'Wed':0.0,
+        'Thu':0.0,
+        'Fri':0.0,
+        'Sat':0.0,
+        'Sun':0.0,
+        'hour_x':0.0,
+        'partly-cloudy-day':0.0,
+        'partly-cloudy-night':0.0,
+        'clear-night':0.0,
+        'clear-day':0.0,
+        'fog':0.0,
+        'wind':0.0,
+        'cloudy':0.0,
+        'rain':0.0,
+        'apparentTemperature':0.0,
+        'cloudCover':0.0,
+        'dewPoint':0.0,
+        'humidity':0.0,
+        'precipIntensity':0.0,
+        'precipProbability':0.0,
+        'pressure':0.0,
+        'temperature':0.0,
+        'windBearing':0.0,
+        'windGust':0.0,
+        'windSpeed':0.0,
+        'uvIndex':0.0,
+        'visibility':0.0
+    }
+
+    # set day and hour.
+    inputs[D] = 1.0
+    inputs['hour_x'] = H
+
+    # get authentication information (api-key)
+    with open("./static/DB/authentication.txt") as f:
+        auth = f.read().split('\n')
+    darksky_key = auth[2]
+
+    # Query the darksy api here. for the relevant information. A Forecast Request returns the current weather conditions, 
+    # a minute-by-minute forecast for the next hour (where available), an hour-by-hour forecast for the next 48 hours, 
+    # and a day-by-day forecast for the next week.
+
+    wresponse = r.get(f"""
+                        https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
+                        units=si&
+                        exclude=currently,flags,alerts,minutely
+                        """)
+    
+    weatherforecast = wresponse.json()
+
+    hourly_data = weatherforecast['hourly']['data']
+    daily_data = weatherforecast['hourly']['data']
 
     # store the day "today"
     current_day  = datetime.datetime.today().weekday()
@@ -118,11 +165,7 @@ def model():
     else:
         time_diff += 24 - H - current_hour
 
-    # generate list of 1s and 0s for building input to model
-    dayslist = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
-    
     for index, day in enumerate(dayslist):
-        
         if day == D:
             dayslist[index] = 1
 
@@ -131,21 +174,41 @@ def model():
                 time_diff += (7*24) - 24*(current_day-index)
             else:
                 time_diff += 24*(current_day-index)
-
         else:
             dayslist[index] = 0
 
-    if time_diff > 48:
-        # use daily data
-        weatherdata = weatherforecast['daily']
-
+    mid = calendar.timegm(datetime.date.today().timetuple())
+    
+    if time_diff > 48:        
         # find the time at midnight tonight and add the number of days to it. 
-        mid = calendar.timegm(datetime.date.today().timetuple())
-        mid += 86400*(time_diff/24)
+        # Account for time zone difference. 
+        mid += 86400*(time_diff//24)
+        mid -= 3600 
+
+        data = daily_data
+
+        for dayrow in data:
+            if dayrow['time']==mid:
+                data = dayrow
+
+        # construct input from data
 
     else:
-        # use hourly data
-        weatherdata = weatherforecast['hourly']
+        mid += 86400 * (time_diff//24) 
+        mid += 3600 * time_diff%24
+        mid -= 3600
+
+        data = hourly_data
+
+        for hourrow in data:
+            if hourrow['time']==mid:
+                data = hourrow
+        
+        # construct input from data
+
+
+
+
 
 
 
@@ -156,7 +219,6 @@ def model():
     model.load_model(f'station_{station_number}.model')
 
     # What is the format of the inputs ?
-
 
     data = xgb.DMatrix(inputs)
     predictions = model.predict(data)
@@ -178,13 +240,46 @@ def testpage():
     # and a day-by-day forecast for the next week.
 
     # using the coordinates for the centre of the city.
-    weatherforecast = r.get(f"https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?units=si")
+    weatherforecast = r.get(f"""https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
+                            units=si&
+                            exclude=currently,flags,alerts,minutely""")
 
     t = weatherforecast.json()
-    data = []
-    for i in list(t.keys()):
-        data.append(t[i])
+    
+    test = list(t['hourly']['data'][0].keys())
+    
+    test2 = {
+        'Mon':0.0,
+        'Tue':0.0,
+        'Wed':0.0,
+        'Thu':0.0,
+        'Fri':0.0,
+        'Sat':0.0,
+        'Sun':0.0,
+        'hour_x':0.0,
+        'partly-cloudy-day':0.0,
+        'partly-cloudy-night':0.0,
+        'clear-night':0.0,
+        'clear-day':0.0,
+        'fog':0.0,
+        'wind':0.0,
+        'cloudy':0.0,
+        'rain':0.0,
+        'apparentTemperature':0.0,
+        'cloudCover':0.0,
+        'dewPoint':0.0,
+        'humidity':0.0,
+        'precipIntensity':0.0,
+        'precipProbability':0.0,
+        'pressure':0.0,
+        'temperature':0.0,
+        'windBearing':0.0,
+        'windGust':0.0,
+        'windSpeed':0.0,
+        'uvIndex':0.0,
+        'visibility':0.0
+    }
 
-    return render_template("testpage.html", **{'WeatherForecast': t.keys(), 'res':data})
+    return render_template("testpage.html", **{'WeatherForecast': test, 'res':test2})
 
 
