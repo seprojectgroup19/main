@@ -162,7 +162,45 @@ select {
     margin-top:250px;
     font-weight:3em;
     border: none;
+}
 
+#submit {
+
+    display: block;
+    text-align: center;
+    cursor: pointer;
+    color: #084c55;
+    background-color: whitesmoke;
+    padding: 14px 28px;
+    border-radius:5px;
+    font-size: 18px;
+    margin: auto;
+    margin-top:20px;
+    font-weight:3em;
+    border: none;
+
+}
+
+#Forecasts_message {
+    display:none;
+}
+
+#Forecast_Content {
+
+    width:90%;
+    font-size: 12pt;
+    text-align:left;
+    margin:auto;
+    margin-top:50px;
+    color:black;
+    display:none;
+    /* background-color: black; */
+}
+
+#Forecast_Content td {
+    padding-top:15px;
+    padding-left:10px;
+    width:100px;
 }
 
 #Forecast_content_inner_html>img {
@@ -235,6 +273,23 @@ select {
     text-align:left;
     margin:0;
     margin-top:5px;
+}
+
+#forecast_form{
+    height:100%; 
+    width:80%; 
+    position:relative; 
+    margin:auto;
+}
+
+#forecast_form select{
+    width:100%;
+    margin-bottom:15px;
+    border-radius:20px;
+    height:25px;
+    font-size: 12pt;
+    bottom:0;
+    top:0;
 }
 
 /* #WeatherInfolist p {

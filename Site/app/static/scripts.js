@@ -64,20 +64,22 @@ var find_station_inner_html = `
   Find Station 
 </h3><br>
 <hr style="width:50%;margin-top:0;margin-bottom:30px;">
-<p>
-  Station Number:<br>
-  <select id="station_number_find" onchange=find_by_number()>
-    <option value='default'>All</option>
-  </select>
-  <script>populate_station_number_dropdown();</script>
-</p>
-<br>
-<p>
-  Station Address:<br>
-  <select id="station_name_find" onchange=find_by_name()>
-    <option value='default'>Search</option>
-  </select>
-</p>
+<div style="width:80%; margin:auto;">
+  <p>
+    Station Number:<br>
+    <select id="station_number_find" onchange=find_by_number()>
+      <option value='default'>All</option>
+    </select>
+    <script>populate_station_number_dropdown();</script>
+  </p>
+  <br>
+  <p>
+    Station Address:<br>
+    <select id="station_name_find" onchange=find_by_name()>
+      <option value='default'>Search</option>
+    </select>
+  </p>
+</div>
 <script>populate_station_name_dropdown();</script>
 
 <button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
@@ -97,33 +99,80 @@ Sample Content
 
 
 var Forecast_content_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"></h3>
-<div style="width:80%; text-align: center; margin:auto; color:whitesmoke">
-  <div style="height:100%; width:80%; position:relative; align-content: center; margin:auto;">
-      Select a day:<br>
-      <select id='time_pred'>
-          <option value='default'>Day</option>
-          <option value="Mon">Monday</option>
-          <option value="Tue">Tuesday</option>
-          <option value="Wed">Wednesday</option>
-          <option value="Thu">Thursday</option>
-          <option value="Fri">Friday</option>
-          <option value="Sat">Saturday</option>
-          <option value="Sun">Sunday</option>
-      </select><br>
-      
-      Select a time (to nearest Hour)<br>
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
+  Forecast
+</h3><br>
+<hr style="width:50%;margin-top:0;margin-bottom:30px;">
+<div style="width:80%; text-align: left; margin:auto; color:whitesmoke">
+  <div id="forecast_form">
+    Select Day:
+    <select id='time_pred'>
+      <option value='default'>Day</option>
+      <option value="Mon">Monday</option>
+      <option value="Tue">Tuesday</option>
+      <option value="Wed">Wednesday</option>
+      <option value="Thu">Thursday</option>
+      <option value="Fri">Friday</option>
+      <option value="Sat">Saturday</option>
+      <option value="Sun">Sunday</option>
+    </select><br>
+    
+    Select Time:
+    <select id="hour_forecast_options">
+    <option value='default'>Hour</option>
+    </select><br>
 
-      <select id="hour_forecast_options"></select><br><br>
-
-      Select station number <br><br>
-      <select id="station_number_forecast_options"></select><br><br>
-
-      <button id="submit" onclick="Forecast()">Get Prediction</button>
+    Select station:
+    <select id="station_number_forecast_options">
+      <option value='default'>Station</option>
+    </select><br>
+    
+    <!-- populate options -->
+    <script>populate_forecast_options()</script>
+    
+    <button id="submit" onclick="Forecast()">Get Prediction</button>
+    
+    <table id="Forecast_Content">
+    <tr>
+    <td>Available Bikes:</td>
+    <td id="avail_b_forecast"></td>
+    </tr>
+    <tr>
+    <td>Available Stands:</td>
+    <td id="avail_s_forecast"></td>
+    </tr>
+    </table>
+    <div id="forecasts_message></div>
   </div>
-  <script>populate_forecast_options()</script>
 </div>
 `;
+
+function Forecast() {
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      
+      var data = JSON.parse(this.responseText);
+      
+      $("#Forecast_Content").css("display","block");
+      $("#avail_b_forecast").text(data);
+      
+      console.log(data);
+    }
+  };
+
+  // send the day and time. 
+  var day = document.getElementById("time_pred").value;
+  var hour = document.getElementById("hour_forecast_options").value;
+  var snum = document.getElementById("station_number_forecast_options").value;
+
+  console.log("/model?Day="+day+"&Time="+hour+"&Station="+snum);
+
+  xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour+"&Station="+snum, true);
+  xmlhttp.send();
+  }
+
 
 function initMap() {
     directionsService = new google.maps.DirectionsService();
@@ -624,7 +673,7 @@ function populate_forecast_options() {
   hrdrpdwn = document.getElementById('hour_forecast_options');
   for (var hr=0; hr <= 23; hr++) {
     var optionhr = document.createElement("OPTION");
-    optionhr.textContent=hr;
+    optionhr.textContent= ((hr < 10) ? "0" : "") + hr + ":00";
     optionhr.value=hr;
     hrdrpdwn.appendChild(optionhr);
   }
