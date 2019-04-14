@@ -132,6 +132,8 @@ var Forecast_content_inner_html = `
     
     <button id="submit" onclick="Forecast()">Get Prediction</button>
     
+    <div id="forecasts_message" style="clear:both"></div>
+    
     <table id="Forecast_Content">
     <tr>
     <td>Available Bikes:</td>
@@ -142,32 +144,68 @@ var Forecast_content_inner_html = `
     <td id="avail_s_forecast"></td>
     </tr>
     </table>
-    <div id="forecasts_message></div>
   </div>
 </div>
 `;
 
 function Forecast() {
 
+  // send the day and time. 
+  var day = document.getElementById("time_pred").value;
+  var hour = document.getElementById("hour_forecast_options").value;
+  var snum = document.getElementById("station_number_forecast_options").value;
+  var test=true;
+
   xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       
       var data = JSON.parse(this.responseText);
-      
+      var nbikes = Math.round(parseFloat(data));
+
       $("#Forecast_Content").css("display","block");
-      $("#avail_b_forecast").text(data);
-      
+      $("#avail_b_forecast").text(nbikes);
       console.log(data);
     }
   };
 
-  // send the day and time. 
-  var day = document.getElementById("time_pred").value;
-  var hour = document.getElementById("hour_forecast_options").value;
-  var snum = document.getElementById("station_number_forecast_options").value;
+  if (day=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#time_pred").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#time_pred").css("color","black");
+  }
 
-  console.log("/model?Day="+day+"&Time="+hour+"&Station="+snum);
+  if (hour=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#hour_forecast_options").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#hour_forecast_options").css("color","black");
+  }
+
+  if (snum=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#station_number_forecast_options").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#station_number_forecast_options").css("color","black");
+  }
+
+  // check that the inputs are valid.
+  if (!test) 
+    return
+  else {
+    $("#forecasts_message").css("display","none");
+    $("#forecasts_message").text("");
+  }
 
   xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour+"&Station="+snum, true);
   xmlhttp.send();

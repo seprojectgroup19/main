@@ -212,10 +212,12 @@ def model():
 
         closest_dayrow = 0
         closest_timestamp = 10000000000000
+        smallest_diff = 100000000000
         # select the closes time stamp to use as the weather data
         for dayrow in data:
             diff = abs(dayrow['time'] - mid)
-            if diff < closest_timestamp:
+            if diff < smallest_diff:
+                smallest_diff =  diff
                 closest_timestamp = dayrow['time']
                 closest_dayrow = dayrow
 
@@ -234,8 +236,12 @@ def model():
                 inputs[col] = ndata[col]
         
         # dont match on temperature or apparent temperature
-        inputs['apparentTemperature'] = ndata['apparentTemperatureHigh']
-        inputs['temperature'] = ndata['temperatureHigh']
+        if (H > 8 or H < 20):
+            inputs['apparentTemperature'] = ndata['apparentTemperatureHigh']
+            inputs['temperature'] = ndata['temperatureHigh']
+        else: 
+            inputs['apparentTemperature'] = ndata['apparentTemperatureLow']
+            inputs['temperature'] = ndata['temperatureLow']        
 
     else:
         mid += 86400 * (time_diff//24) 
@@ -244,13 +250,14 @@ def model():
 
         data = hourly_data
 
-
         closest_hourrow = 0
         closest_timestamp = 10000000000000
+        smallest_diff = 100000000000
         # select the closes time stamp to use as the weather data
         for hourrow in data:
             diff = abs(hourrow['time'] - mid)
-            if diff < closest_timestamp:
+            if diff < smallest_diff:
+                smallest_diff = diff
                 closest_timestamp = hourrow['time']
                 closest_hourrow = hourrow
 
@@ -267,7 +274,6 @@ def model():
         for col in wcols:
             inputs[col] = ndata[col]
 
-    inputcopy = inputs
     # dataframe of information ready for model application.
     inputs = pd.DataFrame(inputs, index=[0])
 
@@ -281,7 +287,7 @@ def model():
     modeldata = xgb.DMatrix(inputs)
     predictions = model.predict(modeldata)
 
-    return json.dumps(tuple([predictions.tolist(),list(inputcopy.items()),list(ndata.items())]))
+    return json.dumps(predictions.tolist())#,list(inputcopy.items()),list(ndata.items())]))
     
 
 @app.route('/testpage')
