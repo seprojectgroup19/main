@@ -97,9 +97,32 @@ Sample Content
 
 
 var Forecast_content_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
-Under Construction
-</h3><br>
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"></h3>
+<div style="width:80%; text-align: center; margin:auto; color:whitesmoke">
+  <div style="height:100%; width:80%; position:relative; align-content: center; margin:auto;">
+      Select a day:<br>
+      <select id='time_pred'>
+          <option value='default'>Day</option>
+          <option value="Mon">Monday</option>
+          <option value="Tue">Tuesday</option>
+          <option value="Wed">Wednesday</option>
+          <option value="Thu">Thursday</option>
+          <option value="Fri">Friday</option>
+          <option value="Sat">Saturday</option>
+          <option value="Sun">Sunday</option>
+      </select><br>
+      
+      Select a time (to nearest Hour)<br>
+
+      <select id="hour_forecast_options"></select><br><br>
+
+      Select station number <br><br>
+      <select id="station_number_forecast_options"></select><br><br>
+
+      <button id="submit" onclick="Forecast()">Get Prediction</button>
+  </div>
+  <script>populate_forecast_options()</script>
+</div>
 `;
 
 function initMap() {
@@ -195,7 +218,6 @@ function weather_update() {
       
       var data = JSON.parse(this.responseText)[0];
       var last_update_time = new Date(data[14] * 1000);
-      console.log("Updated Weather Information");
 
       $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
       $("#Conditions").text(data[12]);
@@ -245,14 +267,14 @@ function clickHandler(val) {
     $("#map").css("width", "70%");
     $("#infobox").css("width", "30%");
     $("#infobox").css("visibility", "visible");
-    $("#infoboxcontent").html(graph_content_inner_html);
+    $("#infoboxcontent").html(Forecast_content_inner_html);
   } 
   else if (val == 3) {
     $("#menu_item_1").text("Close");
     $("#map").css("width", "70%");
     $("#infobox").css("width", "30%");
     $("#infobox").css("visibility", "visible");
-    $("#infoboxcontent").html(Forecast_content_inner_html);
+    $("#infoboxcontent").html(graph_content_inner_html);
   }
 }
 
@@ -583,5 +605,27 @@ function flip_menu() {
     arrow_direction=0;
     $(".dropdown-content").css("height", "140px");
     $(".dropdown-content").css("visibility", "visible");
+  }
+}
+
+function populate_forecast_options() {
+
+  drpdwn = document.getElementById('station_number_forecast_options');
+  $.getJSON("../static/localjson.json", function(data){
+      for (var i=0; i<data.features.length; i++){
+        var station_number = data.features[i].properties.number;
+        var option = document.createElement("OPTION");
+        option.textContent=station_number;
+        option.value=station_number;
+        drpdwn.appendChild(option);
+      }
+    }
+  );
+  hrdrpdwn = document.getElementById('hour_forecast_options');
+  for (var hr=0; hr <= 23; hr++) {
+    var optionhr = document.createElement("OPTION");
+    optionhr.textContent=hr;
+    optionhr.value=hr;
+    hrdrpdwn.appendChild(optionhr);
   }
 }
