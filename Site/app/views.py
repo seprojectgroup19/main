@@ -156,7 +156,7 @@ def model():
 
     # set day and hour.
     inputs[D] = 1.0
-    inputs['hour_x'] = H
+    inputs['hour_x'] = float(H)
 
     # get authentication information (api-key)
     with open("./app/static/DB/authentication.txt") as f:
@@ -173,17 +173,17 @@ def model():
     weatherforecast = wresponse.json()
 
     hourly_data = weatherforecast['hourly']['data']
-    daily_data = weatherforecast['hourly']['data']
+    daily_data = weatherforecast['daily']['data']
 
     # store the day "today"
     now = datetime.datetime.now()
-    current_day  = int(now.weekday())
-    current_hour = int(now.hour)
+    current_day  = float(now.weekday())
+    current_hour = float(now.hour)
 
     # determine the gap in hours between now and the prediction time. (weather forecast data bedomes daily after 48.)
     time_diff = 0
 
-    H = int(H)
+    H = float(H)
     if H >= current_hour:
         time_diff += H - current_hour 
     else:
@@ -199,8 +199,8 @@ def model():
 
     mid = calendar.timegm(datetime.date.today().timetuple())
 
-    
-    return json.dumps(tuple([mid, time_diff, current_day]))
+    if time_diff <= 0:
+        return json.dumps("Please select a time in the Future for predictions.")
 
     if time_diff > 48:        
         # find the time at midnight tonight and add the number of days to it. 
@@ -210,12 +210,19 @@ def model():
 
         data = daily_data
 
+        closest_dayrow = 0
+        closest_timestamp = 10000000000000
+        # select the closes time stamp to use as the weather data
         for dayrow in data:
-            if dayrow['time']==mid:
-                ndata = dayrow
+            diff = abs(dayrow['time'] - mid)
+            if diff < closest_timestamp:
+                closest_timestamp = dayrow['time']
+                closest_dayrow = dayrow
+
+        ndata = closest_dayrow
 
         ################## test
-        return json.dumps(mid)
+        # return json.dumps(mid)
 
         # construct input from data (data[2] is the 'icon')
         if ndata['icon'] in icons:
@@ -237,9 +244,17 @@ def model():
 
         data = hourly_data
 
+
+        closest_hourrow = 0
+        closest_timestamp = 10000000000000
+        # select the closes time stamp to use as the weather data
         for hourrow in data:
-            if hourrow['time']==mid:
-                ndata = hourrow
+            diff = abs(hourrow['time'] - mid)
+            if diff < closest_timestamp:
+                closest_timestamp = hourrow['time']
+                closest_hourrow = hourrow
+
+        ndata = closest_hourrow
         
         ############### test
         # return json.dumps(hourrow)
@@ -252,6 +267,7 @@ def model():
         for col in wcols:
             inputs[col] = ndata[col]
 
+    inputcopy = inputs
     # dataframe of information ready for model application.
     inputs = pd.DataFrame(inputs, index=[0])
 
@@ -262,35 +278,15 @@ def model():
 
     # What is the format of the inputs ?
 
-    data = xgb.DMatrix(inputs)
-    predictions = model.predict(data)
+    modeldata = xgb.DMatrix(inputs)
+    predictions = model.predict(modeldata)
 
-    return json.dumps(predictions)
+    return json.dumps(tuple([predictions.tolist(),list(inputcopy.items()),list(ndata.items())]))
+    
 
 @app.route('/testpage')
 def testpage():
 
-    # get authentication information (api-key)
-    with open("./app/static/DB/authentication.txt") as f:
-        auth = f.read().split('\n')
-    darksky_key = auth[2]
-    
-    #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
-    wresponse = r.get(f"""
-                        https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
-                        units=si&
-                        exclude=currently,flags,alerts,minutely
-                        """)
-    
-    weatherforecast = wresponse.json()
-
-    hourly_data = weatherforecast['hourly']['data']
-    daily_data = weatherforecast['hourly']['data']
-
-    returndict = {
-        'test': daily_data[0]
-    }
-    	
-    return render_template("testpage.html", **returndict)
+    return render_template("testpage.html")
 
 

@@ -105,34 +105,45 @@ var Forecast_content_inner_html = `
 <hr style="width:50%;margin-top:0;margin-bottom:30px;">
 <div style="width:80%; text-align: left; margin:auto; color:whitesmoke">
   <div id="forecast_form">
-      Select Day:
-      <select id='time_pred'>
-        <option value='default'>Day</option>
-        <option value="Mon">Monday</option>
-        <option value="Tue">Tuesday</option>
-        <option value="Wed">Wednesday</option>
-        <option value="Thu">Thursday</option>
-        <option value="Fri">Friday</option>
-        <option value="Sat">Saturday</option>
-        <option value="Sun">Sunday</option>
-      </select><br>
-      
-      Select Time:
-      <select id="hour_forecast_options">
-      <option value='default'>Hour</option>
-      </select><br>
+    Select Day:
+    <select id='time_pred'>
+      <option value='default'>Day</option>
+      <option value="Mon">Monday</option>
+      <option value="Tue">Tuesday</option>
+      <option value="Wed">Wednesday</option>
+      <option value="Thu">Thursday</option>
+      <option value="Fri">Friday</option>
+      <option value="Sat">Saturday</option>
+      <option value="Sun">Sunday</option>
+    </select><br>
+    
+    Select Time:
+    <select id="hour_forecast_options">
+    <option value='default'>Hour</option>
+    </select><br>
 
-      Select station:
-      <select id="station_number_forecast_options">
-        <option value='default'>Station</option>
-      </select><br>
-      
-      <!-- populate options -->
-      <script>populate_forecast_options()</script>
-      
-      <button id="submit" onclick="Forecast()">Get Prediction</button>
+    Select station:
+    <select id="station_number_forecast_options">
+      <option value='default'>Station</option>
+    </select><br>
+    
+    <!-- populate options -->
+    <script>populate_forecast_options()</script>
+    
+    <button id="submit" onclick="Forecast()">Get Prediction</button>
+    
+    <table id="Forecast_Content">
+    <tr>
+    <td>Available Bikes:</td>
+    <td id="avail_b_forecast"></td>
+    </tr>
+    <tr>
+    <td>Available Stands:</td>
+    <td id="avail_s_forecast"></td>
+    </tr>
+    </table>
+    <div id="forecasts_message></div>
   </div>
-  
 </div>
 `;
 
@@ -144,6 +155,8 @@ function Forecast() {
       
       var data = JSON.parse(this.responseText);
       
+      $("#Forecast_Content").css("display","block");
+      $("#avail_b_forecast").text(data);
       
       console.log(data);
     }
@@ -660,7 +673,7 @@ function populate_forecast_options() {
   hrdrpdwn = document.getElementById('hour_forecast_options');
   for (var hr=0; hr <= 23; hr++) {
     var optionhr = document.createElement("OPTION");
-    optionhr.textContent=hr;
+    optionhr.textContent= ((hr < 10) ? "0" : "") + hr + ":00";
     optionhr.value=hr;
     hrdrpdwn.appendChild(optionhr);
   }

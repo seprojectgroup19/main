@@ -181,6 +181,28 @@ select {
 
 }
 
+#Forecasts_message {
+    display:none;
+}
+
+#Forecast_Content {
+
+    width:90%;
+    font-size: 12pt;
+    text-align:left;
+    margin:auto;
+    margin-top:50px;
+    color:black;
+    display:none;
+    /* background-color: black; */
+}
+
+#Forecast_Content td {
+    padding-top:15px;
+    padding-left:10px;
+    width:100px;
+}
+
 #Forecast_content_inner_html>img {
     width:90%;
     height:35%;
