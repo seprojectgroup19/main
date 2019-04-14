@@ -11,13 +11,95 @@
     <h1 style="text-align: center">TESTPAGE</h1>
     <hr>
 
-    <ul>
-        <li>Import Data</li>
-        <li>Google charts</li>
-        <li>apply model and display on chart</li>
-        <li>station specific models</li>
-        <li>{{result}}</li>
-    </ul>
+    <div style="width:80%; text-align: center; margin:auto; color:whitesmoke">
+        <div style="height:100%; width:50%; position:relative; align-content: center; margin:auto; background-color:burlywood">
+            Select a day:<br>
+            <select id='time_pred'>
+                <option value='default'>Day</option>
+                <option value="Mon">Monday</option>
+                <option value="Tue">Tuesday</option>
+                <option value="Wed">Wednesday</option>
+                <option value="Thu">Thursday</option>
+                <option value="Fri">Friday</option>
+                <option value="Sat">Saturday</option>
+                <option value="Sun">Sunday</option>
+            </select><br>
+            Select a time (to nearest Hour)<br>
+            <select id="fukthis">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="13">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+            </select><br><br>
 
+            Select station number <br><br>
+
+            <button id="submit" onclick="Forecast()">Get Prediction</button>
+            <br><br><hr><br><br>
+            <div id="predictionblock">
+                Predictions in here <br><br>
+                {{ WeatherForecast }}
+            </div>
+        </div>
+        
+    </div>
+    <div style="color:white; width:80%; position:relative; margin:auto">
+            {{res}}  
+    </div>
+
+<script>
+    function Forecast() {
+
+    xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function () {
+        
+        if (this.readyState == 4 && this.status == 200) {
+            
+            // send a request to the python side of things. 
+            // it returns a number ? 
+            //  only need to send it a day and hour.
+
+
+            var data = JSON.parse(this.responseText);
+
+            console.log(data);
+            // Formatting output string.
+            // var last_update_time = new Date(data[14] * 1000);
+            // var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
+            // var minutes = ((last_update_time.getMinutes()<10) ? "0" : "") + last_update_time.getMinutes();
+        }
+    };
+
+    // send the day and time. 
+    var day = document.getElementById("time_pred").value;
+    var hour = document.getElementById("fukthis").value;
+
+    console.log("/model?Day="+day+"&Time="+hour);
+
+    xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour, true);
+    xmlhttp.send();
+    }
+
+</script>
 </body>
 </html>
