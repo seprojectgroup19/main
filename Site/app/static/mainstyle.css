@@ -237,6 +237,23 @@ select {
     margin-top:5px;
 }
 
+#forecast_form{
+    height:100%; 
+    width:80%; 
+    position:relative; 
+    margin:auto;
+}
+
+#forecast_form select{
+    width:100%;
+    margin-bottom:15px;
+    border-radius:20px;
+    height:25px;
+    font-size: 12pt;
+    bottom:0;
+    top:0;
+}
+
 /* #WeatherInfolist p {
     width:50%;
     margin:0;
