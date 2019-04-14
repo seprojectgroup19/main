@@ -157,8 +157,8 @@ def model():
     # set day and hour.
     inputs[D] = 1.0
     inputs['hour_x'] = float(H)
-
-    # get authentication information (api-key)
+    
+    #=================================== Weather API Call ===============================#
     with open("./app/static/DB/authentication.txt") as f:
         auth = f.read().split('\n')
     darksky_key = auth[2]
@@ -180,7 +180,7 @@ def model():
     current_day  = float(now.weekday())
     current_hour = float(now.hour)
 
-    # determine the gap in hours between now and the prediction time. (weather forecast data bedomes daily after 48.)
+    #=================================== find timestamp of prediction ===============================#
     time_diff = 0
 
     H = float(H)
@@ -202,6 +202,7 @@ def model():
     if time_diff <= 0:
         return json.dumps("Please select a time in the Future for predictions.")
 
+    #=================================== Weekly weather available ===============================#
     if time_diff > 48:        
         # find the time at midnight tonight and add the number of days to it. 
         # Account for time zone difference. 
@@ -243,6 +244,7 @@ def model():
             inputs['apparentTemperature'] = ndata['apparentTemperatureLow']
             inputs['temperature'] = ndata['temperatureLow']        
 
+     #=================================== Daily Weather available ===============================#
     else:
         mid += 86400 * (time_diff//24) 
         mid += 3600 * time_diff%24
@@ -286,13 +288,36 @@ def model():
 
     modeldata = xgb.DMatrix(inputs)
     predictions = model.predict(modeldata)
+    predicted_available_bikes = predictions.tolist()
+     
+    #=================================== Model stands ===============================#
+    sql = f"""
+    SELECT bike_stands
+    FROM DublinBikesDB.dynamic
+    WHERE number={station_number}
+    LIMIT 1;
+    """
+    stands = int(eq.execute_sql(sql)[0][0])
 
-    return json.dumps(predictions.tolist())#,list(inputcopy.items()),list(ndata.items())]))
+     #=================================== return data ===============================#
+    preds = tuple([predicted_available_bikes, stands])
+
+    return json.dumps(preds)#,list(inputcopy.items()),list(ndata.items())]))
     
 
 @app.route('/testpage')
 def testpage():
 
-    return render_template("testpage.html")
+    sql = f"""
+    SELECT bike_stands
+    FROM DublinBikesDB.dynamic
+    WHERE number={3}
+    LIMIT 1;
+    """
+    stands = int(eq.execute_sql(sql)[0][0])
+
+    returndict={'res':stands}
+
+    return render_template("testpage.html", **returndict)
 
 

@@ -192,20 +192,36 @@ select {
 
 #Forecast_Content {
 
-    width:90%;
+    display:none;
+    width:100%;
     font-size: 12pt;
     text-align:left;
     margin:auto;
     margin-top:50px;
-    color:black;
-    display:none;
-    /* background-color: black; */
+    color:white;
+    border-style:solid;
+    border-color:white;
+    border-radius:10px;
+    
 }
 
+#Forecast_Content tbody{
+    width:100%;
+    position:relative;
+    margin:auto;
+}
+
+
 #Forecast_Content td {
-    padding-top:15px;
-    padding-left:10px;
-    width:100px;
+    padding-top:10px;
+    padding-bottom:10px;
+    padding-left:20px;
+    font-size:13pt;
+    width:60%;
+}
+
+#avail_s_forecast, #avail_b_forecast {
+    text-align:right;
 }
 
 #Forecast_content_inner_html>img {

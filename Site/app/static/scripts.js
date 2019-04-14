@@ -135,14 +135,14 @@ var Forecast_content_inner_html = `
     <div id="forecasts_message" style="clear:both"></div>
     
     <table id="Forecast_Content">
-    <tr>
-    <td>Available Bikes:</td>
-    <td id="avail_b_forecast"></td>
-    </tr>
-    <tr>
-    <td>Available Stands:</td>
-    <td id="avail_s_forecast"></td>
-    </tr>
+      <tr>
+        <td>Available Bikes:</td>
+        <td id="avail_b_forecast"></td>
+      </tr>
+      <tr>
+        <td>Available Stands:</td>
+        <td id="avail_s_forecast"></td>
+      </tr>
     </table>
   </div>
 </div>
@@ -161,10 +161,12 @@ function Forecast() {
     if (this.readyState == 4 && this.status == 200) {
       
       var data = JSON.parse(this.responseText);
-      var nbikes = Math.round(parseFloat(data));
+      var nbikes = Math.round(parseFloat(data[0]));
+      var nstands = Math.round(parseFloat(data[1]));
 
       $("#Forecast_Content").css("display","block");
       $("#avail_b_forecast").text(nbikes);
+      $("#avail_s_forecast").text(nstands - nbikes);
       console.log(data);
     }
   };

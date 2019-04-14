@@ -10,42 +10,9 @@
     <!-- Render html in here -->
     <h1 style="text-align: center">TESTPAGE</h1>
     <hr>
+    <p style="text-align:center;margin:auto;">
+        {{res}}
+    </p>
 
-    {{test}}
-
-<script>
-    function Forecast() {
-
-    xmlhttp = new XMLHttpRequest();
-    xmlhttp.onreadystatechange = function () {
-        
-        if (this.readyState == 4 && this.status == 200) {
-            
-            // send a request to the python side of things. 
-            // it returns a number ? 
-            //  only need to send it a day and hour.
-
-
-            var data = JSON.parse(this.responseText);
-
-            console.log(data);
-            // Formatting output string.
-            // var last_update_time = new Date(data[14] * 1000);
-            // var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
-            // var minutes = ((last_update_time.getMinutes()<10) ? "0" : "") + last_update_time.getMinutes();
-        }
-    };
-
-    // send the day and time. 
-    var day = document.getElementById("time_pred").value;
-    var hour = document.getElementById("fukthis").value;
-
-    console.log("/model?Day="+day+"&Time="+hour);
-
-    xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour, true);
-    xmlhttp.send();
-    }
-
-</script>
 </body>
 </html>
