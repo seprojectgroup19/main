@@ -260,57 +260,8 @@ def model():
 
     return predictions
 
-@app.route('/testpage')
-def testpage():
-    
-    with open("./app/static/DB/authentication.txt") as f:
-        auth = f.read().split('\n')
-    
-    darksky_key = auth[2]
-
-    # using the coordinates for the centre of the city.
-    weatherforecast = r.get(f"""https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
-                            units=si&
-                            exclude=currently,flags,alerts,minutely""")
-
-    t = weatherforecast.json()
-    
-    test = t['daily']['data'][0]
-    
-    test2 = {
-        'Mon':0.0,
-        'Tue':0.0,
-        'Wed':0.0,
-        'Thu':0.0,
-        'Fri':0.0,
-        'Sat':0.0,
-        'Sun':0.0,
-        'hour_x':0.0,
-        'partly-cloudy-day':0.0,
-        'partly-cloudy-night':0.0,
-        'clear-night':0.0,
-        'clear-day':0.0,
-        'fog':0.0,
-        'wind':0.0,
-        'cloudy':0.0,
-        'rain':0.0,
-        'apparentTemperature':0.0,
-        'cloudCover':0.0,
-        'dewPoint':0.0,
-        'humidity':0.0,
-        'precipIntensity':0.0,
-        'precipProbability':0.0,
-        'pressure':0.0,
-        'temperature':0.0,
-        'windBearing':0.0,
-        'windGust':0.0,
-        'windSpeed':0.0,
-        'uvIndex':0.0,
-        'visibility':0.0
-    }
-
-    test2 = xgb.DMatrix(pd.DataFrame(test2, index=[0]))
-
-    return render_template("testpage.html", **{'WeatherForecast': test, 'res':test2})
+@app.route('/testpage')S
+def testpage():S
+    return render_template("testpage.html")
 
 
