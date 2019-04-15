@@ -371,8 +371,8 @@ function weather_update() {
       $('#Temperature').text("");
       $('#Temperature').unbind().append(data[13] + ' &#8451;');
       $("#WindSpeed").text(data[19] + " km/h");
-      $("#Humidity").text(data[4] + " %");
-      $("#Precipitation").text(data[9] + " %");
+      $("#Humidity").text(100*data[4] + " %");
+      $("#Precipitation").text(100*data[9] + " %");
 
       // Formatting output string. 
       var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
@@ -419,8 +419,8 @@ function clickHandler(val) {
   } 
   else if (val == 3) {
     $("#menu_item_1").text("Close");
-    $("#map").css("width", "70%");
-    $("#infobox").css("width", "30%");
+    $("#map").css("width", "55%");
+    $("#infobox").css("width", "45%");
     $("#infobox").css("visibility", "visible");
     $("#infoboxcontent").html(graph_content_inner_html);
   }
@@ -850,14 +850,16 @@ function get_chart_data() {
               // Set chart options
               var options = {
                   'title': 'Bikes Information',
-                  hAxis: {title: 'Time',  titleTextStyle: {color: '#333'}},
-                  vAxis: {title: 'Number', minValue: 0},
+                  'chartArea': {'width': '90%', 'height': '70%'},
+                  backgroundColor: { fill:'transparent' },
                   legend: {position: 'top', maxLines: 3},
+                  vAxis: {gridlines: {color: 'transparent'}},
+                  hAxis: {gridlines: {color: 'transparent'}},
                   explorer: {
                     keepInBounds: true,
                     actions: ['dragToZoom', 'rightClickToReset']
                   },
-                  'height':300,
+                  'height':400,
                   'width':'100%'
               };
 

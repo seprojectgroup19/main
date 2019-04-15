@@ -65,7 +65,7 @@
     background-color: #084c55;
     min-width: 280px;
     height:100%;
-    width:15%;
+    width:12%;
     z-index:1;
     float:left;
     position:fixed;
@@ -332,6 +332,7 @@ select {
     text-align:left;
     width:100%;
     border-radius:10px;
+    margin-left:20px;
 }
 
 html, body {
