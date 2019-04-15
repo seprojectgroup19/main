@@ -310,6 +310,7 @@ function weather_update() {
 
       $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
       $("#Conditions").text(data[12]);
+      $('#Temperature').text("");
       $('#Temperature').unbind().append(data[13] + ' &#8451;');
       $("#WindSpeed").text(data[19] + " km/h");
       $("#Humidity").text(data[4] + " %");

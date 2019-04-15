@@ -303,7 +303,32 @@ def model():
     preds = tuple([predicted_available_bikes, stands])
 
     return json.dumps(preds)#,list(inputcopy.items()),list(ndata.items())]))
+
+@app.route('/make_charts', methods=["GET"])
+def make_charts():
+
+    days = int(request.args.get("Days"))
+    snum = int(request.args.get("Station"))
+    limit= days*288
     
+    sql = f"""
+    SELECT *
+    FROM DublinBikesDB.dynamic
+    WHERE number={snum}
+    LIMIT {limit};
+    """
+    stands = eq.execute_sql(sql)
+
+    Ab=[]
+    As=[]
+    Ts=[]
+
+    for stand in stands:
+        Ab.append(stand[4])
+        As.append(stand[3])
+        Ts.append(stand[5])
+
+    return json.dumps(tuple([As,Ab,Ts]))
 
 @app.route('/testpage')
 def testpage():
@@ -319,21 +344,17 @@ def testpage():
     LIMIT {limit};
     """
     stands = eq.execute_sql(sql)
-    avail_bikes = []
-    avail_stands= []
-    times = []
+
+    Ab=[]
+    As=[]
+    Ts=[]
 
     for stand in stands:
-        avail_bikes.append(stand[3])
-        avail_stands.append(stand[5])
-        times.append(stand[-1])
+        Ab.append(stand[4])
+        As.append(stand[3])
+        Ts.append(stand[5])
 
-    # convert = (lambda x : datetime.datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
-    # times = list(map(convert,times))
-    # times = pd.to_datetime(times)
-
-    sample = [avail_bikes, avail_stands, times]
-    returndict={'res':sample}
+    returndict={'abikes':As,'astands':Ab,'times':Ts}
 
     return render_template("testpage.html", **returndict)
 
