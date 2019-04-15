@@ -92,37 +92,63 @@ var graph_content_inner_html = `
 <hr style="width:50%;margin-top:0;margin-bottom:30px;">
 <!-- Insert select option here to generate graph -->
 <div id="Graph_Content_div">
-  Select station:
-    <select id="station_number_graph_options">
-      <option value='default'>Station</option>
-    </select><br>
-  <script>populate_graph_options()</script>
 
-  Select Time Period:
-    <select id='graph_days'>
-      <option value='default'>Time</option>
-      <option value='0.5'>12 Hours</option>
-      <option value='1'>Day</option>
-      <option value='7'>7 Days</option>
-    </select><br>
+  <table>
+    <tr>
+      <td>
+      Select station:
+      </td>
+      <td>
+      <select id="station_number_graph_options">
+        <option value='default'>Station</option>
+      </select>
+      </td>
+    </tr>
+    <script>populate_graph_options()</script>
 
-  Select Variable:
-    <select id='graph_variable'>
-      <option value='default'>Variable</option>
-      <option value='stand'>Available Stands</option>
-      <option value='bike'>Available Bikes</option>
-      <option value='both'>Both</option>
-    </select><br>
-  
-  Select Chart type:
-    <select id='chart_type'>
-      <option value='default'>Type</option>
-      <option value='line'>Line Chart</option>
-      <option value='bar'>Bar Chart</option>
-      <option value='area'>Area Chart</option>
-      <option value='scatter'>Scatter Chart</option>
-    </select><br>
+    <tr>
+      <td>
+      Select Time Period:
+      </td>
+      <td>
+      <select id='graph_days'>
+        <option value='default'>Time</option>
+        <option value='0.5'>12 Hours</option>
+        <option value='1'>Day</option>
+        <option value='7'>7 Days</option>
+      </select>
+      </td>
+    </tr>
 
+    <tr>
+      <td>
+      Select Variable:
+      </td>
+      <td>
+      <select id='graph_variable'>
+        <option value='default'>Variable</option>
+        <option value='stand'>Available Stands</option>
+        <option value='bike'>Available Bikes</option>
+        <option value='both'>Both</option>
+      </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        Select Chart type:
+      </td>
+      <td>
+        <select id='chart_type'>
+          <option value='default'>Type</option>
+          <option value='line'>Line Chart</option>
+          <option value='bar'>Bar Chart</option>
+          <option value='area'>Area Chart</option>
+          <option value='scatter'>Scatter Chart</option>
+        </select>
+      </td>
+    </tr>
+  </table>
   <button id="submit" onclick="get_chart_data()">Generate Graphs</button>
 
 </div>
@@ -867,37 +893,3 @@ function get_chart_data() {
   xmlhttp.open("GET", request_string, true);
   xmlhttp.send();
 }
-
-// <div id="Graph_Content_div">
-//   Select station:
-//     <select id="station_number_graph_options">
-//       <option value='default'>Station</option>
-//     </select><br>
-//   <script>populate_graph_options()</script>
-
-//   Select Time Period:
-//     <select id='graph_days'>
-//       <option value='default'>Time</option>
-//       <option value='1'>Day</option>
-//       <option value='7'>7 Days</option>
-//       <option value='30'>30 Days</option>
-//     </select><br>
-
-//   Select Variable:
-//     <select id='graph_variable'>
-//       <option value='default'>Variable</option>
-//       <option value='stand'>Available Stands</option>
-//       <option value='bike'>Available Bikes</option>
-//       <option value='both'>Both</option>
-//     </select><br>
-  
-//   Select Chart type:
-//     <select id='chart_type'>
-//       <option value='default'>Type</option>
-//       <option value='line'>Line Chart</option>
-//       <option value='bar'>Bar Chart</option>
-//       <option value='area'>Area Chart</option>
-//       <option value='scatter'>Scatter Chart</option>
-//     </select><br>
-
-//   <button id="submit" onclick="get_chart_data()">Generate Graphs</button>

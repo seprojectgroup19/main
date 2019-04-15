@@ -313,11 +313,26 @@ select {
     top:0;
 }
 
+
 /* #WeatherInfolist p {
     width:50%;
     margin:0;
     padding:0;
 } */
+
+#Graph_Content_div {
+
+    width:90%;
+    margin:auto;
+    text-align:left;
+}
+
+#Graph_Content_div select {
+    
+    text-align:left;
+    width:100%;
+    border-radius:10px;
+}
 
 html, body {
     height: 100%;
