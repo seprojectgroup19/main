@@ -309,10 +309,10 @@ def model():
 @app.route('/make_charts', methods=["GET"])
 def make_charts():
 
-    days = int(request.args.get("Days"))
+    days = float(request.args.get("Days"))
     snum = int(request.args.get("Station"))
     step = request.args.get("TimeStep")
-    limit= days*288
+    limit= int(days*288)
     
     sql = f"""
     SELECT *
@@ -333,31 +333,29 @@ def make_charts():
         Ts.append(stand[5])
 
     # Allow for adjusted timstep resolution.
+    df = pd.DataFrame({
+        'Bikes':Ab,
+        'Stand':As,
+        'Times':Ts
+    })
+
+    # convert epoch time to datetime object for use in resampling.
+    convertTS = (lambda x : datetime.datetime.utcfromtimestamp((int(x)/1000)).strftime('%Y-%m-%d %H:%M:%S'))
+
+    df.Times = df.Times.apply(convertTS)
+    df.Times = pd.to_datetime(df.Times)
+
+    # resample the data to hourly
+    df.set_index(['Times'], inplace=True)
+    df.index.name='Times'
+
     if step:
-
         step = int(step)
-
-        df = pd.DataFrame({
-            'Bikes':Ab,
-            'Stand':As,
-            'Times':Ts
-        })
-
-        # convert epoch time to datetime object for use in resampling.
-        convertTS = (lambda x : datetime.datetime.utcfromtimestamp((int(x)/1000)).strftime('%Y-%m-%d %H:%M:%S'))
-
-        df.Times = df.Times.apply(convertTS)
-        df.Times = pd.to_datetime(df.Times)
-
-        # resample the data to hourly
-        df.set_index(['Times'], inplace=True)
-        df.index.name='Times'
-
         df = df.resample(rule=f'{step}T').mean()
 
-        Ts = list(np.array(pd.DatetimeIndex(df.index).astype(int))/10**6)
-        Ab = list(df.Bikes)
-        As = list(df.Stand)
+    Ts = list(np.array(pd.DatetimeIndex(df.index).astype(int))/10**6)
+    Ab = list(df.Bikes)
+    As = list(df.Stand)
 
     return json.dumps(tuple([As,Ab,Ts]))
 

@@ -101,9 +101,9 @@ var graph_content_inner_html = `
   Select Time Period:
     <select id='graph_days'>
       <option value='default'>Time</option>
+      <option value='0.5'>12 Hours</option>
       <option value='1'>Day</option>
       <option value='7'>7 Days</option>
-      <option value='30'>30 Days</option>
     </select><br>
 
   Select Variable:
@@ -770,7 +770,7 @@ function populate_graph_options() {
 function get_chart_data() {
             
   var Days = document.getElementById("graph_days").value;
-  var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
+  // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
   var station = document.getElementById("station_number_graph_options").value;
   var plot_type =  document.getElementById("chart_type").value;
   var g_vars = document.getElementById("graph_variable").value;
@@ -815,14 +815,15 @@ function get_chart_data() {
               // Plot_Data = Both;
 
               switch (g_vars) {
-                case "Bikes": Plot_Data=Bdata;break;
+                case "bikes": Plot_Data=Bdata;break;
                 case "stand": Plot_Data=Sdata;break;
                 case "both" : Plot_Data=Both; break;
                 default: Plot_Data=Both;break;
               }
+
               // Set chart options
               var options = {
-                  'title': 'Bikes Information last ' + Graph_Time_scale + " Hours",
+                  'title': 'Bikes Information',
                   hAxis: {title: 'Time',  titleTextStyle: {color: '#333'}},
                   vAxis: {title: 'Number', minValue: 0},
                   legend: {position: 'top', maxLines: 3},
@@ -834,28 +835,34 @@ function get_chart_data() {
                   'width':'100%'
               };
 
-              if ( plot_type == 'line') {
-                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, options);
-
-              } else if (plot_type == "area") {
-                var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, options);
-
-              } else if (plot_type == "scatter") {
-                var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, options);
-
-              } else {
-                var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, options);
+              // change plot type
+              switch (plot_type){
                 
+                case 'line': var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                break;
+                
+                case 'area': var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                break;
+                
+                case 'scatter': var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+                break;
+                
+                case 'bar': var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                break;
+                
+                default: var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                break;
+              
               }
+              chart.draw(Plot_Data, options)
           }
       }
   };
-  
-  var request_string = "/make_charts?Days="+Days+"&Station="+station +"&TimeStep="+resultion;
+  var resolution=60;
+  console.log(Days);
+  console.log(station);
+  console.log(resolution);
+  var request_string = "/make_charts?Days="+Days+"&Station="+station +"&TimeStep="+resolution;
   
   xmlhttp.open("GET", request_string, true);
   xmlhttp.send();
