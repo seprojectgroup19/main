@@ -11,6 +11,7 @@
         function get_chart_data() {
             
             var Days=7;
+            var Graph_Time_scale = 24; // neet to pull this from options.
             
             xmlhttp = new XMLHttpRequest();
             xmlhttp.onreadystatechange = function () {
@@ -39,8 +40,7 @@
                     google.charts.setOnLoadCallback(drawChart);
 
                     // Callback that creates and populates a data table,
-                    // instantiates the pie chart, passes in the data and
-                    // draws it.
+                    // instantiates the pie chart, passes in the data and draws it.
                     function drawChart() {
                         
                                     // Create the data table.
@@ -48,18 +48,30 @@
                         var Bdata = new google.visualization.arrayToDataTable(aBTS); 
                         var MultiPlotdata =  new google.visualization.arrayToDataTable(MultiPlot); 
                         // Set chart options
-                        var options = {'title':'Bikes',
-                                    'selectionMode':'multiple',
-                                    'width':1000,
-                                    'height':1000};
+                        var options = {
+                            'title': 'Bikes Information last ' + Graph_Time_scale + " Hours",
+                            hAxis: {title: 'Time',  titleTextStyle: {color: '#333'}},
+                            vAxis: {title: 'Number', minValue: 0},
+                            legend: {position: 'top', maxLines: 3},
+                            explorer: {
+                                keepInBounds: true,
+                                actions: ['dragToZoom', 'rightClickToReset']
+                            },
+                            'width':700,
+                            'height':300
+                        };
 
                         // Instantiate and draw our chart, passing in some options.
-                        var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                        chart.draw(MultiPlotdata)
+                        // plot types: Area/Column/Line/Scatter/DataView
+                        var chart2 = new google.visualization.AreaChart(document.getElementById('chart_div2'));
+                        chart2.draw(MultiPlotdata, options)
+
+                        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                        chart.draw(MultiPlotdata, options)
                     }
                 }
             };
-            xmlhttp.open("GET", "/make_charts?Days=1&Station=5", true);
+            xmlhttp.open("GET", "/make_charts?Days=1&Station=5&TimeStep=30", true);
             xmlhttp.send();
         }
     </script>
@@ -69,12 +81,9 @@
     <h1 style="text-align: center">TESTPAGE</h1>
     <hr>
     <div id="chart_div" style="width:40%; text-align:center; margin:auto;"></div>
+    <div id="chart_div2" style="width:40%; text-align:center; margin:auto;"></div>
     <p style="text-align:center;margin:auto;">
-        {{ abikes }}
-        <hr>
-        {{ times }}
-        <hr>
-        {{ astands }}
+
     </p>
     <script>get_chart_data()</script>
 

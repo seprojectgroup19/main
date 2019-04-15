@@ -312,12 +312,13 @@ def make_charts():
     days = int(request.args.get("Days"))
     snum = int(request.args.get("Station"))
     step = request.args.get("TimeStep")
-    limit= days*400
+    limit= days*288
     
     sql = f"""
     SELECT *
     FROM DublinBikesDB.dynamic
     WHERE number={snum}
+    ORDER BY last_update DESC
     LIMIT {limit};
     """
     stands = eq.execute_sql(sql)

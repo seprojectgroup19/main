@@ -60,9 +60,9 @@ var table_info_content = `
   `;
 
 var find_station_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
   Find Station 
-</h3><br>
+</h3>
 <hr style="width:50%;margin-top:0;margin-bottom:30px;">
 <div style="width:80%; margin:auto;">
   <p>
@@ -86,22 +86,54 @@ var find_station_inner_html = `
 `;
 
 var graph_content_inner_html = `
-<div id="Forecas_content_inner_html">
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
-Sample Content
-</h3><br>
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
+  Graphs
+</h3>
+<hr style="width:50%;margin-top:0;margin-bottom:30px;">
+<!-- Insert select option here to generate graph -->
+<div id="Graph_Content_div">
+  Select station:
+    <select id="station_number_graph_options">
+      <option value='default'>Station</option>
+    </select><br>
+  <script>populate_graph_options()</script>
 
-<img src="../static/images/WeekendAverage.png" alt="Weekend Average">
-<img src="../static/images/WeekdayAverage.png" alt="Weekend Average">
+  Select Time Period:
+    <select id='graph_days'>
+      <option value='default'>Time</option>
+      <option value='1'>Day</option>
+      <option value='7'>7 Days</option>
+      <option value='30'>30 Days</option>
+    </select><br>
+
+  Select Variable:
+    <select id='graph_variable'>
+      <option value='default'>Variable</option>
+      <option value='stand'>Available Stands</option>
+      <option value='bike'>Available Bikes</option>
+      <option value='both'>Both</option>
+    </select><br>
+  
+  Select Chart type:
+    <select id='chart_type'>
+      <option value='default'>Type</option>
+      <option value='line'>Line Chart</option>
+      <option value='bar'>Bar Chart</option>
+      <option value='area'>Area Chart</option>
+      <option value='scatter'>Scatter Chart</option>
+    </select><br>
+
+  <button id="submit" onclick="get_chart_data()">Generate Graphs</button>
 
 </div>
+<div id="chart_div"></div>
 `;
 
 
 var Forecast_content_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
   Forecast
-</h3><br>
+</h3>
 <hr style="width:50%;margin-top:0;margin-bottom:30px;">
 <div style="width:80%; text-align: left; margin:auto; color:whitesmoke">
   <div id="forecast_form">
@@ -719,3 +751,146 @@ function populate_forecast_options() {
     hrdrpdwn.appendChild(optionhr);
   }
 }
+
+function populate_graph_options() {
+  drpdwn = document.getElementById('station_number_graph_options');
+  $.getJSON("../static/localjson.json", function(data){
+      for (var i=0; i<data.features.length; i++){
+        var station_number = data.features[i].properties.number;
+        var option = document.createElement("OPTION");
+        option.textContent=station_number;
+        option.value=station_number;
+        drpdwn.appendChild(option);
+      }
+    }
+  );
+}
+
+// Function to generate charts
+function get_chart_data() {
+            
+  var Days = document.getElementById("graph_days").value;
+  var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
+  var station = document.getElementById("station_number_graph_options").value;
+  var plot_type =  document.getElementById("chart_type").value;
+  var g_vars = document.getElementById("graph_variable").value;
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+      
+          var data = JSON.parse(this.responseText);
+          
+          //As,Ab,Ts
+          var As = data[0];
+          var Ab = data[1];
+          var Ts = data[2];
+
+          var aSTS = [['TimeStamp','AvailableStands']];
+          var aBTS = [['TimeStamp','AvailableBikes']];
+          var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
+
+          for (var i=0; i<As.length; i++){
+              aBTS.push([Ts[i],As[i]]);
+              aSTS.push([Ts[i],Ab[i]]);
+              MultiPlot.push([new Date(Ts[i]),Ab[i],As[i]]);
+          }
+
+          // Load the Visualization API and the corechart package.
+          google.charts.load('current', {'packages':['corechart']});
+
+          // Set a callback to run when the Google Visualization API is loaded.
+          google.charts.setOnLoadCallback(drawChart);
+
+          // Callback that creates and populates a data table,
+          // instantiates the pie chart, passes in the data and
+          // draws it.
+          function drawChart() {
+              
+                          // Create the data table.
+              var Sdata = new google.visualization.arrayToDataTable(aSTS);
+              var Bdata = new google.visualization.arrayToDataTable(aBTS); 
+              var Both =  new google.visualization.arrayToDataTable(MultiPlot);
+              
+              // Plot_Data = Both;
+
+              switch (g_vars) {
+                case "Bikes": Plot_Data=Bdata;break;
+                case "stand": Plot_Data=Sdata;break;
+                case "both" : Plot_Data=Both; break;
+                default: Plot_Data=Both;break;
+              }
+              // Set chart options
+              var options = {
+                  'title': 'Bikes Information last ' + Graph_Time_scale + " Hours",
+                  hAxis: {title: 'Time',  titleTextStyle: {color: '#333'}},
+                  vAxis: {title: 'Number', minValue: 0},
+                  legend: {position: 'top', maxLines: 3},
+                  explorer: {
+                    keepInBounds: true,
+                    actions: ['dragToZoom', 'rightClickToReset']
+                  },
+                  'height':300,
+                  'width':'100%'
+              };
+
+              if ( plot_type == 'line') {
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, options);
+
+              } else if (plot_type == "area") {
+                var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, options);
+
+              } else if (plot_type == "scatter") {
+                var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, options);
+
+              } else {
+                var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, options);
+                
+              }
+          }
+      }
+  };
+  
+  var request_string = "/make_charts?Days="+Days+"&Station="+station +"&TimeStep="+resultion;
+  
+  xmlhttp.open("GET", request_string, true);
+  xmlhttp.send();
+}
+
+// <div id="Graph_Content_div">
+//   Select station:
+//     <select id="station_number_graph_options">
+//       <option value='default'>Station</option>
+//     </select><br>
+//   <script>populate_graph_options()</script>
+
+//   Select Time Period:
+//     <select id='graph_days'>
+//       <option value='default'>Time</option>
+//       <option value='1'>Day</option>
+//       <option value='7'>7 Days</option>
+//       <option value='30'>30 Days</option>
+//     </select><br>
+
+//   Select Variable:
+//     <select id='graph_variable'>
+//       <option value='default'>Variable</option>
+//       <option value='stand'>Available Stands</option>
+//       <option value='bike'>Available Bikes</option>
+//       <option value='both'>Both</option>
+//     </select><br>
+  
+//   Select Chart type:
+//     <select id='chart_type'>
+//       <option value='default'>Type</option>
+//       <option value='line'>Line Chart</option>
+//       <option value='bar'>Bar Chart</option>
+//       <option value='area'>Area Chart</option>
+//       <option value='scatter'>Scatter Chart</option>
+//     </select><br>
+
+//   <button id="submit" onclick="get_chart_data()">Generate Graphs</button>
