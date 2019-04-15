@@ -328,6 +328,8 @@ def make_charts():
         As.append(stand[3])
         Ts.append(stand[5])
 
+    return json.dumps(str(Ts))
+
     return json.dumps(tuple([As,Ab,Ts]))
 
 @app.route('/testpage')

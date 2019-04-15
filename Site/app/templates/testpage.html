@@ -29,7 +29,7 @@
                     for (var i=0; i<As.length; i++){
                         aBTS.push([Ts[i],As[i]]);
                         aSTS.push([Ts[i],Ab[i]]);
-                        MultiPlot.push([Ts[i],Ab[i],As[i]]);
+                        MultiPlot.push([new Date(Ts[i]),Ab[i],As[i]]);
                     }
 
                     // Load the Visualization API and the corechart package.
@@ -50,8 +50,8 @@
                         // Set chart options
                         var options = {'title':'Bikes',
                                     'selectionMode':'multiple',
-                                    'width':500,
-                                    'height':500};
+                                    'width':1000,
+                                    'height':1000};
 
                         // Instantiate and draw our chart, passing in some options.
                         var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
@@ -68,7 +68,7 @@
     <!-- Render chart in here -->
     <h1 style="text-align: center">TESTPAGE</h1>
     <hr>
-    <div id="chart_div"></div>
+    <div id="chart_div" style="width:40%; text-align:center; margin:auto;"></div>
     <p style="text-align:center;margin:auto;">
         {{ abikes }}
         <hr>
