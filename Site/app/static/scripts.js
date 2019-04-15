@@ -103,6 +103,10 @@ var graph_content_inner_html = `
         <option value='default'>Station</option>
       </select>
       </td>
+      <td rowspan="4" style="position:relative;">
+      <button id="submit" onclick="get_chart_data()">Generate<br>Graphs</button>
+      </td>
+
     </tr>
     <script>populate_graph_options()</script>
 
@@ -127,8 +131,8 @@ var graph_content_inner_html = `
       <td>
       <select id='graph_variable'>
         <option value='default'>Variable</option>
-        <option value='stand'>Available Stands</option>
-        <option value='bike'>Available Bikes</option>
+        <option value='stand'>Stands</option>
+        <option value='bike'>Bikes</option>
         <option value='both'>Both</option>
       </select>
       </td>
@@ -149,7 +153,7 @@ var graph_content_inner_html = `
       </td>
     </tr>
   </table>
-  <button id="submit" onclick="get_chart_data()">Generate Graphs</button>
+  
 
 </div>
 <div id="chart_div"></div>
@@ -371,8 +375,8 @@ function weather_update() {
       $('#Temperature').text("");
       $('#Temperature').unbind().append(data[13] + ' &#8451;');
       $("#WindSpeed").text(data[19] + " km/h");
-      $("#Humidity").text(100*data[4] + " %");
-      $("#Precipitation").text(100*data[9] + " %");
+      $("#Humidity").text(100*data[4] + "%");
+      $("#Precipitation").text(100*data[9] + "%");
 
       // Formatting output string. 
       var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
@@ -817,8 +821,8 @@ function get_chart_data() {
           var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
 
           for (var i=0; i<As.length; i++){
-              aBTS.push([Ts[i],As[i]]);
-              aSTS.push([Ts[i],Ab[i]]);
+              aBTS.push([new Date(Ts[i]),As[i]]);
+              aSTS.push([new Date(Ts[i]),Ab[i]]);
               MultiPlot.push([new Date(Ts[i]),Ab[i],As[i]]);
           }
 
@@ -839,7 +843,6 @@ function get_chart_data() {
               var Both =  new google.visualization.arrayToDataTable(MultiPlot);
               
               // Plot_Data = Both;
-
               switch (g_vars) {
                 case "bike": Plot_Data=Bdata;break;
                 case "stand": Plot_Data=Sdata;break;
@@ -848,13 +851,14 @@ function get_chart_data() {
               }
 
               // Set chart options
-              var options = {
-                  'title': 'Bikes Information',
+              var Lineoptions = {
+                  'title': 'Last '+24*Days+' Hrs Information on station '+ station,
                   'chartArea': {'width': '90%', 'height': '70%'},
+                  lineWidth:5,
                   backgroundColor: { fill:'transparent' },
                   legend: {position: 'top', maxLines: 3},
-                  vAxis: {gridlines: {color: 'transparent'}},
-                  hAxis: {gridlines: {color: 'transparent'}},
+                  vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                  hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
                   explorer: {
                     keepInBounds: true,
                     actions: ['dragToZoom', 'rightClickToReset']
@@ -863,26 +867,77 @@ function get_chart_data() {
                   'width':'100%'
               };
 
+              var Columnoptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                isStacked:true,
+                'stroke-width':4,
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
+              var Scatteroptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
+              var Areaoptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
               // change plot type
               switch (plot_type){
                 
                 case 'line': var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Lineoptions);
                 break;
                 
                 case 'area': var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Areaoptions);
                 break;
                 
                 case 'scatter': var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Scatteroptions);
                 break;
                 
                 case 'bar': var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Columnoptions);
                 break;
                 
                 default: var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Areaoptions);
                 break;
               
               }
-              chart.draw(Plot_Data, options)
           }
       }
   };
