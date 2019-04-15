@@ -157,13 +157,13 @@ function initMap() {
       if (toggle_marker_color==1) {
         for (p in allMarkers){
             if (rackdata[p].bikes == 0){
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
             }
             else if (rackdata[p].bikes < 10){
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+                allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/orange-dot.png"
             }
             else{
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/green-dot.png"
             }
         } 
       }else{
