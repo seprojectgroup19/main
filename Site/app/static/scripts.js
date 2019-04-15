@@ -815,7 +815,7 @@ function get_chart_data() {
               // Plot_Data = Both;
 
               switch (g_vars) {
-                case "bikes": Plot_Data=Bdata;break;
+                case "bike": Plot_Data=Bdata;break;
                 case "stand": Plot_Data=Sdata;break;
                 case "both" : Plot_Data=Both; break;
                 default: Plot_Data=Both;break;
