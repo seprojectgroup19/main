@@ -11,9 +11,11 @@ import xgboost as xgb
 import requests as r
 from app import app
 import pandas as pd
+import numpy as np
 import datetime
 import calendar
 import json
+import time
 
 @app.route('/')
 def index():
@@ -309,7 +311,8 @@ def make_charts():
 
     days = int(request.args.get("Days"))
     snum = int(request.args.get("Station"))
-    limit= days*288
+    step = request.args.get("TimeStep")
+    limit= days*400
     
     sql = f"""
     SELECT *
@@ -328,7 +331,32 @@ def make_charts():
         As.append(stand[3])
         Ts.append(stand[5])
 
-    return json.dumps(str(Ts))
+    # Allow for adjusted timstep resolution.
+    if step:
+
+        step = int(step)
+
+        df = pd.DataFrame({
+            'Bikes':Ab,
+            'Stand':As,
+            'Times':Ts
+        })
+
+        # convert epoch time to datetime object for use in resampling.
+        convertTS = (lambda x : datetime.datetime.utcfromtimestamp((int(x)/1000)).strftime('%Y-%m-%d %H:%M:%S'))
+
+        df.Times = df.Times.apply(convertTS)
+        df.Times = pd.to_datetime(df.Times)
+
+        # resample the data to hourly
+        df.set_index(['Times'], inplace=True)
+        df.index.name='Times'
+
+        df = df.resample(rule=f'{step}T').mean()
+
+        Ts = list(np.array(pd.DatetimeIndex(df.index).astype(int))/10**6)
+        Ab = list(df.Bikes)
+        As = list(df.Stand)
 
     return json.dumps(tuple([As,Ab,Ts]))
 
