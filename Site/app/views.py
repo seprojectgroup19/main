@@ -154,7 +154,11 @@ def model():
         'visibility']
 
     # set day and hour.
-    inputs[D] = 1.0
+    if D in ['Mon','Tue','Wed','Thu','Fri']:
+        inputs['weekday'] = 1.0
+    else:
+        inputs['weekend'] = 1.0
+
     inputs['hour_x'] = float(H)
     
     #=================================== Weather API Call ===============================#
@@ -227,8 +231,14 @@ def model():
         # return json.dumps(mid)
 
         # construct input from data (data[2] is the 'icon')
-        if ndata['icon'] in icons:
-            inputs[ndata['icon']] = 1.0
+        if ndata['icon'] in icons_cloudy:
+            inputs['cloudy'] = 1.0
+
+        if ndata['icon'] in icons_clear:
+            inputs['clear'] = 1.0
+        
+        if ndata['icon'] in icons_rain:
+            inputs['rain'] = 1.0
 
         # input does not match up with daily data.
         for col in wcols:
@@ -268,8 +278,14 @@ def model():
         # return json.dumps(hourrow)
 
         # construct input from data
-        if ndata['icon'] in icons:
-            inputs[ndata['icon']] = 1.0
+        if ndata['icon'] in icons_cloudy:
+            inputs['cloudy'] = 1.0
+
+        if ndata['icon'] in icons_clear:
+            inputs['clear'] = 1.0
+        
+        if ndata['icon'] in icons_rain:
+            inputs['rain'] = 1.0sss
 
         # inputs matches up with the hourly data
         for col in wcols:
