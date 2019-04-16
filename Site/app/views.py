@@ -285,7 +285,7 @@ def model():
             inputs['clear'] = 1.0
         
         if ndata['icon'] in icons_rain:
-            inputs['rain'] = 1.0sss
+            inputs['rain'] = 1.0
 
         # inputs matches up with the hourly data
         for col in wcols:
@@ -317,7 +317,7 @@ def model():
      #=================================== return data ===============================#
     preds = tuple([predicted_available_bikes, stands])
 
-    return json.dumps(preds)#,list(inputcopy.items()),list(ndata.items())]))
+    return json.dumps(preds)
 
 @app.route('/make_charts', methods=["GET"])
 def make_charts():
