@@ -81,20 +81,6 @@ var find_station_inner_html = `
   <script>populate_station_number_dropdown();</script>
   <script>populate_station_name_dropdown();</script>
 </div>
-<div id="street-view"></div>
-    <script>
-      var panorama;
-      function initialize() {
-        panorama = new google.maps.StreetViewPanorama(
-            document.getElementById('street-view'),
-            {
-              position: {lat: 37.869260, lng: -122.254811},
-              pov: {heading: 165, pitch: 0},
-              zoom: 1
-            });
-      }
-    </script>
-
 <button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
 `;
 
@@ -130,9 +116,9 @@ var graph_content_inner_html = `
       <td>
       <select id='graph_days'>
         <option value='default'>Time</option>
-        <option value='0.5'>12 Hours</option>
-        <option value='1'>Day</option>
-        <option value='7'>7 Days</option>
+        <option value='0.5'>Last 12 Hours</option>
+        <option value='1'>Last Day</option>
+        <option value='7'>Last 7 Days</option>
       </select>
       </td>
     </tr>
