@@ -100,21 +100,11 @@ def model():
     dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
     inputs = {
-        'Mon':0.0,
-        'Tue':0.0,
-        'Wed':0.0,
-        'Thu':0.0,
-        'Fri':0.0,
-        'Sat':0.0,
-        'Sun':0.0,
+        'weekday':0.0,
+        'weekend':0.0,
         'hour_x':0.0,
-        'partly-cloudy-day':0.0,
-        'partly-cloudy-night':0.0,
-        'clear-night':0.0,
-        'clear-day':0.0,
-        'fog':0.0,
-        'wind':0.0,
         'cloudy':0.0,
+        'clear':0.0,
         'rain':0.0,
         'apparentTemperature':0.0,
         'cloudCover':0.0,
@@ -131,15 +121,22 @@ def model():
         'visibility':0.0
     }
 
-    icons = [
+    icons_cloudy = [
         'partly-cloudy-day',
         'partly-cloudy-night',
+        'cloudy',
+    ]
+
+    icons_clear =[
         'clear-night',
         'clear-day',
+    ]
+
+    icons_rain = [
         'fog',
         'wind',
-        'cloudy',
-        'rain']
+        'rain'
+    ]
 
     wcols = [
         'apparentTemperature',
@@ -284,7 +281,7 @@ def model():
     #=================================== Model application ===============================#
 
     model = xgb.Booster()
-    model.load_model(f'./app/static/Model/station_{station_number}.model')
+    model.load_model(f'./app/static/Model/station{station_number}.model')
 
     # What is the format of the inputs ?
 

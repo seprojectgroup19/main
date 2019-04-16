@@ -70,17 +70,30 @@ var find_station_inner_html = `
     <select id="station_number_find" onchange=find_by_number()>
       <option value='default'>All</option>
     </select>
-    <script>populate_station_number_dropdown();</script>
   </p>
-  <br>
+    <br>
   <p>
     Station Address:<br>
     <select id="station_name_find" onchange=find_by_name()>
-      <option value='default'>Search</option>
+     <option value='default'>Search</option>
     </select>
   </p>
+  <script>populate_station_number_dropdown();</script>
+  <script>populate_station_name_dropdown();</script>
 </div>
-<script>populate_station_name_dropdown();</script>
+<div id="street-view"></div>
+    <script>
+      var panorama;
+      function initialize() {
+        panorama = new google.maps.StreetViewPanorama(
+            document.getElementById('street-view'),
+            {
+              position: {lat: 37.869260, lng: -122.254811},
+              pov: {heading: 165, pitch: 0},
+              zoom: 1
+            });
+      }
+    </script>
 
 <button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
 `;
@@ -188,6 +201,8 @@ var Forecast_content_inner_html = `
     <select id="station_number_forecast_options">
       <option value='default'>Station</option>
     </select><br>
+
+    
     
     <!-- populate options -->
     <script>populate_forecast_options()</script>
