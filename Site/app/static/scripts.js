@@ -13,103 +13,269 @@ var toggle_marker_color=1;
 var toggle_empty_marker=0;
 
 var table_info_content = `
-<table id="information-table">
-<thead>
-    <h2 id="station">Dublin Bikes</h2>
-    <hr style="width: 40%">
-</thead>
-<tbody>
-  <tr>
-    <td>
-      <h3 style ="margin-bottom: 10px;">
-        Weather
-      </h3>
-    </td>
-    <td>
-      <h3>
-        Status:
-      </h3>
-    </td>
-    <td>
-      <p id="status">
-        Open
-      </p>
-    </td>
-  </tr>
-  <tr>
-    <td rowspan="2">
-        <p>
-          <canvas id = "weathericon" class="clear-day" width="50" height="50"></canvas>
-        </p>
-    </td>
-    <td>
-      <h3>
-        Available Bikes:
-      </h3>
-    </td>
-    <td>
-      <p id ="avbikes">
-        Loading...
-      </p>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <h3>
-        Available Stands
-      </h3>
-    </td>
-    <td>
-      <p id ="avstands">
-        Loading...
-      </p>
-    </td>
-  </tr>
-</tbody>
-</table>
-`
-var find_station_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;"> 
-  Find Station 
-</h3><br>
-<hr style="width:50%;margin-top:0;margin-bottom:30px;">
-<p>
-  Station Number:<br>
-  <select id="station_number_find" onchange=find_by_number()>
-    <option value='default'>All</option>
-  </select>
-  <script>populate_station_number_dropdown();</script>
-</p>
-<br>
-<p>
-  Station Address:<br>
-  <select id="station_name_find" onchange=find_by_name()>
-    <option value='default'>Search</option>
-  </select>
-</p>
-<script>populate_station_name_dropdown();</script>
+  <table id="information-table">
+      <thead>
+          <h2 id="station">Dublin Bikes</h2>
+          <hr style="width: 40%">
+      </thead>
+      <tbody>
+        <tr>
+          <td colspan="3">
+            <h3>
+              Status:
+            </h3>
+          </td>
+          <td>
+            <p id="status">
+              Open
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <h3>
+              Available Bikes:
+            </h3>
+          </td>
+          <td>
+            <p id ="avbikes">
+              Loading...
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="3">
+            <h3>
+              Available Stands
+            </h3>
+          </td>
+          <td>
+            <p id ="avstands">
+              Loading...
+            </p>
+          </td>
+        </tr>
+      </tbody>
+      </table>
+  `;
 
+var find_station_inner_html = `
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
+  Find Station 
+</h3>
+<hr style="width:50%;margin-top:0;margin-bottom:30px;">
+<div style="width:80%; margin:auto;">
+  <p>
+    Station Number:<br>
+    <select id="station_number_find" onchange=find_by_number()>
+      <option value='default'>All</option>
+    </select>
+  </p>
+    <br>
+  <p>
+    Station Address:<br>
+    <select id="station_name_find" onchange=find_by_name()>
+     <option value='default'>Search</option>
+    </select>
+  </p>
+  <script>populate_station_number_dropdown();</script>
+  <script>populate_station_name_dropdown();</script>
+</div>
 <button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
 `;
 
+var graph_content_inner_html = `
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
+  Graphs
+</h3>
+<hr style="width:50%;margin-top:0;margin-bottom:30px;">
+<!-- Insert select option here to generate graph -->
+<div id="Graph_Content_div">
+
+  <table>
+    <tr>
+      <td>
+      Select station:
+      </td>
+      <td>
+      <select id="station_number_graph_options">
+        <option value='default'>Station</option>
+      </select>
+      </td>
+      <td rowspan="4" style="position:relative;">
+      <button id="submit" onclick="get_chart_data()">Generate<br>Graphs</button>
+      </td>
+
+    </tr>
+    <script>populate_graph_options()</script>
+
+    <tr>
+      <td>
+      Select Time Period:
+      </td>
+      <td>
+      <select id='graph_days'>
+        <option value='default'>Time</option>
+        <option value='0.5'>Last 12 Hours</option>
+        <option value='1'>Last Day</option>
+        <option value='7'>Last 7 Days</option>
+      </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+      Select Variable:
+      </td>
+      <td>
+      <select id='graph_variable'>
+        <option value='default'>Variable</option>
+        <option value='stand'>Stands</option>
+        <option value='bike'>Bikes</option>
+        <option value='both'>Both</option>
+      </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        Select Chart type:
+      </td>
+      <td>
+        <select id='chart_type'>
+          <option value='default'>Type</option>
+          <option value='line'>Line Chart</option>
+          <option value='bar'>Bar Chart</option>
+          <option value='area'>Area Chart</option>
+          <option value='scatter'>Scatter Chart</option>
+        </select>
+      </td>
+    </tr>
+  </table>
+  
+
+</div>
+<div id="chart_div"></div>
+`;
+
+
 var Forecast_content_inner_html = `
-<div id="Forecast_content_inner_html">
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
-Sample Content
-</h3><br>
+<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
+  Forecast
+</h3>
+<hr style="width:50%;margin-top:0;margin-bottom:30px;">
+<div style="width:80%; text-align: left; margin:auto; color:whitesmoke">
+  <div id="forecast_form">
+    Select Day:
+    <select id='time_pred'>
+      <option value='default'>Day</option>
+      <option value="Mon">Monday</option>
+      <option value="Tue">Tuesday</option>
+      <option value="Wed">Wednesday</option>
+      <option value="Thu">Thursday</option>
+      <option value="Fri">Friday</option>
+      <option value="Sat">Saturday</option>
+      <option value="Sun">Sunday</option>
+    </select><br>
+    
+    Select Time:
+    <select id="hour_forecast_options">
+    <option value='default'>Hour</option>
+    </select><br>
 
-<img src="../static/images/WeekendAverage.png" alt="Weekend Average">
-<img src="../static/images/WeekdayAverage.png" alt="Weekend Average">
+    Select station:
+    <select id="station_number_forecast_options">
+      <option value='default'>Station</option>
+    </select><br>
 
+    
+    
+    <!-- populate options -->
+    <script>populate_forecast_options()</script>
+    
+    <button id="submit" onclick="Forecast()">Get Prediction</button>
+    
+    <div id="forecasts_message" style="clear:both"></div>
+    
+    <table id="Forecast_Content">
+      <tr>
+        <td>Available Bikes:</td>
+        <td id="avail_b_forecast"></td>
+      </tr>
+      <tr>
+        <td>Available Stands:</td>
+        <td id="avail_s_forecast"></td>
+      </tr>
+    </table>
+  </div>
 </div>
 `;
 
+function Forecast() {
 
-var graph_content_inner_html = `
-<h3 style="text-align: center; color: white; font-size: 20pt; padding-top:20px; margin-bottom:0;padding-bottom:0;">
-Under Construction
-</h3><br>
-`;
+  // send the day and time. 
+  var day = document.getElementById("time_pred").value;
+  var hour = document.getElementById("hour_forecast_options").value;
+  var snum = document.getElementById("station_number_forecast_options").value;
+  var test=true;
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      
+      var data = JSON.parse(this.responseText);
+      var nbikes = Math.round(parseFloat(data[0]));
+      var nstands = Math.round(parseFloat(data[1]));
+
+      $("#Forecast_Content").css("display","block");
+      $("#avail_b_forecast").text(nbikes);
+      $("#avail_s_forecast").text(nstands - nbikes);
+      console.log(data);
+    }
+  };
+
+  if (day=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#time_pred").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#time_pred").css("color","black");
+  }
+
+  if (hour=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#hour_forecast_options").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#hour_forecast_options").css("color","black");
+  }
+
+  if (snum=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#station_number_forecast_options").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#station_number_forecast_options").css("color","black");
+  }
+
+  // check that the inputs are valid.
+  if (!test) 
+    return
+  else {
+    $("#forecasts_message").css("display","none");
+    $("#forecasts_message").text("");
+  }
+
+  xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour+"&Station="+snum, true);
+  xmlhttp.send();
+  }
+
 
 function initMap() {
     directionsService = new google.maps.DirectionsService();
@@ -187,8 +353,7 @@ function initMap() {
         document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
         document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
         document.getElementById("status").innerHTML = rackdata[stationnumber].status
-        $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
-        SkyCon();
+      
         var destination = this.position.lat() +"," +this.position.lng();
         getPosition(destination);
 
@@ -196,6 +361,40 @@ function initMap() {
     }
   });
 }
+
+function weather_update() {
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      
+      var data = JSON.parse(this.responseText)[0];
+      var last_update_time = new Date(data[14] * 1000);
+
+      $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
+      $("#Conditions").text(data[12]);
+      $('#Temperature').text("");
+      $('#Temperature').unbind().append(data[13] + ' &#8451;');
+      $("#WindSpeed").text(data[19] + " km/h");
+      $("#Humidity").text(100*data[4] + "%");
+      $("#Precipitation").text(100*data[9] + "%");
+
+      // Formatting output string. 
+      var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
+      var minutes = ((last_update_time.getMinutes()<10) ? "0" : "") + last_update_time.getMinutes();  
+
+      $("#UpdateTime").text(hours + ":" + minutes);
+
+      SkyCon();
+    }
+  };
+  xmlhttp.open("GET", "/get_weather_update", true);
+  xmlhttp.send();
+
+  // sleep 5 mins then update again. 
+  setTimeout(weather_update,300000);
+}
+weather_update();
 
 // handles dropdown menu
 function clickHandler(val) {
@@ -221,14 +420,14 @@ function clickHandler(val) {
     $("#map").css("width", "70%");
     $("#infobox").css("width", "30%");
     $("#infobox").css("visibility", "visible");
-    $("#infoboxcontent").html(graph_content_inner_html);
+    $("#infoboxcontent").html(Forecast_content_inner_html);
   } 
   else if (val == 3) {
     $("#menu_item_1").text("Close");
-    $("#map").css("width", "70%");
-    $("#infobox").css("width", "30%");
+    $("#map").css("width", "55%");
+    $("#infobox").css("width", "45%");
     $("#infobox").css("visibility", "visible");
-    $("#infoboxcontent").html(Forecast_content_inner_html);
+    $("#infoboxcontent").html(graph_content_inner_html);
   }
 }
 
@@ -239,8 +438,6 @@ function standinfo(stand) {
       //Writes query to HTML - allows for interactivity on page
       document.getElementById("avstands").innerHTML = JSON.parse(this.responseText)[0];
       document.getElementById("avbikes").innerHTML = JSON.parse(this.responseText)[1];
-      $("#weathericon").attr("class", JSON.parse(this.responseText)[3]);
-      SkyCon()
     }
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
@@ -266,13 +463,12 @@ function getPosition(ending) {
     // for when getting location is a success
     var userlocation = (position.coords.latitude + "," + position.coords.longitude);
     calcRoute(userlocation,ending);
-    console.log(userlocation)
   return userlocation;
   });
 }
 
 function fulllookup(){
-  var fullinfo
+  var fullinfo;
   xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
@@ -491,6 +687,8 @@ function find_nearest_station() {
   
   var minlat, minlng;
   var mindist=10000000000.0;
+  var station_no;
+
   var x = navigator.geolocation.getCurrentPosition(
     function success(position) {
 
@@ -504,6 +702,8 @@ function find_nearest_station() {
 
           var lng2 = data.features[i].geometry.coordinates[0];
           var lat2 = data.features[i].geometry.coordinates[1];
+          station_no = data.features[i].properties.number;
+
           var dx = lat1 - lat2;
           var dy = lng1 - lng2;
           var dist =  Math.sqrt((dx*dx) + (dy*dy));
@@ -514,10 +714,13 @@ function find_nearest_station() {
             minlng = lng2;
           }
         }
-        console.log(mindist,minlng,minlat);
         var pos1 = (lat1 + "," + lng1);
         var pos2 = (minlat + "," + minlng);
         calcRoute(pos1, pos2);
+
+        document.getElementById("station_number_find").value=station_no;
+        $("station_number_find").text(station_no);
+        find_by_number();
       }
     );
   });
@@ -532,4 +735,219 @@ function toggle_map_colours(){
     toggle_marker_color=0;
     initMap();
   }
+}
+
+var arrow_direction=0;
+function flip_menu() {
+  if (arrow_direction==0){
+    $("#menu_arrow").css({
+      "width":"10px",
+      "height":"15px",
+      "transform":"rotate(270deg)"
+    });
+    arrow_direction=1;
+    $(".dropdown-content").css("height", "0%");
+    $(".dropdown-content").css("visibility", "hidden");
+  }
+  else {
+    $("#menu_arrow").css({
+      "width":"10px",
+      "height":"15px",     
+      "transform":"rotate(90deg)"
+    });
+    arrow_direction=0;
+    $(".dropdown-content").css("height", "140px");
+    $(".dropdown-content").css("visibility", "visible");
+  }
+}
+
+function populate_forecast_options() {
+
+  drpdwn = document.getElementById('station_number_forecast_options');
+  $.getJSON("../static/localjson.json", function(data){
+      for (var i=0; i<data.features.length; i++){
+        var station_number = data.features[i].properties.number;
+        var option = document.createElement("OPTION");
+        option.textContent=station_number;
+        option.value=station_number;
+        drpdwn.appendChild(option);
+      }
+    }
+  );
+  hrdrpdwn = document.getElementById('hour_forecast_options');
+  for (var hr=0; hr <= 23; hr++) {
+    var optionhr = document.createElement("OPTION");
+    optionhr.textContent= ((hr < 10) ? "0" : "") + hr + ":00";
+    optionhr.value=hr;
+    hrdrpdwn.appendChild(optionhr);
+  }
+}
+
+function populate_graph_options() {
+  drpdwn = document.getElementById('station_number_graph_options');
+  $.getJSON("../static/localjson.json", function(data){
+      for (var i=0; i<data.features.length; i++){
+        var station_number = data.features[i].properties.number;
+        var option = document.createElement("OPTION");
+        option.textContent=station_number;
+        option.value=station_number;
+        drpdwn.appendChild(option);
+      }
+    }
+  );
+}
+
+// Function to generate charts
+function get_chart_data() {
+            
+  var Days = document.getElementById("graph_days").value;
+  // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
+  var station = document.getElementById("station_number_graph_options").value;
+  var plot_type =  document.getElementById("chart_type").value;
+  var g_vars = document.getElementById("graph_variable").value;
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+      if (this.readyState == 4 && this.status == 200) {
+      
+          var data = JSON.parse(this.responseText);
+          
+          //As,Ab,Ts
+          var As = data[0];
+          var Ab = data[1];
+          var Ts = data[2];
+
+          var aSTS = [['TimeStamp','AvailableStands']];
+          var aBTS = [['TimeStamp','AvailableBikes']];
+          var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
+
+          for (var i=0; i<As.length; i++){
+              aBTS.push([new Date(Ts[i]),As[i]]);
+              aSTS.push([new Date(Ts[i]),Ab[i]]);
+              MultiPlot.push([new Date(Ts[i]),Ab[i],As[i]]);
+          }
+
+          // Load the Visualization API and the corechart package.
+          google.charts.load('current', {'packages':['corechart']});
+
+          // Set a callback to run when the Google Visualization API is loaded.
+          google.charts.setOnLoadCallback(drawChart);
+
+          // Callback that creates and populates a data table,
+          // instantiates the pie chart, passes in the data and
+          // draws it.
+          function drawChart() {
+              
+                          // Create the data table.
+              var Sdata = new google.visualization.arrayToDataTable(aSTS);
+              var Bdata = new google.visualization.arrayToDataTable(aBTS); 
+              var Both =  new google.visualization.arrayToDataTable(MultiPlot);
+              
+              // Plot_Data = Both;
+              switch (g_vars) {
+                case "bike": Plot_Data=Bdata;break;
+                case "stand": Plot_Data=Sdata;break;
+                case "both" : Plot_Data=Both; break;
+                default: Plot_Data=Both;break;
+              }
+
+              // Set chart options
+              var Lineoptions = {
+                  'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                  'chartArea': {'width': '90%', 'height': '70%'},
+                  lineWidth:5,
+                  backgroundColor: { fill:'transparent' },
+                  legend: {position: 'top', maxLines: 3},
+                  vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                  hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                  explorer: {
+                    keepInBounds: true,
+                    actions: ['dragToZoom', 'rightClickToReset']
+                  },
+                  'height':400,
+                  'width':'100%'
+              };
+
+              var Columnoptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                isStacked:true,
+                'stroke-width':4,
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
+              var Scatteroptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
+              var Areaoptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
+              // change plot type
+              switch (plot_type){
+                
+                case 'line': var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Lineoptions);
+                break;
+                
+                case 'area': var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Areaoptions);
+                break;
+                
+                case 'scatter': var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Scatteroptions);
+                break;
+                
+                case 'bar': var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Columnoptions);
+                break;
+                
+                default: var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Areaoptions);
+                break;
+              
+              }
+          }
+      }
+  };
+  var resolution=60;
+  console.log(Days);
+  console.log(station);
+  console.log(resolution);
+  var request_string = "/make_charts?Days="+Days+"&Station="+station +"&TimeStep="+resolution;
+  
+  xmlhttp.open("GET", request_string, true);
+  xmlhttp.send();
 }
