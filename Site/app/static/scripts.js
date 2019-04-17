@@ -110,8 +110,7 @@ var graph_content_inner_html = `
 Under Construction
 </h3><br>
 `;
-//Allows map to be accessed outside of initMap
-var map
+
 function initMap() {
     directionsService = new google.maps.DirectionsService();
     directionsDisplay = new google.maps.DirectionsRenderer();
@@ -136,13 +135,13 @@ function initMap() {
     }
 
 }
-//Allows markers to be accessed outside of map function
-var allMarkers = [];
+
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
   var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
   $.getJSON('../static/localjson.json', null, function(data) {
     data = data["features"]
+    var allMarkers = [];
     rackdata = fulllookup();
     for (x in data){
       var y = data[x].properties.number
@@ -158,13 +157,13 @@ var allMarkers = [];
       if (toggle_marker_color==1) {
         for (p in allMarkers){
             if (rackdata[p].bikes == 0){
-                allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
             }
             else if (rackdata[p].bikes < 10){
-                allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
             }
             else{
-                allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
             }
         } 
       }else{
@@ -185,9 +184,9 @@ var allMarkers = [];
         $("#avstands").text("Loading...");
         $("#menu_item_1").text("Close");
         map.panBy(0, 0);
-        document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands;
-        document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes;
-        document.getElementById("status").innerHTML = rackdata[stationnumber].status;
+        document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
+        document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
+        document.getElementById("status").innerHTML = rackdata[stationnumber].status
         $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
         SkyCon();
         var destination = this.position.lat() +"," +this.position.lng();
@@ -197,17 +196,6 @@ var allMarkers = [];
     }
   });
 }
-
-//Change markers - "colorblind mode"
-function toggle_marker_mode() {
-    console.log("p")
-    for (p in allMarkers){
-           allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/green-dot.png";
-            allMarkers[p].setMap(null);
-            allMarkers[p].setMap(map);
-        }
-}
-
 
 // handles dropdown menu
 function clickHandler(val) {
