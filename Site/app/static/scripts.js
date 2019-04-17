@@ -110,7 +110,8 @@ var graph_content_inner_html = `
 Under Construction
 </h3><br>
 `;
-
+//Allows map to be accessed outside of initMap
+var map
 function initMap() {
     directionsService = new google.maps.DirectionsService();
     directionsDisplay = new google.maps.DirectionsRenderer();
@@ -135,13 +136,13 @@ function initMap() {
     }
 
 }
-
+//Allows markers to be accessed outside of map function
+var allMarkers = [];
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
   var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
   $.getJSON('../static/localjson.json', null, function(data) {
     data = data["features"]
-    var allMarkers = [];
     rackdata = fulllookup();
     for (x in data){
       var y = data[x].properties.number
@@ -184,9 +185,9 @@ function initMap() {
         $("#avstands").text("Loading...");
         $("#menu_item_1").text("Close");
         map.panBy(0, 0);
-        document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
-        document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
-        document.getElementById("status").innerHTML = rackdata[stationnumber].status
+        document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands;
+        document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes;
+        document.getElementById("status").innerHTML = rackdata[stationnumber].status;
         $("#weathericon").attr("class", rackdata[stationnumber].weather_icon);
         SkyCon();
         var destination = this.position.lat() +"," +this.position.lng();
@@ -196,6 +197,17 @@ function initMap() {
     }
   });
 }
+
+//Change markers - "colorblind mode"
+function toggle_marker_mode() {
+    console.log("p")
+    for (p in allMarkers){
+           allMarkers[p].icon.url = "https://maps.google.com/mapfiles/ms/icons/green-dot.png";
+            allMarkers[p].setMap(null);
+            allMarkers[p].setMap(map);
+        }
+}
+
 
 // handles dropdown menu
 function clickHandler(val) {
