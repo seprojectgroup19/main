@@ -5,7 +5,7 @@
     <title>Test Page</title>
     <link rel="stylesheet" type="text/css" href="../static/mainstyle.css">
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_A2XKU-wVSr9dGPoYBxir0vI2ieENbCo&libraries=visualization&callback=initialize"></script>
     <script>
 
         function get_chart_data() {
@@ -83,6 +83,20 @@
     <div id="chart_div" style="width:40%; text-align:center; margin:auto;"></div>
     <div id="chart_div2" style="width:40%; text-align:center; margin:auto;"></div>
     <p style="text-align:center;margin:auto;">
+
+    <div id="street-view"></div>
+    <script>
+      var panorama;
+      function initialize() {
+        panorama = new google.maps.StreetViewPanorama(
+            document.getElementById('street-view'),
+            {
+              position: {lat: 37.869260, lng: -122.254811},
+              pov: {heading: 165, pitch: 0},
+              zoom: 1
+            });
+      }
+    </script>
 
     </p>
     <script>get_chart_data()</script>

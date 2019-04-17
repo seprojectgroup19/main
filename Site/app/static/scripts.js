@@ -70,18 +70,17 @@ var find_station_inner_html = `
     <select id="station_number_find" onchange=find_by_number()>
       <option value='default'>All</option>
     </select>
-    <script>populate_station_number_dropdown();</script>
   </p>
-  <br>
+    <br>
   <p>
     Station Address:<br>
     <select id="station_name_find" onchange=find_by_name()>
-      <option value='default'>Search</option>
+     <option value='default'>Search</option>
     </select>
   </p>
+  <script>populate_station_number_dropdown();</script>
+  <script>populate_station_name_dropdown();</script>
 </div>
-<script>populate_station_name_dropdown();</script>
-
 <button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
 `;
 
@@ -92,38 +91,68 @@ var graph_content_inner_html = `
 <hr style="width:50%;margin-top:0;margin-bottom:30px;">
 <!-- Insert select option here to generate graph -->
 <div id="Graph_Content_div">
-  Select station:
-    <select id="station_number_graph_options">
-      <option value='default'>Station</option>
-    </select><br>
-  <script>populate_graph_options()</script>
 
-  Select Time Period:
-    <select id='graph_days'>
-      <option value='default'>Time</option>
-      <option value='0.5'>12 Hours</option>
-      <option value='1'>Day</option>
-      <option value='7'>7 Days</option>
-    </select><br>
+  <table>
+    <tr>
+      <td>
+      Select station:
+      </td>
+      <td>
+      <select id="station_number_graph_options">
+        <option value='default'>Station</option>
+      </select>
+      </td>
+      <td rowspan="4" style="position:relative;">
+      <button id="submit" onclick="get_chart_data()">Generate<br>Graphs</button>
+      </td>
 
-  Select Variable:
-    <select id='graph_variable'>
-      <option value='default'>Variable</option>
-      <option value='stand'>Available Stands</option>
-      <option value='bike'>Available Bikes</option>
-      <option value='both'>Both</option>
-    </select><br>
+    </tr>
+    <script>populate_graph_options()</script>
+
+    <tr>
+      <td>
+      Select Time Period:
+      </td>
+      <td>
+      <select id='graph_days'>
+        <option value='default'>Time</option>
+        <option value='0.5'>Last 12 Hours</option>
+        <option value='1'>Last Day</option>
+        <option value='7'>Last 7 Days</option>
+      </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+      Select Variable:
+      </td>
+      <td>
+      <select id='graph_variable'>
+        <option value='default'>Variable</option>
+        <option value='stand'>Stands</option>
+        <option value='bike'>Bikes</option>
+        <option value='both'>Both</option>
+      </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        Select Chart type:
+      </td>
+      <td>
+        <select id='chart_type'>
+          <option value='default'>Type</option>
+          <option value='line'>Line Chart</option>
+          <option value='bar'>Bar Chart</option>
+          <option value='area'>Area Chart</option>
+          <option value='scatter'>Scatter Chart</option>
+        </select>
+      </td>
+    </tr>
+  </table>
   
-  Select Chart type:
-    <select id='chart_type'>
-      <option value='default'>Type</option>
-      <option value='line'>Line Chart</option>
-      <option value='bar'>Bar Chart</option>
-      <option value='area'>Area Chart</option>
-      <option value='scatter'>Scatter Chart</option>
-    </select><br>
-
-  <button id="submit" onclick="get_chart_data()">Generate Graphs</button>
 
 </div>
 <div id="chart_div"></div>
@@ -158,6 +187,8 @@ var Forecast_content_inner_html = `
     <select id="station_number_forecast_options">
       <option value='default'>Station</option>
     </select><br>
+
+    
     
     <!-- populate options -->
     <script>populate_forecast_options()</script>
@@ -345,8 +376,8 @@ function weather_update() {
       $('#Temperature').text("");
       $('#Temperature').unbind().append(data[13] + ' &#8451;');
       $("#WindSpeed").text(data[19] + " km/h");
-      $("#Humidity").text(data[4] + " %");
-      $("#Precipitation").text(data[9] + " %");
+      $("#Humidity").text(100*data[4] + "%");
+      $("#Precipitation").text(100*data[9] + "%");
 
       // Formatting output string. 
       var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
@@ -393,8 +424,8 @@ function clickHandler(val) {
   } 
   else if (val == 3) {
     $("#menu_item_1").text("Close");
-    $("#map").css("width", "70%");
-    $("#infobox").css("width", "30%");
+    $("#map").css("width", "55%");
+    $("#infobox").css("width", "45%");
     $("#infobox").css("visibility", "visible");
     $("#infoboxcontent").html(graph_content_inner_html);
   }
@@ -791,8 +822,8 @@ function get_chart_data() {
           var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
 
           for (var i=0; i<As.length; i++){
-              aBTS.push([Ts[i],As[i]]);
-              aSTS.push([Ts[i],Ab[i]]);
+              aBTS.push([new Date(Ts[i]),As[i]]);
+              aSTS.push([new Date(Ts[i]),Ab[i]]);
               MultiPlot.push([new Date(Ts[i]),Ab[i],As[i]]);
           }
 
@@ -813,7 +844,6 @@ function get_chart_data() {
               var Both =  new google.visualization.arrayToDataTable(MultiPlot);
               
               // Plot_Data = Both;
-
               switch (g_vars) {
                 case "bike": Plot_Data=Bdata;break;
                 case "stand": Plot_Data=Sdata;break;
@@ -822,39 +852,93 @@ function get_chart_data() {
               }
 
               // Set chart options
-              var options = {
-                  'title': 'Bikes Information',
-                  hAxis: {title: 'Time',  titleTextStyle: {color: '#333'}},
-                  vAxis: {title: 'Number', minValue: 0},
+              var Lineoptions = {
+                  'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                  'chartArea': {'width': '90%', 'height': '70%'},
+                  lineWidth:5,
+                  backgroundColor: { fill:'transparent' },
                   legend: {position: 'top', maxLines: 3},
+                  vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                  hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
                   explorer: {
                     keepInBounds: true,
                     actions: ['dragToZoom', 'rightClickToReset']
                   },
-                  'height':300,
+                  'height':400,
                   'width':'100%'
+              };
+
+              var Columnoptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                isStacked:true,
+                'stroke-width':4,
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
+              var Scatteroptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
+              };
+
+              var Areaoptions = {
+                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+                'chartArea': {'width': '90%', 'height': '70%'},
+                backgroundColor: { fill:'transparent' },
+                legend: {position: 'top', maxLines: 3},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                explorer: {
+                  keepInBounds: true,
+                  actions: ['dragToZoom', 'rightClickToReset']
+                },
+                'height':400,
+                'width':'100%'
               };
 
               // change plot type
               switch (plot_type){
                 
                 case 'line': var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Lineoptions);
                 break;
                 
                 case 'area': var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Areaoptions);
                 break;
                 
                 case 'scatter': var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Scatteroptions);
                 break;
                 
                 case 'bar': var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Columnoptions);
                 break;
                 
                 default: var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(Plot_Data, Areaoptions);
                 break;
               
               }
-              chart.draw(Plot_Data, options)
           }
       }
   };
@@ -867,37 +951,3 @@ function get_chart_data() {
   xmlhttp.open("GET", request_string, true);
   xmlhttp.send();
 }
-
-// <div id="Graph_Content_div">
-//   Select station:
-//     <select id="station_number_graph_options">
-//       <option value='default'>Station</option>
-//     </select><br>
-//   <script>populate_graph_options()</script>
-
-//   Select Time Period:
-//     <select id='graph_days'>
-//       <option value='default'>Time</option>
-//       <option value='1'>Day</option>
-//       <option value='7'>7 Days</option>
-//       <option value='30'>30 Days</option>
-//     </select><br>
-
-//   Select Variable:
-//     <select id='graph_variable'>
-//       <option value='default'>Variable</option>
-//       <option value='stand'>Available Stands</option>
-//       <option value='bike'>Available Bikes</option>
-//       <option value='both'>Both</option>
-//     </select><br>
-  
-//   Select Chart type:
-//     <select id='chart_type'>
-//       <option value='default'>Type</option>
-//       <option value='line'>Line Chart</option>
-//       <option value='bar'>Bar Chart</option>
-//       <option value='area'>Area Chart</option>
-//       <option value='scatter'>Scatter Chart</option>
-//     </select><br>
-
-//   <button id="submit" onclick="get_chart_data()">Generate Graphs</button>

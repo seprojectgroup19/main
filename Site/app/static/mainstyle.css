@@ -65,7 +65,7 @@
     background-color: #084c55;
     min-width: 280px;
     height:100%;
-    width:15%;
+    width:12%;
     z-index:1;
     float:left;
     position:fixed;
@@ -313,11 +313,52 @@ select {
     top:0;
 }
 
+
 /* #WeatherInfolist p {
     width:50%;
     margin:0;
     padding:0;
 } */
+
+#Graph_Content_div {
+
+    width:100%;
+    margin:auto;
+    padding-left:50px;
+    text-align:left;
+}
+
+#Graph_content_div table {
+    width:100%; 
+    margin:0;
+    padding:0;
+
+}
+
+#Graph_Content_div select {
+    
+    text-align:left;
+    width:100%;
+    border-radius:10px;
+    margin-left:20px;
+    margin-right:20px;
+    max-width: 150px;
+}
+
+#chart_div {
+    padding-top:25px;
+    cursor: poniter;
+    /* border-style:solid;
+    border-color:white;
+    border-radius:10px;
+    border-width: 2px; */
+    width:98%;
+    margin:auto;
+}
+
+#street-view {
+    height: 100%;
+}
 
 html, body {
     height: 100%;
