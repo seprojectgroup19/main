@@ -114,7 +114,7 @@ var graph_content_inner_html = `
       Select Time Period:
       </td>
       <td>
-      <select id='graph_days'>
+      <select id='graph_days' onchange="chart_type_predictions()">
         <option value='default'>Time</option>
         <option value='-0.5'>Last 12 Hrs</option>
         <option value='-1'>Last Day</option>
@@ -810,25 +810,30 @@ function get_chart_data() {
             var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
 
             for (var i=0; i<As.length; i++){
-                aBTS.push([new Date(Ts[i]),As[i]]);
-                aSTS.push([new Date(Ts[i]),Ab[i]]);
-                MultiPlot.push([new Date(Ts[i]),Ab[i],As[i]]);
+              AStand = Math.round(parseFloat(Ab[i]));
+              ABikes = Math.round(parseFloat(As[i]));
+              aBTS.push([new Date(Ts[i]),AStand]);
+              aSTS.push([new Date(Ts[i]),ABikes]);
+              MultiPlot.push([new Date(Ts[i]),ABikes,AStand]);
             }
           } else {
+
+            console.log(data)
             var aSTS = [['TimeStamp','AvailableStands']];
             var aBTS = [['TimeStamp','AvailableBikes']];
             var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
 
-            for (var i=0; i < data.length; i++){
+            for (var i=0; i < data[0].length; i++){
+
               Ts = data[0][i].time;
-              Bs =  Math.round(parseFloat(data[0][i].bike));
-              As = parseFloat(data[1]) - Bs;
-              aBTS.push([new Date(Ts),As]);
-              aSTS.push([new Date(Ts),Bs]);
-              MultiPlot.push([new Date(Ts),Bs,As]);
+              Ab =  Math.round(parseFloat(data[0][i].bike));
+              As =  Math.round(parseFloat(data[1]) - Ab);
+
+              aBTS.push([new Date(Ts),Ab]);
+              aSTS.push([new Date(Ts),As]);
+              MultiPlot.push([new Date(Ts),Ab,As]);
             }
           }
-
 
           // Load the Visualization API and the corechart package.
           google.charts.load('current', {'packages':['corechart']});
@@ -1010,4 +1015,28 @@ function get_chart_data() {
   }
   xmlhttp.open("GET", request_string, true);
   xmlhttp.send();
+}
+
+function chart_type_predictions() {
+  var Days = document.getElementById("graph_days").value;
+
+  var original_html = `
+      <option value='default'>Type</option>
+      <option value='line'>Line Chart</option>
+      <option value='bar'>Bar Chart</option>
+      <option value='area'>Area Chart</option>
+      <option value='scatter'>Scatter Chart</option>
+  `
+
+  var new_html = `
+    <option value='default'>Type</option>
+    <option value='bar'>Bar Chart</option>
+    <option value='scatter'>Scatter Chart</option>
+  `
+
+  if (parseFloat(Days) > 0) {
+    document.getElementById("chart_type").innerHTML=new_html;
+  } else {
+    document.getElementById("chart_type").innerHTML=original_html;
+  }
 }

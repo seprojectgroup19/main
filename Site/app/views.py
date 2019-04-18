@@ -663,6 +663,7 @@ def make_charts():
         step = int(step)
         df = df.resample(rule=f'{step}T').mean()
 
+    # converting the timestamp to nanoseconds timestamp.
     Ts = list(np.array(pd.DatetimeIndex(df.index).astype(int))/10**6)
     Ab = list(df.Bikes)
     As = list(df.Stand)
@@ -712,6 +713,32 @@ def fullmodelgraph():
             'visibility':0.0
         }
 
+        def reset_inputs():
+
+            inputs = {
+                'weekday':0.0,
+                'weekend':0.0,
+                'hour_x':0.0,
+                'cloudy':0.0,
+                'clear':0.0,
+                'rain':0.0,
+                'apparentTemperature':0.0,
+                'cloudCover':0.0,
+                'dewPoint':0.0,
+                'humidity':0.0,
+                'precipIntensity':0.0,
+                'precipProbability':0.0,
+                'pressure':0.0,
+                'temperature':0.0,
+                'windBearing':0.0,
+                'windGust':0.0,
+                'windSpeed':0.0,
+                'uvIndex':0.0,
+                'visibility':0.0
+            }
+
+            return inputs
+
         icons_cloudy = [
             'partly-cloudy-day',
             'partly-cloudy-night',
@@ -751,68 +778,26 @@ def fullmodelgraph():
         limit_timestamp = now + (86400 * float(timeframe))
 
         input_list = []
-        #=================================== Weekly weather available ===============================#
-        
-        for row in daily_data:
- 
-            if row['time'] < limit_timestamp:
 
-                date_time = datetime.datetime.fromtimestamp(row['time'])
-
-                    # set day and hour.
-                if date_time.weekday() < 5:
-                    inputs['weekday'] = 1.0
-                else:
-                    inputs['weekend'] = 1.0         
-
-                # construct input from data (data[2] is the 'icon')
-                if row['icon'] in icons_cloudy:
-                    inputs['cloudy'] = 1.0
-
-                if row['icon'] in icons_clear:
-                    inputs['clear'] = 1.0
-                
-                if row['icon'] in icons_rain:
-                    inputs['rain'] = 1.0
-
-                # input does not match up with daily data.
-                for col in wcols:
-                    if col in row:
-                        inputs[col] = row[col]
-                
-                
-                for hour in range(24):
-
-                    inputs['hour_x'] = hour
-
-                    if ((hour > 8) or (hour < 20)):
-
-                        inputs['apparentTemperature'] = row['apparentTemperatureHigh']
-                        inputs['temperature'] = row['temperatureHigh']        
-
-                    else:
-
-                        inputs['apparentTemperature'] = row['apparentTemperatureLow']
-                        inputs['temperature'] = row['temperatureLow']
-
-                    input_list.append({(row['time'] + hour*3600 ):inputs})
-
-        #=================================== Daily Weather available ===============================#
+        #=================================== hourly Weather available ===============================#
 
         for row in hourly_data:
   
+            inputs = reset_inputs()
+
             date_time = datetime.datetime.fromtimestamp(row['time'])
 
             # set day and hour.
             if date_time.weekday() < 5:
                 inputs['weekday'] = 1.0
+
             else:
                 inputs['weekend'] = 1.0
 
             inputs['hour_x'] = date_time.hour
 
             if row['time'] < limit_timestamp:
-                print('here')
+
                 # construct input from data
                 if row['icon'] in icons_cloudy:
                     inputs['cloudy'] = 1.0
@@ -826,15 +811,65 @@ def fullmodelgraph():
                 # inputs matches up with the hourly data
                 for col in wcols:
                     inputs[col] = row[col]
-                print(inputs)
-                input_list.append({(row['time']):inputs})
+
+                input_list.append({(row['time'])*10**3:inputs})
+
+        #=================================== Weekly weather available ===============================#
+        
+        for row in daily_data:
+ 
+            if row['time'] < limit_timestamp:
+
+                for hour in range(24):
+                    
+                    inputs = reset_inputs()
+
+                    inputs['hour_x'] = hour
+                    
+                    date_time = datetime.datetime.fromtimestamp(row['time'])
+
+                        # set day and hour.
+                    if date_time.weekday() < 5:
+                        inputs['weekday'] = 1.0
+                    else:
+                        inputs['weekend'] = 1.0         
+
+                    # construct input from data (data[2] is the 'icon')
+                    if row['icon'] in icons_cloudy:
+                        inputs['cloudy'] = 1.0
+
+                    if row['icon'] in icons_clear:
+                        inputs['clear'] = 1.0
+                    
+                    if row['icon'] in icons_rain:
+                        inputs['rain'] = 1.0
+
+                    # input does not match up with daily data.
+                    for col in wcols:
+                        if col in row:
+                            inputs[col] = row[col]
+                    
+                    if ((hour > 8) or (hour < 20)):
+
+                        inputs['apparentTemperature'] = row['apparentTemperatureHigh']
+                        inputs['temperature'] = row['temperatureHigh']        
+
+                    else:
+
+                        inputs['apparentTemperature'] = row['apparentTemperatureLow']
+                        inputs['temperature'] = row['temperatureLow']
+
+                    new_time = row['time'] + 3600*hour
+
+                    if new_time < limit_timestamp:
+
+                        input_list.append({(row['time'] + hour*3600 )*10**3:inputs})
             
-        # dataframe of information ready for model application.
+        # dataframe of information ready for model application
         return input_list
 
     inputdict = gen_model_inputs(daily_data,hourly_data,timeframe)
-    for i in inputdict:
-        print(i)
+
     # for row,itme in inputdict.items():
     #     print(itme['hour_x'])
     # #=================================== Model application ===============================#
