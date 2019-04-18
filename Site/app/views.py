@@ -12,18 +12,19 @@ import requests as r
 from app import app
 import pandas as pd
 import numpy as np
+import threading
 import datetime
 import calendar
 import json
 import time
 
 
-@app.before_first_request
-def setup():
-#=================================== find all station numbers ===============================#
-
+# @app.before_first_request
+# def setup():
+allmodels = {}
 StationNumbers = []
 
+#=================================== find all station numbers ===============================#
 with open("./app/static/localjson.json") as f:
     localjson = json.loads(f.read())
 
@@ -33,16 +34,54 @@ for idx in range(len(data_nums)):
     StationNumbers.append(int(data_nums[idx]['properties']['number']))
 
 #=================================== load all models ===============================#
-
-allmodels = {}
-
 for station_number in StationNumbers:
 
     model = xgb.Booster()
     model.load_model(f'./app/static/Model/station{station_number}.model')
 
     allmodels[f"model{station_number}"] = model
+
+#=================================== Auto refresh weather information ===============================#
+class WeatherForecast():
+    """ Threading example class
+    The run() method will be started and it will run in the background
+    until the application exits.
+    """
+
+    def __init__(self, interval):
+        """ Constructor: Make a background job whihch automatically updates the weather infomration.
+
+        (int) Interval: time to sleep after running update function
+        """
+        self.interval = interval
+
+        thread = threading.Thread(target=self.update_information, args=())
+        thread.start()
+
+    def update_information(self):
+        """ Method that runs in background updating global variable weatherinformation """
         
+        with open("./app/static/DB/authentication.txt") as f:
+            auth = f.read().split('\n')
+        darksky_key = auth[2]
+        
+        while True:
+
+            #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
+            wresponse = r.get(f"""
+                                https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
+                                units=si&
+                                exclude=currently,flags,alerts,minutely
+                                """)
+            
+            weatherforecast = wresponse.json()
+            self.update = weatherforecast
+
+            #sleep for set interval (~ 30min/ 1hr)
+            time.sleep(self.interval)
+
+# Access forecast information via Weather.update
+Weather = WeatherForecast(1800)
 
 @app.route('/')
 def index():
