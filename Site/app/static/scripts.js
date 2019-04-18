@@ -1069,8 +1069,7 @@ function get_chart_data() {
   xmlhttp.open("GET", request_string, true);
   xmlhttp.send();
 }
-<<<<<<< HEAD
-=======
+
 
 function chart_type_predictions() {
   var Days = document.getElementById("graph_days").value;
@@ -1095,4 +1094,3 @@ function chart_type_predictions() {
     document.getElementById("chart_type").innerHTML=original_html;
   }
 }
->>>>>>> seprojectgroup19/master
