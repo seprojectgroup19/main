@@ -31,7 +31,7 @@ def setup():
     global StationNumbers
     global allmodels
     global Weather
-    
+
     #=================================== find all station numbers ===============================#
     with open("./app/static/localjson.json") as f:
         localjson = json.loads(f.read())
@@ -67,11 +67,11 @@ def setup():
 
         def update_information(self):
             """ Method that runs in background updating global variable weatherinformation """
-            
+
             with open("./app/static/DB/authentication.txt") as f:
                 auth = f.read().split('\n')
             darksky_key = auth[2]
-            
+
             while True:
 
                 #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
@@ -80,11 +80,11 @@ def setup():
                                     units=si&
                                     exclude=currently,flags,alerts,minutely
                                     """)
-                
+
                 # parse the response and convert to json
                 weatherforecast = wresponse.json()
-                
-                # set weather forecast information as an attribute of weather instance. 
+
+                # set weather forecast information as an attribute of weather instance.
                 self.update = weatherforecast
 
                 #sleep for set interval (~ 30min/ 1hr)
@@ -262,7 +262,7 @@ def model_prediction():
     hourly_data = weatherforecast['hourly']['data']
     daily_data = weatherforecast['daily']['data']
 
-    # store the day "today" and  current hour. 
+    # store the day "today" and  current hour.
     now = datetime.datetime.now()
     current_day  = float(now.weekday())
     current_hour = float(now.hour)
@@ -609,14 +609,14 @@ def model_all_stations():
         # make predictions
         predictions = model.predict(modeldata)
 
-        # convert predictions to list. 
+        # convert predictions to list.
         predicted_bikes = predictions.tolist()
 
         # Add prediction to dictionary for returning.
         predicted_available_bikes[station_number] = predicted_bikes
 
     #=================================== return data ===============================#
-    
+
     """ conver the dict of station_numbers: available bikes to tuple """
     preds = tuple(predicted_available_bikes.items())
 
@@ -630,7 +630,7 @@ def make_charts():
     snum = int(request.args.get("Station"))
     step = request.args.get("TimeStep") # will be set to 60mins in javascript, leaving option to change here just in case
     limit= int(days*288)
-    
+
     # query to pull dynamic data from RDS DB
     sql = f"""
     SELECT *
@@ -658,7 +658,7 @@ def make_charts():
         'Times':Ts
     })
 
-    # fuction to convert epoch to datetime 
+    # fuction to convert epoch to datetime
     convertTS = (lambda x : datetime.datetime.utcfromtimestamp((int(x)/1000)).strftime('%Y-%m-%d %H:%M:%S'))
 
     # convert epoch time to datetime object for use in resampling
@@ -685,7 +685,7 @@ def make_charts():
 """ Return predictions up to 7 days every hour """
 @app.route('/fullmodelgraph', methods=["GET"])
 def fullmodelgraph():
-    
+
     global StationNumbers
     global allmodels
     global Weather
@@ -781,10 +781,10 @@ def fullmodelgraph():
             'windSpeed',
             'uvIndex',
             'visibility']
-        
+
         #=================================== Timing Information ===============================#
         now = calendar.timegm(datetime.datetime.now().timetuple())
-        
+
         # set a limiting timestamp based on the value of timeframe. (e.g. a hard limit on how far forward to go)
         limit_timestamp = now + (86400 * float(timeframe))
 
@@ -793,7 +793,7 @@ def fullmodelgraph():
         #=================================== hourly Weather available ===============================#
 
         for row in hourly_data:
-  
+
             inputs = reset_inputs()
 
             date_time = datetime.datetime.fromtimestamp(row['time'])
@@ -815,7 +815,7 @@ def fullmodelgraph():
 
                 if row['icon'] in icons_clear:
                     inputs['clear'] = 1.0
-                
+
                 if row['icon'] in icons_rain:
                     inputs['rain'] = 1.0
 
@@ -826,24 +826,24 @@ def fullmodelgraph():
                 input_list.append({(row['time'])*10**3:inputs})
 
         #=================================== Weekly weather available ===============================#
-        
+
         for row in daily_data:
- 
+
             if row['time'] < limit_timestamp:
 
                 for hour in range(24):
-                    
+
                     inputs = reset_inputs()
 
                     inputs['hour_x'] = hour
-                    
+
                     date_time = datetime.datetime.fromtimestamp(row['time'])
 
                         # set day and hour.
                     if date_time.weekday() < 5:
                         inputs['weekday'] = 1.0
                     else:
-                        inputs['weekend'] = 1.0         
+                        inputs['weekend'] = 1.0
 
                     # construct input from data (data[2] is the 'icon')
                     if row['icon'] in icons_cloudy:
@@ -851,7 +851,7 @@ def fullmodelgraph():
 
                     if row['icon'] in icons_clear:
                         inputs['clear'] = 1.0
-                    
+
                     if row['icon'] in icons_rain:
                         inputs['rain'] = 1.0
 
@@ -859,11 +859,11 @@ def fullmodelgraph():
                     for col in wcols:
                         if col in row:
                             inputs[col] = row[col]
-                    
+
                     if ((hour > 8) or (hour < 20)):
 
                         inputs['apparentTemperature'] = row['apparentTemperatureHigh']
-                        inputs['temperature'] = row['temperatureHigh']        
+                        inputs['temperature'] = row['temperatureHigh']
 
                     else:
 
@@ -875,7 +875,7 @@ def fullmodelgraph():
                     if new_time < limit_timestamp:
 
                         input_list.append({(row['time'] + hour*3600 )*10**3:inputs})
-            
+
         # dataframe of information ready for model application
         return input_list
 
@@ -886,9 +886,9 @@ def fullmodelgraph():
     # #=================================== Model application ===============================#
     resultslist = []
     model = allmodels[f'model{station_number}']
-    
+
     for row in inputdict:
-        
+
         for key in row.keys():
             timestamp_key = key
         elem = row[timestamp_key]

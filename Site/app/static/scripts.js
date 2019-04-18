@@ -280,7 +280,7 @@ function Forecast() {
   xmlhttp.send();
   }
 
-
+var map;
 function initMap() {
     directionsService = new google.maps.DirectionsService();
     directionsDisplay = new google.maps.DirectionsRenderer();
@@ -306,12 +306,12 @@ function initMap() {
 
 }
 
+var allMarkers = [];
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
   var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
   $.getJSON('../static/localjson.json', null, function(data) {
     data = data["features"]
-    var allMarkers = [];
     rackdata = fulllookup();
     for (x in data){
       var y = data[x].properties.number
@@ -321,19 +321,21 @@ function initMap() {
         map : map,
         name : data[x]["properties"]["name"],
         number : data[x]["properties"]["number"],
-        icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
+        icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"},
+        avbikes: rackdata[y].bikes,
+        avstands: rackdata[y].stands
       });
 
       if (toggle_marker_color==1) {
         for (p in allMarkers){
             if (rackdata[p].bikes == 0){
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                allMarkers[p].icon.url = "../static/images/markers/red-dot.png"
             }
             else if (rackdata[p].bikes < 10){
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+                allMarkers[p].icon.url = "../static/images/markers/orange-dot.png"
             }
             else{
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                allMarkers[p].icon.url = "../static/images/markers/green-dot.png"
             }
         } 
       }else{
@@ -446,6 +448,57 @@ function standinfo(stand) {
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
   xmlhttp.send();
+}
+
+//Function updates marker mode - Different visuals for accessibility
+var marker_mode_toggle = false;
+function toggle_marker_mode(){
+    if (marker_mode_toggle == false){
+        console.log("on")
+        marker_mode_toggle = true;
+            //If not toggled, will change map markers to visual counterparts
+                for (p in allMarkers){
+            if (allMarkers[p].avbikes == 0){
+                allMarkers[p].icon.url = "../static/images/markers/letter_x.png"
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else if (allMarkers[p].avbikes < 10){
+                allMarkers[p].icon.url = "../static/images/markers/number_1.png"
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else{
+                allMarkers[p].icon.url = "../static/images/markers/number_10.png"
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+        };
+    }else{
+        console.log("off")
+        marker_mode_toggle = false;
+        for (p in allMarkers){
+            if (allMarkers[p].avbikes == 0){
+                allMarkers[p].icon.url = "../static/images/markers/red-dot.png";
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else if (allMarkers[p].avbikes < 10){
+                allMarkers[p].icon.url = "../static/images/markers/orange-dot.png";
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else{
+                allMarkers[p].icon.url = "../static/images/markers/green-dot.png";
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+        };
+
+
+    }
+
+
 }
 
 function calcRoute(start, end) {
@@ -786,7 +839,7 @@ function populate_graph_options() {
 function get_chart_data() {
             
   var Days = parseFloat(document.getElementById("graph_days").value);
-  
+
   // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
   var station = document.getElementById("station_number_graph_options").value;
   var plot_type =  document.getElementById("chart_type").value;
@@ -800,7 +853,7 @@ function get_chart_data() {
           
           //As,Ab,Ts
           if (Days < 0) {
-            
+
             var As = data[0];
             var Ab = data[1];
             var Ts = data[2];
@@ -845,12 +898,12 @@ function get_chart_data() {
           // instantiates the pie chart, passes in the data and
           // draws it.
           function drawChart() {
-                
+
             // Create the data table.
             var Sdata = new google.visualization.arrayToDataTable(aSTS);
-            var Bdata = new google.visualization.arrayToDataTable(aBTS); 
+            var Bdata = new google.visualization.arrayToDataTable(aBTS);
             var Both =  new google.visualization.arrayToDataTable(MultiPlot);
-            
+
             // Plot_Data = Both;
             switch (g_vars) {
               case "bike": Plot_Data=Bdata;break;
@@ -858,7 +911,7 @@ function get_chart_data() {
               case "both" : Plot_Data=Both; break;
               default: Plot_Data=Both;break;
             }
-          
+
             // Set chart options
             var Lineoptions = {
                 'title': 'Last '+24*Days+' Hrs Information on station '+ station,
@@ -925,15 +978,15 @@ function get_chart_data() {
 
             // change plot type
             switch (plot_type){
-              
+
               case 'line': var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
               chart.draw(Plot_Data, Lineoptions);
               break;
-              
+
               case 'area': var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
               chart.draw(Plot_Data, Areaoptions);
               break;
-              
+
               case 'scatter': var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
               chart.draw(Plot_Data, Scatteroptions);
               break;
@@ -941,11 +994,11 @@ function get_chart_data() {
               case 'bar': var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
               chart.draw(Plot_Data, Columnoptions);
               break;
-              
+
               default: var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
               chart.draw(Plot_Data, Areaoptions);
               break;
-            
+
             }
           }
       }
@@ -964,7 +1017,7 @@ function get_chart_data() {
     $("#graph_error_message").css("display","block");
     $("#graph_days").css('color','red');
     test=false;
-  } 
+  }
   else {
     $("#graph_days").css("color","black");
   }
@@ -974,7 +1027,7 @@ function get_chart_data() {
     $("#graph_error_message").css("display","block");
     $("#station_number_graph_options").css('color','red');
     test=false;
-  } 
+  }
   else {
     $("#station_number_graph_options").css("color","black");
   }
@@ -984,7 +1037,7 @@ function get_chart_data() {
     $("#graph_error_message").css("display","block");
     $("#chart_type").css('color','red');
     test=false;
-  } 
+  }
   else {
     $("#chart_type").css("color","black");
   }
@@ -994,12 +1047,12 @@ function get_chart_data() {
     $("#graph_error_message").css("display","block");
     $("#graph_variable").css('color','red');
     test=false;
-  } 
+  }
   else {
     $("#graph_variable").css("color","black");
   }
 
-  if (!test) 
+  if (!test)
     return
   else {
     $("#graph_error_message").css("display","none");
@@ -1016,6 +1069,7 @@ function get_chart_data() {
   xmlhttp.open("GET", request_string, true);
   xmlhttp.send();
 }
+
 
 function chart_type_predictions() {
   var Days = document.getElementById("graph_days").value;
