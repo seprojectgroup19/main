@@ -273,7 +273,7 @@ function Forecast() {
     $("#forecasts_message").text("");
   }
 
-  xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour+"&Station="+snum, true);
+  xmlhttp.open("GET", "/model_prediction?Day="+day+"&Time="+hour+"&Station="+snum, true);
   xmlhttp.send();
   }
 

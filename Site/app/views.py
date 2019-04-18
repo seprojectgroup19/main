@@ -19,69 +19,77 @@ import json
 import time
 
 
-# @app.before_first_request
-# def setup():
+
 allmodels = {}
 StationNumbers = []
+Weather = ""
 
-#=================================== find all station numbers ===============================#
-with open("./app/static/localjson.json") as f:
-    localjson = json.loads(f.read())
+@app.before_first_request
+def setup():
 
-data_nums = localjson['features']
+    global StationNumbers
+    global allmodels
+    global Weather
+    
+    #=================================== find all station numbers ===============================#
+    with open("./app/static/localjson.json") as f:
+        localjson = json.loads(f.read())
 
-for idx in range(len(data_nums)):
-    StationNumbers.append(int(data_nums[idx]['properties']['number']))
+    data_nums = localjson['features']
 
-#=================================== load all models ===============================#
-for station_number in StationNumbers:
+    for idx in range(len(data_nums)):
+        StationNumbers.append(int(data_nums[idx]['properties']['number']))
 
-    model = xgb.Booster()
-    model.load_model(f'./app/static/Model/station{station_number}.model')
+    #=================================== load all models ===============================#
+    for station_number in StationNumbers:
 
-    allmodels[f"model{station_number}"] = model
+        model = xgb.Booster()
+        model.load_model(f'./app/static/Model/station{station_number}.model')
 
-#=================================== Auto refresh weather information ===============================#
-class WeatherForecast():
-    """ Threading example class
-    The run() method will be started and it will run in the background
-    until the application exits.
-    """
+        allmodels[f"model{station_number}"] = model
 
-    def __init__(self, interval):
-        """ Constructor: Make a background job whihch automatically updates the weather infomration.
-
-        (int) Interval: time to sleep after running update function
+    #=================================== Auto refresh weather information ===============================#
+    class WeatherForecast():
+        """ 
+        Pull forecast information hourl in background to reduce overhead of prediction functions. 
         """
-        self.interval = interval
 
-        thread = threading.Thread(target=self.update_information, args=())
-        thread.start()
+        def __init__(self, interval):
+            """ Constructor: Make a background job whihch automatically updates the weather infomration.
 
-    def update_information(self):
-        """ Method that runs in background updating global variable weatherinformation """
-        
-        with open("./app/static/DB/authentication.txt") as f:
-            auth = f.read().split('\n')
-        darksky_key = auth[2]
-        
-        while True:
+            (int) Interval: time to sleep after running update function
+            """
+            self.interval = interval
+            thread = threading.Thread(target=self.update_information, args=())
+            thread.start()
 
-            #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
-            wresponse = r.get(f"""
-                                https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
-                                units=si&
-                                exclude=currently,flags,alerts,minutely
-                                """)
+        def update_information(self):
+            """ Method that runs in background updating global variable weatherinformation """
             
-            weatherforecast = wresponse.json()
-            self.update = weatherforecast
-            print("UPDATED WEATHER INFORMATION")
-            #sleep for set interval (~ 30min/ 1hr)
-            time.sleep(self.interval)
+            with open("./app/static/DB/authentication.txt") as f:
+                auth = f.read().split('\n')
+            darksky_key = auth[2]
+            
+            while True:
 
-# Access forecast information via Weather.update
-Weather = WeatherForecast(1800)
+                #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
+                wresponse = r.get(f"""
+                                    https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
+                                    units=si&
+                                    exclude=currently,flags,alerts,minutely
+                                    """)
+                
+                # parse the response and convert to json
+                weatherforecast = wresponse.json()
+                
+                # set weather forecast information as an attribute of weather instance. 
+                self.update = weatherforecast
+
+                #sleep for set interval (~ 30min/ 1hr)
+                time.sleep(self.interval)
+
+    # Access forecast information via Weather.update
+    Weather = WeatherForecast(1800)
 
 @app.route('/')
 def index():
@@ -89,6 +97,7 @@ def index():
 
 @app.route("/get_weather_update", methods=["GET"])
 def get_weather_update():
+    """ Pulls latest weather information from database """
 
     # Using the O'Connell street stations latest weather report as city wide weather
     weather = """
@@ -154,9 +163,10 @@ def fulllookup():
 
     return json.dumps(resultdictionary)
 
-@app.route('/model', methods=["GET"])
-def model():
+@app.route('/model_prediction', methods=["GET"])
+def model_prediction():
     
+    global StationNumbers
     global allmodels
     global Weather
 
@@ -555,11 +565,8 @@ def model_all_stations():
                 closest_hourrow = hourrow
 
         ndata = closest_hourrow
-        
-        ############### test
-        # return json.dumps(hourrow)
 
-        # construct input from data
+        """  convert weather data to format required for model input """
         if ndata['icon'] in icons_cloudy:
             inputs['cloudy'] = 1.0
 
@@ -579,17 +586,27 @@ def model_all_stations():
     #=================================== Model application ===============================#
     predicted_available_bikes = {}
 
+    """ For each station number apply the model. """
     for station_number in StationNumbers:
 
+        # pull pre-loaded model from global variable allmodels (dict {'model{station_num}':model})
         model = allmodels[f"model{station_number}"]
 
+        # make inputs correct format for model applciation
         modeldata = xgb.DMatrix(inputs)
+
+        # make predictions
         predictions = model.predict(modeldata)
+
+        # convert predictions to list. 
         predicted_bikes = predictions.tolist()
 
+        # Add prediction to dictionary for returning.
         predicted_available_bikes[station_number] = predicted_bikes
 
-     #=================================== return data ===============================#
+    #=================================== return data ===============================#
+    
+    """ conver the dict of station_numbers: available bikes to tuple """
     preds = tuple(predicted_available_bikes.items())
 
     return json.dumps(preds)
@@ -599,9 +616,10 @@ def make_charts():
 
     days = float(request.args.get("Days"))
     snum = int(request.args.get("Station"))
-    step = request.args.get("TimeStep")
+    step = request.args.get("TimeStep") # will be set to 60mins in javascript, leaving option to change here just in case
     limit= int(days*288)
     
+    # query to pull dynamic data from RDS DB
     sql = f"""
     SELECT *
     FROM DublinBikesDB.dynamic
@@ -615,6 +633,7 @@ def make_charts():
     As=[]
     Ts=[]
 
+    # loop thorugh data returned from DB call and select relevant columns.
     for stand in stands:
         Ab.append(stand[4])
         As.append(stand[3])
@@ -627,16 +646,18 @@ def make_charts():
         'Times':Ts
     })
 
-    # convert epoch time to datetime object for use in resampling.
+    # fuction to convert epoch to datetime 
     convertTS = (lambda x : datetime.datetime.utcfromtimestamp((int(x)/1000)).strftime('%Y-%m-%d %H:%M:%S'))
 
+    # convert epoch time to datetime object for use in resampling
     df.Times = df.Times.apply(convertTS)
     df.Times = pd.to_datetime(df.Times)
 
-    # resample the data to hourly
+    # set index to times.
     df.set_index(['Times'], inplace=True)
     df.index.name='Times'
 
+    # resample the data to hourly
     if step:
         step = int(step)
         df = df.resample(rule=f'{step}T').mean()
@@ -645,6 +666,7 @@ def make_charts():
     Ab = list(df.Bikes)
     As = list(df.Stand)
 
+    # returning bikes information for graph.
     return json.dumps(tuple([As,Ab,Ts]))
 
 @app.route('/fullmodelgraph', methods=["GET"])
@@ -665,203 +687,176 @@ def fullmodelgraph():
     hourly_data = weatherforecast['hourly']['data']
     daily_data = weatherforecast['daily']['data']
 
-    # store the day "today"
-    now = datetime.datetime.now()
-    current_day  = float(now.weekday())
-    current_hour = float(now.hour)
+    #=================================== Timing Information ===============================#
+    now = calendar.timegm(datetime.datetime.now().timetuple())
     
-    # generate list of 1s and 0s for building input to model
-    dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    # set a limiting timestamp based on the value of timeframe. (e.g. a hard limit on how far forward to go)
+    limit_timestamp = now + 86400 * float(timeframe)
 
-    inputdict = {'timestamp':'inputs'}
-    resultsdict = {'timestamp':'value'}
+    # time_limit_in hours.
+    time_diff = ( limit_timestamp - now ) // (3600)
 
-    inputs = {
-        'weekday':0.0,
-        'weekend':0.0,
-        'hour_x':0.0,
-        'cloudy':0.0,
-        'clear':0.0,
-        'rain':0.0,
-        'apparentTemperature':0.0,
-        'cloudCover':0.0,
-        'dewPoint':0.0,
-        'humidity':0.0,
-        'precipIntensity':0.0,
-        'precipProbability':0.0,
-        'pressure':0.0,
-        'temperature':0.0,
-        'windBearing':0.0,
-        'windGust':0.0,
-        'windSpeed':0.0,
-        'uvIndex':0.0,
-        'visibility':0.0
-    }
+    def gen_model_inputs(time_diff,daily_data,hourly_data):
+        #=================================== Set inputs for model ===============================#
+        inputs = {
+            'weekday':0.0,
+            'weekend':0.0,
+            'hour_x':0.0,
+            'cloudy':0.0,
+            'clear':0.0,
+            'rain':0.0,
+            'apparentTemperature':0.0,
+            'cloudCover':0.0,
+            'dewPoint':0.0,
+            'humidity':0.0,
+            'precipIntensity':0.0,
+            'precipProbability':0.0,
+            'pressure':0.0,
+            'temperature':0.0,
+            'windBearing':0.0,
+            'windGust':0.0,
+            'windSpeed':0.0,
+            'uvIndex':0.0,
+            'visibility':0.0
+        }
 
-    icons_cloudy = [
-        'partly-cloudy-day',
-        'partly-cloudy-night',
-        'cloudy',
-    ]
+        icons_cloudy = [
+            'partly-cloudy-day',
+            'partly-cloudy-night',
+            'cloudy',
+        ]
 
-    icons_clear =[
-        'clear-night',
-        'clear-day',
-    ]
+        icons_clear =[
+            'clear-night',
+            'clear-day',
+        ]
 
-    icons_rain = [
-        'fog',
-        'wind',
-        'rain'
-    ]
+        icons_rain = [
+            'fog',
+            'wind',
+            'rain'
+        ]
 
-    wcols = [
-        'apparentTemperature',
-        'cloudCover',
-        'dewPoint',
-        'humidity',
-        'precipIntensity',
-        'precipProbability',
-        'pressure',
-        'temperature',
-        'windBearing',
-        'windGust',
-        'windSpeed',
-        'uvIndex',
-        'visibility']
+        wcols = [
+            'apparentTemperature',
+            'cloudCover',
+            'dewPoint',
+            'humidity',
+            'precipIntensity',
+            'precipProbability',
+            'pressure',
+            'temperature',
+            'windBearing',
+            'windGust',
+            'windSpeed',
+            'uvIndex',
+            'visibility']
+        
+        #=================================== Weekly weather available ===============================#
+        if time_diff > 48:        
+            # find the time at midnight tonight and add the number of days to it. 
+            # Account for time zone difference. 
+            mid += 86400*(time_diff//24)
+            mid -= 3600 
 
-    # set day and hour.
-    if D in ['Mon','Tue','Wed','Thu','Fri']:
-        inputs['weekday'] = 1.0
-    else:
-        inputs['weekend'] = 1.0
+            data = daily_data
 
-    inputs['hour_x'] = float(H)
-    
+            closest_dayrow = 0
+            closest_timestamp = 10000000000000
+            smallest_diff = 100000000000
+            # select the closes time stamp to use as the weather data
+            for dayrow in data:
+                diff = abs(dayrow['time'] - mid)
+                if diff < smallest_diff:
+                    smallest_diff =  diff
+                    closest_timestamp = dayrow['time']
+                    closest_dayrow = dayrow
 
-    #=================================== find timestamp of prediction ===============================#
-    time_diff = 0
+            ndata = closest_dayrow
 
-    H = float(H)
-    if H >= current_hour:
-        time_diff += H - current_hour 
-    else:
-        time_diff -= current_hour - H # minus as add to the day later.
+            # construct input from data (data[2] is the 'icon')
+            if ndata['icon'] in icons_cloudy:
+                inputs['cloudy'] = 1.0
 
-    dayslist_index_predict_day = dayslist.index(D)
-    
-    if ((current_day != dayslist_index_predict_day) or (H < current_hour)):
-        if current_day < dayslist_index_predict_day: 
-            time_diff += (dayslist_index_predict_day - current_day)*24
+            if ndata['icon'] in icons_clear:
+                inputs['clear'] = 1.0
+            
+            if ndata['icon'] in icons_rain:
+                inputs['rain'] = 1.0
+
+            # input does not match up with daily data.
+            for col in wcols:
+                if col in ndata:
+                    inputs[col] = ndata[col]
+            
+            # dont match on temperature or apparent temperature
+            if (H > 8 or H < 20):
+                inputs['apparentTemperature'] = ndata['apparentTemperatureHigh']
+                inputs['temperature'] = ndata['temperatureHigh']
+            else: 
+                inputs['apparentTemperature'] = ndata['apparentTemperatureLow']
+                inputs['temperature'] = ndata['temperatureLow']        
+
+        #=================================== Daily Weather available ===============================#
         else:
-            time_diff += (7*24) + (dayslist_index_predict_day - current_day)*24
+            mid += 86400 * (time_diff//24) 
+            mid += 3600 * time_diff%24
+            mid -= 3600
 
-    mid = calendar.timegm(datetime.date.today().timetuple())
+            data = hourly_data
 
-    if time_diff <= 0:
-        return json.dumps("Please select a time in the Future for predictions.")
+            closest_hourrow = 0
+            closest_timestamp = 10000000000000
+            smallest_diff = 100000000000
+            # select the closes time stamp to use as the weather data
+            for hourrow in data:
+                diff = abs(hourrow['time'] - mid)
+                if diff < smallest_diff:
+                    smallest_diff = diff
+                    closest_timestamp = hourrow['time']
+                    closest_hourrow = hourrow
 
-    #=================================== Weekly weather available ===============================#
-    if time_diff > 48:        
-        # find the time at midnight tonight and add the number of days to it. 
-        # Account for time zone difference. 
-        mid += 86400*(time_diff//24)
-        mid -= 3600 
+            ndata = closest_hourrow
+            
+            ############### test
+            # return json.dumps(hourrow)
 
-        data = daily_data
+            # construct input from data
+            if ndata['icon'] in icons_cloudy:
+                inputs['cloudy'] = 1.0
 
-        closest_dayrow = 0
-        closest_timestamp = 10000000000000
-        smallest_diff = 100000000000
-        # select the closes time stamp to use as the weather data
-        for dayrow in data:
-            diff = abs(dayrow['time'] - mid)
-            if diff < smallest_diff:
-                smallest_diff =  diff
-                closest_timestamp = dayrow['time']
-                closest_dayrow = dayrow
+            if ndata['icon'] in icons_clear:
+                inputs['clear'] = 1.0
+            
+            if ndata['icon'] in icons_rain:
+                inputs['rain'] = 1.0
 
-        ndata = closest_dayrow
-
-        ################## test
-        # return json.dumps(mid)
-
-        # construct input from data (data[2] is the 'icon')
-        if ndata['icon'] in icons_cloudy:
-            inputs['cloudy'] = 1.0
-
-        if ndata['icon'] in icons_clear:
-            inputs['clear'] = 1.0
-        
-        if ndata['icon'] in icons_rain:
-            inputs['rain'] = 1.0
-
-        # input does not match up with daily data.
-        for col in wcols:
-            if col in ndata:
+            # inputs matches up with the hourly data
+            for col in wcols:
                 inputs[col] = ndata[col]
+
+        # dataframe of information ready for model application.
+        return = pd.DataFrame(inputs, index=[0])
+
+    inputdict = {}
+
+    for hour in range(time_diff):
+        inputdict['hour'] = gen_model_inputs(hour, daily_data, hourly_data)
+    
+    resultsdict = {}
+    
+    for i,elem in inputsdict.items():
         
-        # dont match on temperature or apparent temperature
-        if (H > 8 or H < 20):
-            inputs['apparentTemperature'] = ndata['apparentTemperatureHigh']
-            inputs['temperature'] = ndata['temperatureHigh']
-        else: 
-            inputs['apparentTemperature'] = ndata['apparentTemperatureLow']
-            inputs['temperature'] = ndata['temperatureLow']        
-
-     #=================================== Daily Weather available ===============================#
-    else:
-        mid += 86400 * (time_diff//24) 
-        mid += 3600 * time_diff%24
-        mid -= 3600
-
-        data = hourly_data
-
-        closest_hourrow = 0
-        closest_timestamp = 10000000000000
-        smallest_diff = 100000000000
-        # select the closes time stamp to use as the weather data
-        for hourrow in data:
-            diff = abs(hourrow['time'] - mid)
-            if diff < smallest_diff:
-                smallest_diff = diff
-                closest_timestamp = hourrow['time']
-                closest_hourrow = hourrow
-
-        ndata = closest_hourrow
-        
-        ############### test
-        # return json.dumps(hourrow)
-
-        # construct input from data
-        if ndata['icon'] in icons_cloudy:
-            inputs['cloudy'] = 1.0
-
-        if ndata['icon'] in icons_clear:
-            inputs['clear'] = 1.0
-        
-        if ndata['icon'] in icons_rain:
-            inputs['rain'] = 1.0
-
-        # inputs matches up with the hourly data
-        for col in wcols:
-            inputs[col] = ndata[col]
-
-    # dataframe of information ready for model application.
-    inputs = pd.DataFrame(inputs, index=[0])
-
     #=================================== Model application ===============================#
 
-    model = xgb.Booster()
-    model.load_model(f'./app/static/Model/station{station_number}.model')
+    model = allmodels[f'model{station_number}']
 
-    # What is the format of the inputs ?
-
+    """ Applying the model """
     modeldata = xgb.DMatrix(inputs)
     predictions = model.predict(modeldata)
     predicted_available_bikes = predictions.tolist()
      
-    #=================================== Model stands ===============================#
+    #=================================== Station stands ===============================#
     sql = f"""
     SELECT bike_stands
     FROM DublinBikesDB.dynamic
