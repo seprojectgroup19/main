@@ -158,6 +158,7 @@ def fulllookup():
 def model():
     
     global allmodels
+    global Weather
 
     # Required forecast day and hour and station to choose model. One for each station.
     D = request.args.get('Day')
@@ -229,24 +230,14 @@ def model():
 
     inputs['hour_x'] = float(H)
     
-    #=================================== Weather API Call ===============================#
-    with open("./app/static/DB/authentication.txt") as f:
-        auth = f.read().split('\n')
-    darksky_key = auth[2]
-    
-    #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
-    wresponse = r.get(f"""
-                        https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
-                        units=si&
-                        exclude=currently,flags,alerts,minutely
-                        """)
-    
-    weatherforecast = wresponse.json()
+
+    #=================================== get weather information ===============================#
+    weatherforecast = Weather.update
 
     hourly_data = weatherforecast['hourly']['data']
     daily_data = weatherforecast['daily']['data']
 
-    # store the day "today"
+    # store the day "today" and  current hour. 
     now = datetime.datetime.now()
     current_day  = float(now.weekday())
     current_hour = float(now.hour)
@@ -392,6 +383,8 @@ def model_all_stations():
 
     global StationNumbers
     global allmodels
+    global Weather
+
     # Required forecast day and hour and station to choose model. One for each station.
     D = request.args.get('Day')
     H = request.args.get('Time')
@@ -461,19 +454,8 @@ def model_all_stations():
 
     inputs['hour_x'] = float(H)
     
-    #=================================== Weather API Call ===============================#
-    with open("./app/static/DB/authentication.txt") as f:
-        auth = f.read().split('\n')
-    darksky_key = auth[2]
-    
-    #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
-    wresponse = r.get(f"""
-                        https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
-                        units=si&
-                        exclude=currently,flags,alerts,minutely
-                        """)
-    
-    weatherforecast = wresponse.json()
+    #=================================== Weather information ===============================#
+    weatherforecast = Weather.update
 
     hourly_data = weatherforecast['hourly']['data']
     daily_data = weatherforecast['daily']['data']
@@ -668,24 +650,17 @@ def make_charts():
 @app.route('/fullmodelgraph', methods=["GET"])
 def fullmodelgraph():
     
+    global StationNumbers
+    global allmodels
+    global Weather
+
     # generate predictions for all times up to time frame given station and variables
     variable = request.args.get('variable')
     timeframe = request.args.get('TimeFrame')
     station_number = request.args.get('Station')
 
-    #=================================== Weather API Call ===============================#
-    with open("./app/static/DB/authentication.txt") as f:
-        auth = f.read().split('\n')
-    darksky_key = auth[2]
-    
-    #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
-    wresponse = r.get(f"""
-                        https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
-                        units=si&
-                        exclude=currently,flags,alerts,minutely
-                        """)
-    
-    weatherforecast = wresponse.json()
+    #=================================== Weather Information ===============================#
+    weatherforecast = Weather.update
 
     hourly_data = weatherforecast['hourly']['data']
     daily_data = weatherforecast['daily']['data']
