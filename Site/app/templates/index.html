@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../static/mainstyle.css">
+    <link rel="icon" href="../static/images/Dublin_Bikes_logo.jpg" type="image/jpg">
+
+    <script type=></script>
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="../static/skycons.js"></script>
+    <script src="../static/scripts.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD_A2XKU-wVSr9dGPoYBxir0vI2ieENbCo&libraries=visualization&callback=initMap"></script>
+
+  </head>
+
+  <body>
+
+      <!-- Header -->
+      <header id="headerbox">
+        <h1 style="margin-bottom: 0;">
+          <img src="../static/images/Dublin_Bikes_logo.jpg">
+        </h1>
+        <hr style="width: 20%;margin-top:0%;margin-bottom: 0%">
+      </header>
+      <div style="clear:both;"></div>
+
+      <!-- Main Body: Map and interactive info window -->
+      <div id="loadingwindow" >
+          <div class="loader"></div>
+      </div>
+      <div id="contentwindow">
+
+        <div id="sidenav">
+          <!-- <div class="dropdown"> -->
+          <div id="menu_headbar" onclick="flip_menu()"> 
+            <img src="../static/images/menu.png" style="height:35px; width:40px;float:left;" >
+            <p>Menu</p>
+            <div style="float:left;padding:0; padding-top:10px;margin:0;">
+              <img id="menu_arrow" src="../static/images/arrow.png">
+            </div>
+          </div>
+          
+          <div style="clear:both"></div>
+          
+          <div class="dropdown-content">
+            <a href="#" id="menu_item_1" onclick="clickHandler(1)">Find Station</a>
+            <a href="#" id="menu_item_2" onclick="clickHandler(2)">Forecasts</a>
+            <a href="#" id="menu_item_3" onclick="clickHandler(3)">Graphs</a>
+          </div>
+          
+          <hr style="color:white; width:100%; margin:0;padding:0;">
+
+          <div> <!-- container for weather information -->
+            <div>
+              <h4>Weather Information</h4>
+            </div>
+            <p>
+                <canvas id="weathericon" class="clear-day" width="50" height="50"></canvas>
+            </p>
+            <!-- <hr style="color:white; width:60%; position:relative; margin:0;padding:0;"> -->
+            <table id="WeatherInfolist">
+              <tr>
+                <td>
+                  <p>
+                    Conditions:
+                  </p>
+                </td>
+                <td>
+                  <p id="Conditions">
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>
+                    Temperature:
+                  </p>
+                </td>
+                <td>
+                  <p id="Temperature">
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>
+                    Wind speed:
+                  </p>
+                </td>
+                <td>
+                  <p id="WindSpeed">
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>
+                    Humidity:
+                  </p>
+                </td>
+                <td>
+                  <p id="Humidity">
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>
+                    Precipitation:
+                  </p>
+                </td>
+                <td>
+                  <p id="Precipitation">
+                  </p>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <p>last updated:
+                  </p>
+                </td>
+                <td>
+                  <p id="UpdateTime">
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      
+        <div id="map_container">
+          <div id="map">
+          <!-- This is empty for the map to be placed in -->
+          </div>
+          
+          <div id="infobox">
+            <div id="infoboxcontent">
+              <!-- Information Table: Contains info on bikes and weather -->
+              
+            <hr style="width: 30%; ">
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer id=footerbox>
+        <!-- Place Toggle Options Here -->
+        <ul id="toggle_list">
+          <li>
+            Toggle Markers:
+            <label class="switch" id="toggle_markers_switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+          </li>
+          <li>
+            Station colors:
+            <label class="switch" id="toggle_station_colours_switch" onchange="toggle_map_colours();">
+                <input type="checkbox" checked>
+                <span class="slider"></span>
+            </label>
+          </li>
+          <li>
+            Hide Empty:
+            <label class="switch" id="toggle_hide_empty_switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+          </li>
+          <li>
+            Heatmap:
+            <label class="switch" id="toggle_heatmap_switch">
+                <input type="checkbox">
+                <span class="slider"></span>
+            </label>
+          </li>
+        </ul>
+      </footer>
+
+  </body>
+</html>

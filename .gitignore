@@ -1,5 +1,12 @@
-
-# ignore text/log files when commiting to github
+<<<<<<< HEAD
+/app/static/validation.txt
+/app/validation.txt
+=======
+server_file_swap
 *.log
 *.txt
-model/TimeSeriesAnalysisWithPython-master/
+.project
+.pydevproject
+
+# ignore text/log files when commiting to github
+>>>>>>> master
