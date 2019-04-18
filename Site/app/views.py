@@ -27,6 +27,7 @@ Weather = ""
 @app.before_first_request
 def setup():
 
+    # Importing global variables
     global StationNumbers
     global allmodels
     global Weather
@@ -50,8 +51,8 @@ def setup():
 
     #=================================== Auto refresh weather information ===============================#
     class WeatherForecast():
-        """
-        Pull forecast information hourl in background to reduce overhead of prediction functions.
+        """ 
+        Pull forecast information hourly in background to reduce overhead of prediction functions. 
         """
 
         def __init__(self, interval):
@@ -107,29 +108,37 @@ def get_weather_update():
         WHERE number = 33
         ORDER BY time DESC LIMIT 1;
     """
+
+    # format results for json.dumps
     results = [tuple(eq.execute_sql(weather)[0])]
     
+    # return json
     return json.dumps(results)
 
 @app.route('/lookup', methods=["GET"])
 def lookup():
 
+    # read arguments passed in xhttprequest.
     id = request.args.get('id')
-    
+
+    # query to get dynamic information on bike stands  
     bikes = f"""
         SELECT available_bike_stands, available_bikes, last_update 
         FROM DublinBikesDB.dynamic 
         WHERE number = {str(id)} 
         ORDER BY last_update DESC LIMIT 1;
     """
-    
+
+    # run query and fomat results of query for json.dumps
     result = list(eq.execute_sql(bikes)[0])
 
+    # return json
     return json.dumps(result)
 
 @app.route('/fulllookup', methods=["GET"])
 def fulllookup():
 
+    # query to gather information for bike stands
     fulldata = f"""
         SELECT first.number, first.status, first.available_bike_stands, first.available_bikes, second.icon
         FROM
@@ -153,6 +162,7 @@ def fulllookup():
         ON first.number = second.number
     """
 
+    # execute query and read output into dictionary
     result = list(eq.execute_sql(fulldata))
     resultdictionary = {}
     for i in result:
@@ -162,11 +172,13 @@ def fulllookup():
         resultdictionary[str(i[0])]["bikes"] = i[3]
         resultdictionary[str(i[0])]["weather_icon"] = i[4]
 
+    #return json format
     return json.dumps(resultdictionary)
 
 @app.route('/model_prediction', methods=["GET"])
 def model_prediction():
     
+    # importing global variables
     global StationNumbers
     global allmodels
     global Weather
@@ -179,6 +191,7 @@ def model_prediction():
     # generate list of 1s and 0s for building input to model
     dayslist = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
 
+    # input format for model. Must use this format!
     inputs = {
         'weekday':0.0,
         'weekend':0.0,
@@ -201,6 +214,7 @@ def model_prediction():
         'visibility':0.0
     }
 
+    # Icon groupings for model.
     icons_cloudy = [
         'partly-cloudy-day',
         'partly-cloudy-night',
@@ -256,6 +270,7 @@ def model_prediction():
     #=================================== find timestamp of prediction ===============================#
     time_diff = 0
 
+    # Adding hours during day to time difference. 
     H = float(H)
     if H >= current_hour:
         time_diff += H - current_hour 
@@ -264,6 +279,7 @@ def model_prediction():
 
     dayslist_index_predict_day = dayslist.index(D)
     
+    # Adding days to time difference. 
     if ((current_day != dayslist_index_predict_day) or (H < current_hour)):
         if current_day < dayslist_index_predict_day: 
             time_diff += (dayslist_index_predict_day - current_day)*24
@@ -297,9 +313,6 @@ def model_prediction():
                 closest_dayrow = dayrow
 
         ndata = closest_dayrow
-
-        ################## test
-        # return json.dumps(mid)
 
         # construct input from data (data[2] is the 'icon')
         if ndata['icon'] in icons_cloudy:
@@ -344,9 +357,6 @@ def model_prediction():
                 closest_hourrow = hourrow
 
         ndata = closest_hourrow
-        
-        ############### test
-        # return json.dumps(hourrow)
 
         # construct input from data
         if ndata['icon'] in icons_cloudy:
@@ -615,6 +625,7 @@ def model_all_stations():
 @app.route('/make_charts', methods=["GET"])
 def make_charts():
 
+    # reading variables passed in xhhtprequest from javascript. (site options)
     days = float(request.args.get("Days"))
     snum = int(request.args.get("Station"))
     step = request.args.get("TimeStep") # will be set to 60mins in javascript, leaving option to change here just in case
@@ -905,6 +916,7 @@ def fullmodelgraph():
 
     return json.dumps(preds)
 
+""" TEST PAGE: NOT IN USE """
 @app.route('/testpage')
 def testpage():
 
