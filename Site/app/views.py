@@ -670,6 +670,7 @@ def make_charts():
     # returning bikes information for graph.
     return json.dumps(tuple([As,Ab,Ts]))
 
+""" Return predictions up to 7 days every hour """
 @app.route('/fullmodelgraph', methods=["GET"])
 def fullmodelgraph():
     
@@ -678,7 +679,6 @@ def fullmodelgraph():
     global Weather
 
     # generate predictions for all times up to time frame given station and variables
-    variable = request.args.get('variable')
     timeframe = request.args.get('TimeFrame')
     station_number = request.args.get('Station')
 
@@ -750,7 +750,7 @@ def fullmodelgraph():
         # set a limiting timestamp based on the value of timeframe. (e.g. a hard limit on how far forward to go)
         limit_timestamp = now + (86400 * float(timeframe))
 
-        input_dict = {}
+        input_list = []
         #=================================== Weekly weather available ===============================#
         
         for row in daily_data:
@@ -795,7 +795,7 @@ def fullmodelgraph():
                         inputs['apparentTemperature'] = row['apparentTemperatureLow']
                         inputs['temperature'] = row['temperatureLow']
 
-                    input_dict[row['time'] + hour*3600 ] = inputs
+                    input_list.append({(row['time'] + hour*3600 ):inputs})
 
         #=================================== Daily Weather available ===============================#
 
@@ -812,7 +812,7 @@ def fullmodelgraph():
             inputs['hour_x'] = date_time.hour
 
             if row['time'] < limit_timestamp:
-
+                print('here')
                 # construct input from data
                 if row['icon'] in icons_cloudy:
                     inputs['cloudy'] = 1.0
@@ -826,25 +826,35 @@ def fullmodelgraph():
                 # inputs matches up with the hourly data
                 for col in wcols:
                     inputs[col] = row[col]
-                
-                input_dict[row['time']] = inputs
-
+                print(inputs)
+                input_list.append({(row['time']):inputs})
+            
         # dataframe of information ready for model application.
-        return input_dict, limit_timestamp
+        return input_list
 
-    inputdict,limit = gen_model_inputs(daily_data,hourly_data,timeframe)
-    
-    #=================================== Model application ===============================#
-    resultsdict = {}
+    inputdict = gen_model_inputs(daily_data,hourly_data,timeframe)
+    for i in inputdict:
+        print(i)
+    # for row,itme in inputdict.items():
+    #     print(itme['hour_x'])
+    # #=================================== Model application ===============================#
+    resultslist = []
     model = allmodels[f'model{station_number}']
     
-    for timestamp_key,elem in inputdict.items():
+    for row in inputdict:
+        
+        for key in row.keys():
+            timestamp_key = key
+        elem = row[timestamp_key]
 
         """ Applying the model """
         elem_df = pd.DataFrame(elem, index=[0])
         modeldata = xgb.DMatrix(elem_df)
         predictions = model.predict(modeldata)
-        resultsdict[timestamp_key] = predictions.tolist()
+        resultslist.append({
+            'time':timestamp_key,
+            'bike': predictions.tolist()[0]
+        })
      
     #=================================== Station stands ===============================#
     sql = f"""
@@ -856,10 +866,9 @@ def fullmodelgraph():
     stands = int(eq.execute_sql(sql)[0][0])
 
      #=================================== return data ===============================#
-    preds = tuple([resultsdict, stands, timeframe,limit])
+    preds = tuple([resultslist, stands])
 
     return json.dumps(preds)
-
 
 @app.route('/testpage')
 def testpage():
