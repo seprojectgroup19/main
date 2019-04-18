@@ -114,11 +114,14 @@ var graph_content_inner_html = `
       Select Time Period:
       </td>
       <td>
-      <select id='graph_days'>
+      <select id='graph_days' onchange="chart_type_predictions()">
         <option value='default'>Time</option>
-        <option value='0.5'>Last 12 Hours</option>
-        <option value='1'>Last Day</option>
-        <option value='7'>Last 7 Days</option>
+        <option value='-0.5'>Last 12 Hrs</option>
+        <option value='-1'>Last Day</option>
+        <option value='-7'>Last 7 Days</option>
+        <option value='0.5'>Next 12 Hrs</option>
+        <option value='1'>Next Day</option>
+        <option value='7'>Next 7 Days</option>
       </select>
       </td>
     </tr>
@@ -152,7 +155,8 @@ var graph_content_inner_html = `
       </td>
     </tr>
   </table>
-  
+
+  <div id="graph_error_message" style="clear:both"></div>
 
 </div>
 <div id="chart_div"></div>
@@ -167,7 +171,7 @@ var Forecast_content_inner_html = `
 <div style="width:80%; text-align: left; margin:auto; color:whitesmoke">
   <div id="forecast_form">
     Select Day:
-    <select id='time_pred'>
+    <select id='time_pred'>f
       <option value='default'>Day</option>
       <option value="Mon">Monday</option>
       <option value="Tue">Tuesday</option>
@@ -272,7 +276,7 @@ function Forecast() {
     $("#forecasts_message").text("");
   }
 
-  xmlhttp.open("GET", "/model?Day="+day+"&Time="+hour+"&Station="+snum, true);
+  xmlhttp.open("GET", "/model_prediction?Day="+day+"&Time="+hour+"&Station="+snum, true);
   xmlhttp.send();
   }
 
@@ -566,14 +570,6 @@ SkyCon()
 function heatmap(state) {
   if (state == 1) {
       // turn on heatmap
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: {
-          lat: 53.34481,
-          lng: -6.266209
-        },
-        zoom: 13.5,
-        mapTypeId: 'satellite'
-      });
       var heatmap = new google.maps.visualization.HeatmapLayer({
         data: getPoints(),
         map : map
@@ -603,17 +599,6 @@ function get_Points(){
     return map_data[0];
   });
 };
-
-function getPoints() {
-  return [
-    new google.maps.LatLng(53.782745, -6.444586),
-    new google.maps.LatLng(53.782842, -6.443688),
-    new google.maps.LatLng(53.782919, -6.442815),
-    new google.maps.LatLng(53.782551, -6.445368),
-    new google.maps.LatLng(53.782992, -6.442112),
-    new google.maps.LatLng(53.783100, -6.441461)
-  ];
-}
 
 function populate_station_number_dropdown(){
   drpdwn = document.getElementById('station_number_find');
@@ -853,7 +838,8 @@ function populate_graph_options() {
 // Function to generate charts
 function get_chart_data() {
             
-  var Days = document.getElementById("graph_days").value;
+  var Days = parseFloat(document.getElementById("graph_days").value);
+
   // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
   var station = document.getElementById("station_number_graph_options").value;
   var plot_type =  document.getElementById("chart_type").value;
@@ -866,18 +852,40 @@ function get_chart_data() {
           var data = JSON.parse(this.responseText);
           
           //As,Ab,Ts
-          var As = data[0];
-          var Ab = data[1];
-          var Ts = data[2];
+          if (Days < 0) {
 
-          var aSTS = [['TimeStamp','AvailableStands']];
-          var aBTS = [['TimeStamp','AvailableBikes']];
-          var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
+            var As = data[0];
+            var Ab = data[1];
+            var Ts = data[2];
 
-          for (var i=0; i<As.length; i++){
-              aBTS.push([new Date(Ts[i]),As[i]]);
-              aSTS.push([new Date(Ts[i]),Ab[i]]);
-              MultiPlot.push([new Date(Ts[i]),Ab[i],As[i]]);
+            var aSTS = [['TimeStamp','AvailableStands']];
+            var aBTS = [['TimeStamp','AvailableBikes']];
+            var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
+
+            for (var i=0; i<As.length; i++){
+              AStand = Math.round(parseFloat(Ab[i]));
+              ABikes = Math.round(parseFloat(As[i]));
+              aBTS.push([new Date(Ts[i]),AStand]);
+              aSTS.push([new Date(Ts[i]),ABikes]);
+              MultiPlot.push([new Date(Ts[i]),ABikes,AStand]);
+            }
+          } else {
+
+            console.log(data)
+            var aSTS = [['TimeStamp','AvailableStands']];
+            var aBTS = [['TimeStamp','AvailableBikes']];
+            var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
+
+            for (var i=0; i < data[0].length; i++){
+
+              Ts = data[0][i].time;
+              Ab =  Math.round(parseFloat(data[0][i].bike));
+              As =  Math.round(parseFloat(data[1]) - Ab);
+
+              aBTS.push([new Date(Ts),Ab]);
+              aSTS.push([new Date(Ts),As]);
+              MultiPlot.push([new Date(Ts),Ab,As]);
+            }
           }
 
           // Load the Visualization API and the corechart package.
@@ -890,42 +898,25 @@ function get_chart_data() {
           // instantiates the pie chart, passes in the data and
           // draws it.
           function drawChart() {
-              
-                          // Create the data table.
-              var Sdata = new google.visualization.arrayToDataTable(aSTS);
-              var Bdata = new google.visualization.arrayToDataTable(aBTS); 
-              var Both =  new google.visualization.arrayToDataTable(MultiPlot);
-              
-              // Plot_Data = Both;
-              switch (g_vars) {
-                case "bike": Plot_Data=Bdata;break;
-                case "stand": Plot_Data=Sdata;break;
-                case "both" : Plot_Data=Both; break;
-                default: Plot_Data=Both;break;
-              }
 
-              // Set chart options
-              var Lineoptions = {
-                  'title': 'Last '+24*Days+' Hrs Information on station '+ station,
-                  'chartArea': {'width': '90%', 'height': '70%'},
-                  lineWidth:5,
-                  backgroundColor: { fill:'transparent' },
-                  legend: {position: 'top', maxLines: 3},
-                  vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-                  hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-                  explorer: {
-                    keepInBounds: true,
-                    actions: ['dragToZoom', 'rightClickToReset']
-                  },
-                  'height':400,
-                  'width':'100%'
-              };
+            // Create the data table.
+            var Sdata = new google.visualization.arrayToDataTable(aSTS);
+            var Bdata = new google.visualization.arrayToDataTable(aBTS);
+            var Both =  new google.visualization.arrayToDataTable(MultiPlot);
 
-              var Columnoptions = {
+            // Plot_Data = Both;
+            switch (g_vars) {
+              case "bike": Plot_Data=Bdata;break;
+              case "stand": Plot_Data=Sdata;break;
+              case "both" : Plot_Data=Both; break;
+              default: Plot_Data=Both;break;
+            }
+
+            // Set chart options
+            var Lineoptions = {
                 'title': 'Last '+24*Days+' Hrs Information on station '+ station,
                 'chartArea': {'width': '90%', 'height': '70%'},
-                isStacked:true,
-                'stroke-width':4,
+                lineWidth:5,
                 backgroundColor: { fill:'transparent' },
                 legend: {position: 'top', maxLines: 3},
                 vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
@@ -936,71 +927,172 @@ function get_chart_data() {
                 },
                 'height':400,
                 'width':'100%'
-              };
+            };
 
-              var Scatteroptions = {
-                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
-                'chartArea': {'width': '90%', 'height': '70%'},
-                backgroundColor: { fill:'transparent' },
-                legend: {position: 'top', maxLines: 3},
-                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-                explorer: {
-                  keepInBounds: true,
-                  actions: ['dragToZoom', 'rightClickToReset']
-                },
-                'height':400,
-                'width':'100%'
-              };
+            var Columnoptions = {
+              'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+              'chartArea': {'width': '90%', 'height': '70%'},
+              isStacked:true,
+              'stroke-width':4,
+              backgroundColor: { fill:'transparent' },
+              legend: {position: 'top', maxLines: 3},
+              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              explorer: {
+                keepInBounds: true,
+                actions: ['dragToZoom', 'rightClickToReset']
+              },
+              'height':400,
+              'width':'100%'
+            };
 
-              var Areaoptions = {
-                'title': 'Last '+24*Days+' Hrs Information on station '+ station,
-                'chartArea': {'width': '90%', 'height': '70%'},
-                backgroundColor: { fill:'transparent' },
-                legend: {position: 'top', maxLines: 3},
-                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-                explorer: {
-                  keepInBounds: true,
-                  actions: ['dragToZoom', 'rightClickToReset']
-                },
-                'height':400,
-                'width':'100%'
-              };
+            var Scatteroptions = {
+              'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+              'chartArea': {'width': '90%', 'height': '70%'},
+              backgroundColor: { fill:'transparent' },
+              legend: {position: 'top', maxLines: 3},
+              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              explorer: {
+                keepInBounds: true,
+                actions: ['dragToZoom', 'rightClickToReset']
+              },
+              'height':400,
+              'width':'100%'
+            };
 
-              // change plot type
-              switch (plot_type){
-                
-                case 'line': var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, Lineoptions);
-                break;
-                
-                case 'area': var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, Areaoptions);
-                break;
-                
-                case 'scatter': var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, Scatteroptions);
-                break;
-                
-                case 'bar': var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, Columnoptions);
-                break;
-                
-                default: var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-                chart.draw(Plot_Data, Areaoptions);
-                break;
+            var Areaoptions = {
+              'title': 'Last '+24*Days+' Hrs Information on station '+ station,
+              'chartArea': {'width': '90%', 'height': '70%'},
+              backgroundColor: { fill:'transparent' },
+              legend: {position: 'top', maxLines: 3},
+              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              explorer: {
+                keepInBounds: true,
+                actions: ['dragToZoom', 'rightClickToReset']
+              },
+              'height':400,
+              'width':'100%'
+            };
+
+            // change plot type
+            switch (plot_type){
+
+              case 'line': var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+              chart.draw(Plot_Data, Lineoptions);
+              break;
+
+              case 'area': var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+              chart.draw(Plot_Data, Areaoptions);
+              break;
+
+              case 'scatter': var chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+              chart.draw(Plot_Data, Scatteroptions);
+              break;
               
-              }
+              case 'bar': var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+              chart.draw(Plot_Data, Columnoptions);
+              break;
+
+              default: var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+              chart.draw(Plot_Data, Areaoptions);
+              break;
+
+            }
           }
       }
   };
-  var resolution=60;
-  console.log(Days);
-  console.log(station);
-  console.log(resolution);
-  var request_string = "/make_charts?Days="+Days+"&Station="+station +"&TimeStep="+resolution;
-  
+
+  var Days = document.getElementById("graph_days").value;
+  // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
+  var station = document.getElementById("station_number_graph_options").value;
+  var plot_type =  document.getElementById("chart_type").value;
+  var g_vars = document.getElementById("graph_variable").value;
+
+  var test=true;
+
+  if (Days=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#graph_days").css('color','red');
+    test=false;
+  }
+  else {
+    $("#graph_days").css("color","black");
+  }
+
+  if (station=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#station_number_graph_options").css('color','red');
+    test=false;
+  }
+  else {
+    $("#station_number_graph_options").css("color","black");
+  }
+
+  if (plot_type=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#chart_type").css('color','red');
+    test=false;
+  }
+  else {
+    $("#chart_type").css("color","black");
+  }
+
+  if (g_vars=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#graph_variable").css('color','red');
+    test=false;
+  }
+  else {
+    $("#graph_variable").css("color","black");
+  }
+
+  if (!test)
+    return
+  else {
+    $("#graph_error_message").css("display","none");
+    $("#graph_error_message").text("");
+  }
+
+  if (Days < 0) {
+    var resolution=60;
+    var request_string = "/make_charts?Days="+(-1*Days)+"&Station="+station +"&TimeStep="+resolution;
+  }
+  else {
+    var request_string = "/fullmodelgraph?TimeFrame="+Days+"&Station="+station;
+  }
   xmlhttp.open("GET", request_string, true);
   xmlhttp.send();
 }
+<<<<<<< HEAD
+=======
+
+function chart_type_predictions() {
+  var Days = document.getElementById("graph_days").value;
+
+  var original_html = `
+      <option value='default'>Type</option>
+      <option value='line'>Line Chart</option>
+      <option value='bar'>Bar Chart</option>
+      <option value='area'>Area Chart</option>
+      <option value='scatter'>Scatter Chart</option>
+  `
+
+  var new_html = `
+    <option value='default'>Type</option>
+    <option value='bar'>Bar Chart</option>
+    <option value='scatter'>Scatter Chart</option>
+  `
+
+  if (parseFloat(Days) > 0) {
+    document.getElementById("chart_type").innerHTML=new_html;
+  } else {
+    document.getElementById("chart_type").innerHTML=original_html;
+  }
+}
+>>>>>>> seprojectgroup19/master
