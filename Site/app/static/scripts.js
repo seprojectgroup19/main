@@ -303,7 +303,6 @@ function initMap() {
 }
 
 var allMarkers = [];
-var rackdata;
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
   var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
@@ -318,19 +317,21 @@ var rackdata;
         map : map,
         name : data[x]["properties"]["name"],
         number : data[x]["properties"]["number"],
-        icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"}
+        icon: {url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png"},
+        avbikes: rackdata[y].bikes,
+        avstands: rackdata[y].stands
       });
 
       if (toggle_marker_color==1) {
         for (p in allMarkers){
             if (rackdata[p].bikes == 0){
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                allMarkers[p].icon.url = "../static/images/markers/red-dot.png"
             }
             else if (rackdata[p].bikes < 10){
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"
+                allMarkers[p].icon.url = "../static/images/markers/orange-dot.png"
             }
             else{
-                allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                allMarkers[p].icon.url = "../static/images/markers/green-dot.png"
             }
         } 
       }else{
@@ -446,15 +447,51 @@ function standinfo(stand) {
 }
 
 //Function updates marker mode - Different visuals for accessibility
+var marker_mode_toggle = false;
 function toggle_marker_mode(){
-    var toggle = false;
-    if (toggle == false){
+    if (marker_mode_toggle == false){
+        console.log("on")
+        marker_mode_toggle = true;
             //If not toggled, will change map markers to visual counterparts
-                for (i in allMarkers){
-                        allMarkers[i].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
-                        allMarkers[i].setMap(null);
-                        allMarkers[i].setMap(map);
-                };
+                for (p in allMarkers){
+            if (allMarkers[p].avbikes == 0){
+                allMarkers[p].icon.url = "../static/images/markers/letter_x.png"
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else if (allMarkers[p].avbikes < 10){
+                allMarkers[p].icon.url = "../static/images/markers/number_1.png"
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else{
+                allMarkers[p].icon.url = "../static/images/markers/number_10.png"
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+        };
+    }else{
+        console.log("off")
+        marker_mode_toggle = false;
+        for (p in allMarkers){
+            if (allMarkers[p].avbikes == 0){
+                allMarkers[p].icon.url = "../static/images/markers/red-dot.png";
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else if (allMarkers[p].avbikes < 10){
+                allMarkers[p].icon.url = "../static/images/markers/orange-dot.png";
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+            else{
+                allMarkers[p].icon.url = "../static/images/markers/green-dot.png";
+                allMarkers[p].setMap(null);
+                allMarkers[p].setMap(map);
+            }
+        };
+
+
     }
 
 
