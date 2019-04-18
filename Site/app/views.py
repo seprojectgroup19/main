@@ -17,28 +17,31 @@ import calendar
 import json
 import time
 
-weatherforecastglobal = ""
 
-def storeweatherforecast():
+@app.before_first_request
+def setup():
+#=================================== find all station numbers ===============================#
 
-    global weatherforecastglobal
+StationNumbers = []
 
-    while True: 
+with open("./app/static/localjson.json") as f:
+    localjson = json.loads(f.read())
 
-        with open("./app/static/DB/authentication.txt") as f:
-            auth = f.read().split('\n')
-        darksky_key = auth[2]
-        
-        #  hour-by-hour forecast for the next 48 hours, and a day-by-day forecast for the next week.
-        wresponse = r.get(f"""
-                            https://api.darksky.net/forecast/{darksky_key}/53.34481, -6.266209?
-                            units=si&
-                            exclude=currently,flags,alerts,minutely
-                            """)
-        
-        weatherforecastglobal = wresponse.json()
+data_nums = localjson['features']
 
-        time.sleep(3600)
+for idx in range(len(data_nums)):
+    StationNumbers.append(int(data_nums[idx]['properties']['number']))
+
+#=================================== load all models ===============================#
+
+allmodels = {}
+
+for station_number in StationNumbers:
+
+    model = xgb.Booster()
+    model.load_model(f'./app/static/Model/station{station_number}.model')
+
+    allmodels[f"model{station_number}"] = model
         
 
 @app.route('/')
@@ -115,6 +118,8 @@ def fulllookup():
 @app.route('/model', methods=["GET"])
 def model():
     
+    global allmodels
+
     # Required forecast day and hour and station to choose model. One for each station.
     D = request.args.get('Day')
     H = request.args.get('Time')
@@ -241,6 +246,7 @@ def model():
         closest_dayrow = 0
         closest_timestamp = 10000000000000
         smallest_diff = 100000000000
+
         # select the closes time stamp to use as the weather data
         for dayrow in data:
             diff = abs(dayrow['time'] - mid)
@@ -320,8 +326,7 @@ def model():
 
     #=================================== Model application ===============================#
 
-    model = xgb.Booster()
-    model.load_model(f'./app/static/Model/station{station_number}.model')
+    model = allmodels[f"model{station_number}"]
 
     # What is the format of the inputs ?
 
@@ -346,6 +351,8 @@ def model():
 @app.route('/model_all_stations', methods=["GET"])
 def model_all_stations():
 
+    global StationNumbers
+    global allmodels
     # Required forecast day and hour and station to choose model. One for each station.
     D = request.args.get('Day')
     H = request.args.get('Time')
@@ -548,28 +555,12 @@ def model_all_stations():
     # dataframe of information ready for model application.
     inputs = pd.DataFrame(inputs, index=[0])
 
-    #=================================== find all station numbers ===============================#
-
-    predicted_available_bikes = {}
-    StationNumbers = []
-
-    with open("./app/static/localjson.json") as f:
-        localjson = json.loads(f.read())
-
-    data_nums = localjson['features']
-
-
-    for idx in range(len(data_nums)):
-        StationNumbers.append(int(data_nums[idx]['properties']['number']))
-
     #=================================== Model application ===============================#
+    predicted_available_bikes = {}
 
     for station_number in StationNumbers:
 
-        model = xgb.Booster()
-        model.load_model(f'./app/static/Model/station{station_number}.model')
-
-        # What is the format of the inputs ?
+        model = allmodels[f"model{station_number}"]
 
         modeldata = xgb.DMatrix(inputs)
         predictions = model.predict(modeldata)
