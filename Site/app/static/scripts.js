@@ -116,7 +116,7 @@ var graph_content_inner_html = `
       <td>
       <select id='graph_days'>
         <option value='default'>Time</option>
-        <option value='0.5'>Last 12 Hours</option>
+        <option value='0.5'>Last 12 Hrs</option>
         <option value='1'>Last Day</option>
         <option value='7'>Last 7 Days</option>
       </select>
@@ -152,7 +152,8 @@ var graph_content_inner_html = `
       </td>
     </tr>
   </table>
-  
+
+  <div id="graph_error_message" style="clear:both"></div>
 
 </div>
 <div id="chart_div"></div>
@@ -513,14 +514,6 @@ SkyCon()
 function heatmap(state) {
   if (state == 1) {
       // turn on heatmap
-      map = new google.maps.Map(document.getElementById('map'), {
-        center: {
-          lat: 53.34481,
-          lng: -6.266209
-        },
-        zoom: 13.5,
-        mapTypeId: 'satellite'
-      });
       var heatmap = new google.maps.visualization.HeatmapLayer({
         data: getPoints(),
         map : map
@@ -550,17 +543,6 @@ function get_Points(){
     return map_data[0];
   });
 };
-
-function getPoints() {
-  return [
-    new google.maps.LatLng(53.782745, -6.444586),
-    new google.maps.LatLng(53.782842, -6.443688),
-    new google.maps.LatLng(53.782919, -6.442815),
-    new google.maps.LatLng(53.782551, -6.445368),
-    new google.maps.LatLng(53.782992, -6.442112),
-    new google.maps.LatLng(53.783100, -6.441461)
-  ];
-}
 
 function populate_station_number_dropdown(){
   drpdwn = document.getElementById('station_number_find');
@@ -942,10 +924,63 @@ function get_chart_data() {
           }
       }
   };
+
+  var Days = document.getElementById("graph_days").value;
+  // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
+  var station = document.getElementById("station_number_graph_options").value;
+  var plot_type =  document.getElementById("chart_type").value;
+  var g_vars = document.getElementById("graph_variable").value;
+
+  var test=true;
+
+  if (Days=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#graph_days").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#graph_days").css("color","black");
+  }
+
+  if (station=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#station_number_graph_options").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#station_number_graph_options").css("color","black");
+  }
+
+  if (plot_type=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#chart_type").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#chart_type").css("color","black");
+  }
+
+  if (g_vars=='default') {
+    $("#graph_error_message").text("* The above fields are required.");
+    $("#graph_error_message").css("display","block");
+    $("#graph_variable").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#graph_variable").css("color","black");
+  }
+
+  if (!test) 
+    return
+  else {
+    $("#graph_error_message").css("display","none");
+    $("#graph_error_message").text("");
+  }
+
   var resolution=60;
-  console.log(Days);
-  console.log(station);
-  console.log(resolution);
   var request_string = "/make_charts?Days="+Days+"&Station="+station +"&TimeStep="+resolution;
   
   xmlhttp.open("GET", request_string, true);

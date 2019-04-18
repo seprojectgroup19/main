@@ -181,6 +181,15 @@ select {
 
 }
 
+#graph_error_message {
+    display:none;
+    color:red;
+    font-size:14pt;
+    margin-top: 20px;
+    text-align:left;
+    font-family: 'Times New Roman', Times, serif; 
+}
+
 #forecasts_message {
     display:none;
     color:red;
