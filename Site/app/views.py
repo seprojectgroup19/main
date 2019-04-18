@@ -61,6 +61,7 @@ def setup():
             """
             self.interval = interval
             thread = threading.Thread(target=self.update_information, args=())
+            thread.setDaemon(True)
             thread.start()
 
         def update_information(self):
@@ -846,7 +847,7 @@ def fullmodelgraph():
     resultsdict = {}
     
     for i,elem in inputsdict.items():
-        
+
     #=================================== Model application ===============================#
 
     model = allmodels[f'model{station_number}']
