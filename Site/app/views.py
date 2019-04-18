@@ -688,16 +688,7 @@ def fullmodelgraph():
     hourly_data = weatherforecast['hourly']['data']
     daily_data = weatherforecast['daily']['data']
 
-    #=================================== Timing Information ===============================#
-    now = calendar.timegm(datetime.datetime.now().timetuple())
-    
-    # set a limiting timestamp based on the value of timeframe. (e.g. a hard limit on how far forward to go)
-    limit_timestamp = now + 86400 * float(timeframe)
-
-    # time_limit_in hours.
-    time_diff = ( limit_timestamp - now ) // (3600)
-
-    def gen_model_inputs(time_diff,daily_data,hourly_data):
+    def gen_model_inputs(daily_data,hourly_data,timeframe):
         #=================================== Set inputs for model ===============================#
         inputs = {
             'weekday':0.0,
@@ -753,109 +744,107 @@ def fullmodelgraph():
             'uvIndex',
             'visibility']
         
+        #=================================== Timing Information ===============================#
+        now = calendar.timegm(datetime.datetime.now().timetuple())
+        
+        # set a limiting timestamp based on the value of timeframe. (e.g. a hard limit on how far forward to go)
+        limit_timestamp = now + (86400 * float(timeframe))
+
+        input_dict = {}
         #=================================== Weekly weather available ===============================#
-        if time_diff > 48:        
-            # find the time at midnight tonight and add the number of days to it. 
-            # Account for time zone difference. 
-            mid += 86400*(time_diff//24)
-            mid -= 3600 
+        
+        for row in daily_data:
+ 
+            if row['time'] < limit_timestamp:
 
-            data = daily_data
+                date_time = datetime.datetime.fromtimestamp(row['time'])
 
-            closest_dayrow = 0
-            closest_timestamp = 10000000000000
-            smallest_diff = 100000000000
-            # select the closes time stamp to use as the weather data
-            for dayrow in data:
-                diff = abs(dayrow['time'] - mid)
-                if diff < smallest_diff:
-                    smallest_diff =  diff
-                    closest_timestamp = dayrow['time']
-                    closest_dayrow = dayrow
+                    # set day and hour.
+                if date_time.weekday() < 5:
+                    inputs['weekday'] = 1.0
+                else:
+                    inputs['weekend'] = 1.0         
 
-            ndata = closest_dayrow
+                # construct input from data (data[2] is the 'icon')
+                if row['icon'] in icons_cloudy:
+                    inputs['cloudy'] = 1.0
 
-            # construct input from data (data[2] is the 'icon')
-            if ndata['icon'] in icons_cloudy:
-                inputs['cloudy'] = 1.0
+                if row['icon'] in icons_clear:
+                    inputs['clear'] = 1.0
+                
+                if row['icon'] in icons_rain:
+                    inputs['rain'] = 1.0
 
-            if ndata['icon'] in icons_clear:
-                inputs['clear'] = 1.0
-            
-            if ndata['icon'] in icons_rain:
-                inputs['rain'] = 1.0
+                # input does not match up with daily data.
+                for col in wcols:
+                    if col in row:
+                        inputs[col] = row[col]
+                
+                
+                for hour in range(24):
 
-            # input does not match up with daily data.
-            for col in wcols:
-                if col in ndata:
-                    inputs[col] = ndata[col]
-            
-            # dont match on temperature or apparent temperature
-            if (H > 8 or H < 20):
-                inputs['apparentTemperature'] = ndata['apparentTemperatureHigh']
-                inputs['temperature'] = ndata['temperatureHigh']
-            else: 
-                inputs['apparentTemperature'] = ndata['apparentTemperatureLow']
-                inputs['temperature'] = ndata['temperatureLow']        
+                    inputs['hour_x'] = hour
+
+                    if ((hour > 8) or (hour < 20)):
+
+                        inputs['apparentTemperature'] = row['apparentTemperatureHigh']
+                        inputs['temperature'] = row['temperatureHigh']        
+
+                    else:
+
+                        inputs['apparentTemperature'] = row['apparentTemperatureLow']
+                        inputs['temperature'] = row['temperatureLow']
+
+                    input_dict[row['time'] + hour*3600 ] = inputs
 
         #=================================== Daily Weather available ===============================#
-        else:
-            mid += 86400 * (time_diff//24) 
-            mid += 3600 * time_diff%24
-            mid -= 3600
 
-            data = hourly_data
+        for row in hourly_data:
+  
+            date_time = datetime.datetime.fromtimestamp(row['time'])
 
-            closest_hourrow = 0
-            closest_timestamp = 10000000000000
-            smallest_diff = 100000000000
-            # select the closes time stamp to use as the weather data
-            for hourrow in data:
-                diff = abs(hourrow['time'] - mid)
-                if diff < smallest_diff:
-                    smallest_diff = diff
-                    closest_timestamp = hourrow['time']
-                    closest_hourrow = hourrow
+            # set day and hour.
+            if date_time.weekday() < 5:
+                inputs['weekday'] = 1.0
+            else:
+                inputs['weekend'] = 1.0
 
-            ndata = closest_hourrow
-            
-            ############### test
-            # return json.dumps(hourrow)
+            inputs['hour_x'] = date_time.hour
 
-            # construct input from data
-            if ndata['icon'] in icons_cloudy:
-                inputs['cloudy'] = 1.0
+            if row['time'] < limit_timestamp:
 
-            if ndata['icon'] in icons_clear:
-                inputs['clear'] = 1.0
-            
-            if ndata['icon'] in icons_rain:
-                inputs['rain'] = 1.0
+                # construct input from data
+                if row['icon'] in icons_cloudy:
+                    inputs['cloudy'] = 1.0
 
-            # inputs matches up with the hourly data
-            for col in wcols:
-                inputs[col] = ndata[col]
+                if row['icon'] in icons_clear:
+                    inputs['clear'] = 1.0
+                
+                if row['icon'] in icons_rain:
+                    inputs['rain'] = 1.0
+
+                # inputs matches up with the hourly data
+                for col in wcols:
+                    inputs[col] = row[col]
+                
+                input_dict[row['time']] = inputs
 
         # dataframe of information ready for model application.
-        return = pd.DataFrame(inputs, index=[0])
+        return input_dict, limit_timestamp
 
-    inputdict = {}
-
-    for hour in range(time_diff):
-        inputdict['hour'] = gen_model_inputs(hour, daily_data, hourly_data)
+    inputdict,limit = gen_model_inputs(daily_data,hourly_data,timeframe)
     
-    resultsdict = {}
-    
-    for i,elem in inputsdict.items():
-
     #=================================== Model application ===============================#
-
+    resultsdict = {}
     model = allmodels[f'model{station_number}']
+    
+    for timestamp_key,elem in inputdict.items():
 
-    """ Applying the model """
-    modeldata = xgb.DMatrix(inputs)
-    predictions = model.predict(modeldata)
-    predicted_available_bikes = predictions.tolist()
+        """ Applying the model """
+        elem_df = pd.DataFrame(elem, index=[0])
+        modeldata = xgb.DMatrix(elem_df)
+        predictions = model.predict(modeldata)
+        resultsdict[timestamp_key] = predictions.tolist()
      
     #=================================== Station stands ===============================#
     sql = f"""
@@ -867,7 +856,7 @@ def fullmodelgraph():
     stands = int(eq.execute_sql(sql)[0][0])
 
      #=================================== return data ===============================#
-    preds = tuple([predicted_available_bikes, stands])
+    preds = tuple([resultsdict, stands, timeframe,limit])
 
     return json.dumps(preds)
 
