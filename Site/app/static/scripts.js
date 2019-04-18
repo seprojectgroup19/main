@@ -276,7 +276,7 @@ function Forecast() {
   xmlhttp.send();
   }
 
-
+var map;
 function initMap() {
     directionsService = new google.maps.DirectionsService();
     directionsDisplay = new google.maps.DirectionsRenderer();
@@ -302,12 +302,13 @@ function initMap() {
 
 }
 
+var allMarkers = [];
+var rackdata;
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
   var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
   $.getJSON('../static/localjson.json', null, function(data) {
     data = data["features"]
-    var allMarkers = [];
     rackdata = fulllookup();
     for (x in data){
       var y = data[x].properties.number
@@ -442,6 +443,21 @@ function standinfo(stand) {
   };
   xmlhttp.open("GET", "/lookup?id=" + stand, true);
   xmlhttp.send();
+}
+
+//Function updates marker mode - Different visuals for accessibility
+function toggle_marker_mode(){
+    var toggle = false;
+    if (toggle == false){
+            //If not toggled, will change map markers to visual counterparts
+                for (i in allMarkers){
+                        allMarkers[i].icon.url = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                        allMarkers[i].setMap(null);
+                        allMarkers[i].setMap(map);
+                };
+    }
+
+
 }
 
 function calcRoute(start, end) {
