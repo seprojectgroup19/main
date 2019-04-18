@@ -76,7 +76,7 @@ class WeatherForecast():
             
             weatherforecast = wresponse.json()
             self.update = weatherforecast
-
+            print("UPDATED WEATHER INFORMATION")
             #sleep for set interval (~ 30min/ 1hr)
             time.sleep(self.interval)
 
