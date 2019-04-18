@@ -1,5 +1,9 @@
 /* Styles for index.html */ 
 
+/* Fix the flickering grepah popups*/
+svg > g:last-child > g:last-child { pointer-events: none }
+div.google-visualization-tooltip { pointer-events: none; }
+
 #headerbox {
     height: 15%;
     width: 100%;
@@ -179,6 +183,15 @@ select {
     font-weight:3em;
     border: none;
 
+}
+
+#graph_error_message {
+    display:none;
+    color:red;
+    font-size:14pt;
+    margin-top: 20px;
+    text-align:left;
+    font-family: 'Times New Roman', Times, serif; 
 }
 
 #forecasts_message {
