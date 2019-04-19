@@ -7,10 +7,6 @@ var map_center = {
   lng: -6.266209
 };
 var zoom_level = 13.5;
-var toggle_markers=1;
-var toggle_heatmap=0;
-var toggle_marker_color=1;
-var toggle_empty_marker=0;
 
 var table_info_content = `
   <table id="information-table">
@@ -95,19 +91,31 @@ var graph_content_inner_html = `
   <table>
     <tr>
       <td>
-      Select station:
+      Station number:
       </td>
       <td>
-      <select id="station_number_graph_options">
+      <select id="station_number_find" onchange="find_by_number()">
         <option value='default'>Station</option>
       </select>
       </td>
-      <td rowspan="4" style="position:relative;">
+      <td rowspan="5" style="position:relative;">
       <button id="submit" onclick="get_chart_data()">Generate<br>Graphs</button>
       </td>
 
     </tr>
+    <tr>
+      <td>
+      Station Address:
+      </td>
+      <td>
+      <select id="station_name_find" onchange="find_by_name()">
+        <option value='default'>Search</option>
+      </select>
+    </tr>
+    
     <script>populate_graph_options()</script>
+
+
 
     <tr>
       <td>
@@ -187,12 +195,15 @@ var Forecast_content_inner_html = `
     <option value='default'>Hour</option>
     </select><br>
 
-    Select station:
-    <select id="station_number_forecast_options">
+    Station number:
+    <select id="station_number_find" onchange="find_by_number()">
       <option value='default'>Station</option>
     </select><br>
 
-    
+    Station Address:<br>
+    <select id="station_name_find" onchange="find_by_name()">
+     <option value='default'>Search</option>
+    </select>
     
     <!-- populate options -->
     <script>populate_forecast_options()</script>
@@ -220,7 +231,7 @@ function Forecast() {
   // send the day and time. 
   var day = document.getElementById("time_pred").value;
   var hour = document.getElementById("hour_forecast_options").value;
-  var snum = document.getElementById("station_number_forecast_options").value;
+  var snum = document.getElementById("station_number_find").value;
   var test=true;
 
   xmlhttp = new XMLHttpRequest();
@@ -293,17 +304,7 @@ function initMap() {
         mapTypeId: 'terrain'
     });
     directionsDisplay.setMap(map);
-
-    if (toggle_markers==1) {
-      showStationMarkers();
-    }
-    else if (toggle_heatmap) {
-      console.log("HEATMAP")
-    }
-    else {
-      console.log("NO MARKERS")
-    }
-
+    showStationMarkers();
 }
 
 var allMarkers = [];
@@ -326,23 +327,17 @@ var allMarkers = [];
         avstands: rackdata[y].stands
       });
 
-      if (toggle_marker_color==1) {
-        for (p in allMarkers){
-            if (rackdata[p].bikes == 0){
-                allMarkers[p].icon.url = "../static/images/markers/red-dot.png"
-            }
-            else if (rackdata[p].bikes < 10){
-                allMarkers[p].icon.url = "../static/images/markers/orange-dot.png"
-            }
-            else{
-                allMarkers[p].icon.url = "../static/images/markers/green-dot.png"
-            }
-        } 
-      }else{
-        for (p in allMarkers){
-          allMarkers[p].icon.url = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
-        }
-      }
+      for (p in allMarkers){
+          if (rackdata[p].bikes == 0){
+            allMarkers[p].icon.url = "../static/images/markers/red-dot.png"
+          }
+          else if (rackdata[p].bikes < 10){
+            allMarkers[p].icon.url = "../static/images/markers/orange-dot.png"
+          }
+          else{
+            allMarkers[p].icon.url = "../static/images/markers/green-dot.png"
+          }
+      } 
 
       allMarkers[y].addListener("click", function() {
         var stationname = this["name"];
@@ -454,7 +449,7 @@ function standinfo(stand) {
 var marker_mode_toggle = false;
 function toggle_marker_mode(){
     if (marker_mode_toggle == false){
-        console.log("on")
+        
         marker_mode_toggle = true;
             //If not toggled, will change map markers to visual counterparts
                 for (p in allMarkers){
@@ -475,7 +470,7 @@ function toggle_marker_mode(){
             }
         };
     }else{
-        console.log("off")
+        
         marker_mode_toggle = false;
         for (p in allMarkers){
             if (allMarkers[p].avbikes == 0){
@@ -537,7 +532,6 @@ function fulllookup(){
         $("#contentwindow").css("height","70%");
         $("#contentwindow").css("width","100%");
         return testvar;
-
     }
   };
 
@@ -567,37 +561,67 @@ function SkyCon() {
 }
 SkyCon()
 
-function heatmap(state) {
-  if (state == 1) {
-      // turn on heatmap
-      var heatmap = new google.maps.visualization.HeatmapLayer({
-        data: getPoints(),
+function HideEmptyMarkers(state){
+
+  if (state=="on") {
+    console.log("hide");
+  }
+  else{
+    console.log("show");
+  }
+}
+
+var heatmap_on=0;
+function Makeheatmap(state) {
+  if (state == "on") {
+      // create on heatmap
+      if (heatmap_on==0) {
+        heatmap = new google.maps.visualization.HeatmapLayer({
+        data: get_Points(),
         map : map
-      });
-      console.log(getPoints());
+        });
+        heatmap.set('radius', 15);
+        heatmap_on=1;
+      }
       heatmap.setMap(map);
-  } else {
-    // redraw original map
-    initMap();
+
+      for (i in allMarkers) {
+        allMarkers[i].setMap(null);
+      }
+  }
+  else {
+    // turn off heatmap
+    heatmap.setMap(null);
+
+    // turn markers back on.
+    for (i in allMarkers) {
+      allMarkers[i].setMap(map);
+    }
   }
 }
 
 function get_Points(){
   var map_data = [];
+
   var file="../static/localjson.json";
+
+  // returns station number -> bikes. 
+  rackdata=fulllookup();
+
   $.getJSON(file,
     function(data){
       for (var i=0; i<data.features.length; i++){
         var lng = data.features[i].geometry.coordinates[0];
         var lat = data.features[i].geometry.coordinates[1];
         var station_number = data.features[i].properties.number;
-        // add data to array for sending to heatmap. replace station number with n_bikes.
-        // var str_ = new google.maps.LatLng(lat, lng);
-        console.log(lat); console.log(53.782745);
-        map_data.push(new google.maps.LatLng(parseFloat(lat), parseFloat(lng)));
+        
+        map_data.push(
+          {location: new google.maps.LatLng(parseFloat(lat), parseFloat(lng)), 
+          weight: parseInt(rackdata[station_number].bikes)}
+        );
       }
-    return map_data[0];
-  });
+    });
+  return map_data;
 };
 
 function populate_station_number_dropdown(){
@@ -764,17 +788,6 @@ function find_nearest_station() {
   });
 }
 
-function toggle_map_colours(){
-  if (toggle_marker_color==0) {
-    // change marker colour here.    
-    toggle_marker_color=1;
-    initMap();
-  }else{
-    toggle_marker_color=0;
-    initMap();
-  }
-}
-
 var arrow_direction=0;
 function flip_menu() {
   if (arrow_direction==0){
@@ -801,7 +814,8 @@ function flip_menu() {
 
 function populate_forecast_options() {
 
-  drpdwn = document.getElementById('station_number_forecast_options');
+  drpdwn = document.getElementById('station_number_find');
+  name_drpdwn = document.getElementById('station_name_find');
   $.getJSON("../static/localjson.json", function(data){
       for (var i=0; i<data.features.length; i++){
         var station_number = data.features[i].properties.number;
@@ -809,6 +823,12 @@ function populate_forecast_options() {
         option.textContent=station_number;
         option.value=station_number;
         drpdwn.appendChild(option);
+
+        var name = data.features[i].properties.name;
+        var name_option = document.createElement("OPTION");
+        name_option.textContent=name;
+        name_option.value=name;
+        name_drpdwn.appendChild(name_option);
       }
     }
   );
@@ -818,11 +838,12 @@ function populate_forecast_options() {
     optionhr.textContent= ((hr < 10) ? "0" : "") + hr + ":00";
     optionhr.value=hr;
     hrdrpdwn.appendChild(optionhr);
-  }
+  };
 }
 
 function populate_graph_options() {
-  drpdwn = document.getElementById('station_number_graph_options');
+  drpdwn = document.getElementById('station_number_find');
+  name_drpdwn = document.getElementById('station_name_find');
   $.getJSON("../static/localjson.json", function(data){
       for (var i=0; i<data.features.length; i++){
         var station_number = data.features[i].properties.number;
@@ -830,6 +851,12 @@ function populate_graph_options() {
         option.textContent=station_number;
         option.value=station_number;
         drpdwn.appendChild(option);
+
+        var name = data.features[i].properties.name;
+        var name_option = document.createElement("OPTION");
+        name_option.textContent=name;
+        name_option.value=name;
+        name_drpdwn.appendChild(name_option);
       }
     }
   );
@@ -841,7 +868,7 @@ function get_chart_data() {
   var Days = parseFloat(document.getElementById("graph_days").value);
 
   // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
-  var station = document.getElementById("station_number_graph_options").value;
+  var station = document.getElementById("station_number_find").value;
   var plot_type =  document.getElementById("chart_type").value;
   var g_vars = document.getElementById("graph_variable").value;
 
@@ -871,7 +898,6 @@ function get_chart_data() {
             }
           } else {
 
-            console.log(data)
             var aSTS = [['TimeStamp','AvailableStands']];
             var aBTS = [['TimeStamp','AvailableBikes']];
             var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
@@ -1006,7 +1032,7 @@ function get_chart_data() {
 
   var Days = document.getElementById("graph_days").value;
   // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
-  var station = document.getElementById("station_number_graph_options").value;
+  var station = document.getElementById("station_number_find").value;
   var plot_type =  document.getElementById("chart_type").value;
   var g_vars = document.getElementById("graph_variable").value;
 
@@ -1025,11 +1051,11 @@ function get_chart_data() {
   if (station=='default') {
     $("#graph_error_message").text("* The above fields are required.");
     $("#graph_error_message").css("display","block");
-    $("#station_number_graph_options").css('color','red');
+    $("#station_number_find").css('color','red');
     test=false;
   }
   else {
-    $("#station_number_graph_options").css("color","black");
+    $("#station_number_find").css("color","black");
   }
 
   if (plot_type=='default') {
@@ -1070,7 +1096,6 @@ function get_chart_data() {
   xmlhttp.send();
 }
 
-
 function chart_type_predictions() {
   var Days = document.getElementById("graph_days").value;
 
@@ -1094,3 +1119,25 @@ function chart_type_predictions() {
     document.getElementById("chart_type").innerHTML=original_html;
   }
 }
+
+$(document).ready(function(){
+  $('#heatmap_toggle').click(function(){
+      if($(this).prop("checked") == true){
+        Makeheatmap("on");
+      }
+      else if($(this).prop("checked") == false){
+        Makeheatmap("off");
+      }
+  });
+});
+
+$(document).ready(function(){
+  $('#toggle_hide_empty_switch').click(function(){
+      if($(this).prop("checked") == true){
+        HideEmptyMarkers("on");
+      }
+      else if($(this).prop("checked") == false){
+        HideEmptyMarkers("off");
+      }
+  });
+});
