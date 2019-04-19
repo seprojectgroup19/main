@@ -18,8 +18,6 @@ import calendar
 import json
 import time
 
-
-
 allmodels = {}
 StationNumbers = []
 Weather = ""
