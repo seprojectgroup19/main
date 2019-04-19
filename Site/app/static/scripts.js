@@ -172,7 +172,7 @@ var graph_content_inner_html = `
   <div id="graph_error_message" style="clear:both"></div>
 
 </div>
-<div id="chart_div"></div>
+<div id="chart_div" style="overflow:hidden"></div>
 `;
 
 // Inner html for information window when menu button clicked. 
@@ -1091,9 +1091,9 @@ function get_chart_data() {
             for (var i=0; i<As.length; i++){
               AStand = Math.round(parseFloat(Ab[i]));
               ABikes = Math.round(parseFloat(As[i]));
-              aBTS.push([new Date(Ts[i]),AStand]);
-              aSTS.push([new Date(Ts[i]),ABikes]);
-              MultiPlot.push([new Date(Ts[i]),ABikes,AStand]);
+              aBTS.push([new Date(Ts[i]),Math.abs(AStand)]);
+              aSTS.push([new Date(Ts[i]),Math.abs(ABikes)]);
+              MultiPlot.push([new Date(Ts[i]),Math.abs(ABikes),Math.abs(AStand)]);
             }
           } else {
 
@@ -1107,9 +1107,9 @@ function get_chart_data() {
               Ab =  Math.round(parseFloat(data[0][i].bike));
               As =  Math.round(parseFloat(data[1]) - Ab);
 
-              aBTS.push([new Date(Ts),Ab]);
-              aSTS.push([new Date(Ts),As]);
-              MultiPlot.push([new Date(Ts),Ab,As]);
+              aBTS.push([new Date(Ts),Math.abs(Ab)]);
+              aSTS.push([new Date(Ts),Math.abs(As)]);
+              MultiPlot.push([new Date(Ts),Math.abs(Ab),Math.abs(As)]);
             }
           }
 
