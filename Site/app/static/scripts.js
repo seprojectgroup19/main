@@ -563,11 +563,19 @@ SkyCon()
 
 function HideEmptyMarkers(state){
 
-  if (state=="on") {
+  if (state==true) {
     console.log("hide");
+    allMarkers.forEach(function(marker){
+      if (marker.avbikes == 0) {
+        marker.setMap(null);
+      }
+    });
   }
   else{
     console.log("show");
+    allMarkers.forEach(function(marker){
+      marker.setMap(map);
+    });
   }
 }
 
@@ -1122,22 +1130,22 @@ function chart_type_predictions() {
 
 $(document).ready(function(){
   $('#heatmap_toggle').click(function(){
-      if($(this).prop("checked") == true){
-        Makeheatmap("on");
-      }
-      else if($(this).prop("checked") == false){
-        Makeheatmap("off");
-      }
+    if($(this).prop("checked") == true){
+      Makeheatmap("on");
+    }
+    else if($(this).prop("checked") == false){
+      Makeheatmap("off");
+    }
   });
 });
 
 $(document).ready(function(){
-  $('#toggle_hide_empty_switch').click(function(){
-      if($(this).prop("checked") == true){
-        HideEmptyMarkers("on");
-      }
-      else if($(this).prop("checked") == false){
-        HideEmptyMarkers("off");
-      }
+  $('#check_toggle_empty').click(function(){
+    if($(this).prop("checked") == true){
+      HideEmptyMarkers(true);
+    }
+    else if($(this).prop("checked") == false){
+      HideEmptyMarkers(false);
+    }
   });
 });
