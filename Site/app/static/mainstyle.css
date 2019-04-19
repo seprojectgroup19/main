@@ -18,8 +18,8 @@ div.google-visualization-tooltip { pointer-events: none; }
 }
 
 #street-view {
-    height:400px;
-    width:100%px;
+    height:350px;
+    width:100%;
     display:block;
     position:relative;
     margin:auto;
