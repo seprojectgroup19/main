@@ -372,12 +372,14 @@ select {
     margin:auto;
     padding-left:50px;
     text-align:left;
+    overflow:hidden;
 }
 
 #Graph_content_div table {
     width:100%; 
     margin:0;
     padding:0;
+    overflow:hidden;
 
 }
 
@@ -389,6 +391,7 @@ select {
     margin-left:20px;
     margin-right:20px;
     max-width: 150px;
+    overflow:hidden;
 }
 
 #reset_map_button {
@@ -407,6 +410,7 @@ select {
 #chart_div {
     padding-top:25px;
     cursor: poniter;
+    overflow:hidden;
     color: white;
     /* border-style:solid;
     border-color:white;
