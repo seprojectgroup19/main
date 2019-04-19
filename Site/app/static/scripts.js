@@ -91,19 +91,31 @@ var graph_content_inner_html = `
   <table>
     <tr>
       <td>
-      Select station:
+      Station number:
       </td>
       <td>
-      <select id="station_number_graph_options">
+      <select id="station_number_find" onchange="find_by_number()">
         <option value='default'>Station</option>
       </select>
       </td>
-      <td rowspan="4" style="position:relative;">
+      <td rowspan="5" style="position:relative;">
       <button id="submit" onclick="get_chart_data()">Generate<br>Graphs</button>
       </td>
 
     </tr>
+    <tr>
+      <td>
+      Station Address:
+      </td>
+      <td>
+      <select id="station_name_find" onchange="find_by_name()">
+        <option value='default'>Search</option>
+      </select>
+    </tr>
+    
     <script>populate_graph_options()</script>
+
+
 
     <tr>
       <td>
@@ -830,7 +842,8 @@ function populate_forecast_options() {
 }
 
 function populate_graph_options() {
-  drpdwn = document.getElementById('station_number_graph_options');
+  drpdwn = document.getElementById('station_number_find');
+  name_drpdwn = document.getElementById('station_name_find');
   $.getJSON("../static/localjson.json", function(data){
       for (var i=0; i<data.features.length; i++){
         var station_number = data.features[i].properties.number;
@@ -838,6 +851,12 @@ function populate_graph_options() {
         option.textContent=station_number;
         option.value=station_number;
         drpdwn.appendChild(option);
+
+        var name = data.features[i].properties.name;
+        var name_option = document.createElement("OPTION");
+        name_option.textContent=name;
+        name_option.value=name;
+        name_drpdwn.appendChild(name_option);
       }
     }
   );
@@ -849,7 +868,7 @@ function get_chart_data() {
   var Days = parseFloat(document.getElementById("graph_days").value);
 
   // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
-  var station = document.getElementById("station_number_graph_options").value;
+  var station = document.getElementById("station_number_find").value;
   var plot_type =  document.getElementById("chart_type").value;
   var g_vars = document.getElementById("graph_variable").value;
 
@@ -1013,7 +1032,7 @@ function get_chart_data() {
 
   var Days = document.getElementById("graph_days").value;
   // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
-  var station = document.getElementById("station_number_graph_options").value;
+  var station = document.getElementById("station_number_find").value;
   var plot_type =  document.getElementById("chart_type").value;
   var g_vars = document.getElementById("graph_variable").value;
 
@@ -1032,11 +1051,11 @@ function get_chart_data() {
   if (station=='default') {
     $("#graph_error_message").text("* The above fields are required.");
     $("#graph_error_message").css("display","block");
-    $("#station_number_graph_options").css('color','red');
+    $("#station_number_find").css('color','red');
     test=false;
   }
   else {
-    $("#station_number_graph_options").css("color","black");
+    $("#station_number_find").css("color","black");
   }
 
   if (plot_type=='default') {
