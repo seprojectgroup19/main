@@ -183,12 +183,15 @@ var Forecast_content_inner_html = `
     <option value='default'>Hour</option>
     </select><br>
 
-    Select station:
-    <select id="station_number_forecast_options">
+    Station number:
+    <select id="station_number_find" onchange="find_by_number()">
       <option value='default'>Station</option>
     </select><br>
 
-    
+    Station Address:<br>
+    <select id="station_name_find" onchange="find_by_name()">
+     <option value='default'>Search</option>
+    </select>
     
     <!-- populate options -->
     <script>populate_forecast_options()</script>
@@ -216,7 +219,7 @@ function Forecast() {
   // send the day and time. 
   var day = document.getElementById("time_pred").value;
   var hour = document.getElementById("hour_forecast_options").value;
-  var snum = document.getElementById("station_number_forecast_options").value;
+  var snum = document.getElementById("station_number_find").value;
   var test=true;
 
   xmlhttp = new XMLHttpRequest();
@@ -565,6 +568,7 @@ function Makeheatmap(state) {
         data: get_Points(),
         map : map
         });
+        heatmap.set('radius', 15);
         heatmap_on=1;
       }
       heatmap.setMap(map);
@@ -798,7 +802,8 @@ function flip_menu() {
 
 function populate_forecast_options() {
 
-  drpdwn = document.getElementById('station_number_forecast_options');
+  drpdwn = document.getElementById('station_number_find');
+  name_drpdwn = document.getElementById('station_name_find');
   $.getJSON("../static/localjson.json", function(data){
       for (var i=0; i<data.features.length; i++){
         var station_number = data.features[i].properties.number;
@@ -806,6 +811,12 @@ function populate_forecast_options() {
         option.textContent=station_number;
         option.value=station_number;
         drpdwn.appendChild(option);
+
+        var name = data.features[i].properties.name;
+        var name_option = document.createElement("OPTION");
+        name_option.textContent=name;
+        name_option.value=name;
+        name_drpdwn.appendChild(name_option);
       }
     }
   );
@@ -815,7 +826,7 @@ function populate_forecast_options() {
     optionhr.textContent= ((hr < 10) ? "0" : "") + hr + ":00";
     optionhr.value=hr;
     hrdrpdwn.appendChild(optionhr);
-  }
+  };
 }
 
 function populate_graph_options() {
