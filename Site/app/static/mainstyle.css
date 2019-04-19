@@ -5,16 +5,19 @@ svg > g:last-child > g:last-child { pointer-events: none }
 div.google-visualization-tooltip { pointer-events: none; }
 
 #headerbox {
-    height: 15%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 150px;
     width: 100%;
-    padding-top: 4px;
+    /* padding-top: 4px; */
     padding-bottom: 40px;
     border-bottom: 1px solid white;
     text-align: center;
     background: #084c55;
     color: white;
     font-size: 25px;
-    font-family: Arial
+    /* font-family: Arial */
 }
 
 #street-view {
@@ -27,25 +30,30 @@ div.google-visualization-tooltip { pointer-events: none; }
 }
 
 #footerbox {
-    height: 1%;
+    height: 50px;
     width: 100%;
-    z-index:1;
-    padding-top: 14px;
-    padding-bottom: 80px;
+    z-index: 10;
+    /* padding-top: 14px;*/
+    /* padding-bottom: 0px; */
     border-top: 1px solid white;
     text-align: center;
     background: #084c55;
     color: white;
     font-size: 25px;
-    font-family: Arial;
-    position:fixed;
-    bottom: 0;
+    /* font-family: Arial; */
+    position: fixed;
+    bottom: 00px;
     left:0;
 }
 
 #contentwindow {
-    height: 0%;
-    width: 0%;
+    height: auto !important;
+    width: 100%;
+    position: absolute;
+    margin-top: 191px;
+    margin-bottom: 50px;
+    top: 0px;
+    bottom: 0px;
     overflow: hidden;
     visibility: hidden;
 }
@@ -216,7 +224,7 @@ select {
     font-size:14pt;
     margin-top: 20px;
     text-align:left;
-    font-family: 'Times New Roman', Times, serif;
+    /* font-family: 'Times New Roman', Times, serif; */
 }
 
 #forecasts_message {
@@ -225,7 +233,7 @@ select {
     font-size:14pt;
     margin-top: 20px;
     text-align:left;
-    font-family: 'Times New Roman', Times, serif; 
+    /* font-family: 'Times New Roman', Times, serif;  */
 }
 
 #Forecast_Content {
@@ -278,7 +286,7 @@ select {
     background: #417782;
     color: white;
     font-size: 20px;
-    font-family: Arial;
+    /* font-family: Arial; */
     visibility:hidden;
 }
 
@@ -399,6 +407,7 @@ select {
 #chart_div {
     padding-top:25px;
     cursor: poniter;
+    color: white;
     /* border-style:solid;
     border-color:white;
     border-radius:10px;
@@ -412,6 +421,8 @@ html, body {
     margin: 0;
     padding: 0;
     background: #084c55;
+    font-family: "serif";
+    color: white;
 }
 
 /* Following is placeholder dropdown css */

@@ -1141,10 +1141,10 @@ function get_chart_data() {
                 'title': 'Last '+24*Days+' Hrs Information on station '+ station,
                 'chartArea': {'width': '90%', 'height': '70%'},
                 lineWidth:5,
-                backgroundColor: { fill:'transparent' },
-                legend: {position: 'top', maxLines: 3},
-                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+                backgroundColor: { fill:'white', fillOpacity:1, stroke:'blue', strokeWidth:5 },
+                legend: {position: 'top', maxLines: 3, textStyle:{color: 'black'}},
+                vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
+                hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
                 explorer: {
                   keepInBounds: true,
                   actions: ['dragToZoom', 'rightClickToReset']
@@ -1158,10 +1158,10 @@ function get_chart_data() {
               'chartArea': {'width': '90%', 'height': '70%'},
               isStacked:true,
               'stroke-width':4,
-              backgroundColor: { fill:'transparent' },
-              legend: {position: 'top', maxLines: 3},
-              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              backgroundColor: { fill:'white', fillOpacity:1, stroke:'blue', strokeWidth:5 },
+              legend: {position: 'top', maxLines: 3, textStyle:{color: 'black'}},
+              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
+              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
               explorer: {
                 keepInBounds: true,
                 actions: ['dragToZoom', 'rightClickToReset']
@@ -1173,10 +1173,10 @@ function get_chart_data() {
             var Scatteroptions = {
               'title': 'Last '+24*Days+' Hrs Information on station '+ station,
               'chartArea': {'width': '90%', 'height': '70%'},
-              backgroundColor: { fill:'transparent' },
-              legend: {position: 'top', maxLines: 3},
-              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              backgroundColor: { fill:'white', fillOpacity:1, stroke:'blue', strokeWidth:5 },
+              legend: {position: 'top', maxLines: 3, textStyle:{color: 'black'}},
+              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
+              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
               explorer: {
                 keepInBounds: true,
                 actions: ['dragToZoom', 'rightClickToReset']
@@ -1188,10 +1188,10 @@ function get_chart_data() {
             var Areaoptions = {
               'title': 'Last '+24*Days+' Hrs Information on station '+ station,
               'chartArea': {'width': '90%', 'height': '70%'},
-              backgroundColor: { fill:'transparent' },
-              legend: {position: 'top', maxLines: 3},
-              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
-              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: '#FFF'}},
+              backgroundColor: { fill:'white', fillOpacity:1, stroke:'blue', strokeWidth:5 },
+              legend: {position: 'top', maxLines: 3, textStyle:{color: 'black'}},
+              vAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
+              hAxis: {gridlines: {color: 'transparent'}, textStyle:{color: 'black'}},
               explorer: {
                 keepInBounds: true,
                 actions: ['dragToZoom', 'rightClickToReset']
