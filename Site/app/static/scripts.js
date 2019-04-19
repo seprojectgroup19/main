@@ -93,7 +93,7 @@ var graph_content_inner_html = `
 <!-- Insert select option here to generate graph -->
 <div id="Graph_Content_div">
 
-  <table>
+  <table >
     <tr>
       <td>
       Station number:
