@@ -8,6 +8,7 @@ var map_center = {
 };
 var zoom_level = 13.5;
 
+// Inner html for information window when menu button clicked. 
 var table_info_content = `
   
   <table id="information-table">
@@ -57,6 +58,7 @@ var table_info_content = `
   <div id="street-view"></div>
   `;
 
+// Inner html for information window when menu button clicked. 
 var find_station_inner_html = `
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
   Find Station 
@@ -82,6 +84,7 @@ var find_station_inner_html = `
 <button id="find_nearest_station_button" onclick="find_nearest_station();">Find Nearest Station</button>
 `;
 
+// Inner html for information window when menu button clicked. 
 var graph_content_inner_html = `
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
   Graphs
@@ -172,7 +175,7 @@ var graph_content_inner_html = `
 <div id="chart_div"></div>
 `;
 
-
+// Inner html for information window when menu button clicked. 
 var Forecast_content_inner_html = `
 <h3 style="text-align: center; color: white; font-size: 20pt; padding-top:10px; margin-bottom:0;padding-bottom:0;"> 
   Forecast
@@ -229,22 +232,26 @@ var Forecast_content_inner_html = `
 </div>
 `;
 
+// function get forecast information onclick of button. 
 function Forecast() {
 
-  // send the day and time. 
+  // reading in values from select options
   var day = document.getElementById("time_pred").value;
   var hour = document.getElementById("hour_forecast_options").value;
   var snum = document.getElementById("station_number_find").value;
   var test=true;
 
+  // set up requrest to python backend for data.
   xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       
+      // reading in json response from backend.
       var data = JSON.parse(this.responseText);
       var nbikes = Math.round(parseFloat(data[0]));
       var nstands = Math.round(parseFloat(data[1]));
 
+      // make window visible with predeiction information inside.
       $("#Forecast_Content").css("display","block");
       $("#submit_all").css("display","block");
       $("#avail_b_forecast").text(nbikes);
@@ -253,6 +260,7 @@ function Forecast() {
     }
   };
 
+  // Error checking. 
   if (day=='default'){
     $("#forecasts_message").text("* The above fields are required.");
     $("#forecasts_message").css("display","block");
@@ -291,10 +299,12 @@ function Forecast() {
     $("#forecasts_message").text("");
   }
 
+  // send request for information to backend. 
   xmlhttp.open("GET", "/model_prediction?Day="+day+"&Time="+hour+"&Station="+snum, true);
   xmlhttp.send();
   }
 
+// function to apply the forecast information to all the pins on the map. The colours will change base on predicted available bikes. 
 function Forecast_all() {
 
   // send the day and time. 
@@ -310,9 +320,10 @@ function Forecast_all() {
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       
+      // parse json response and get data. 
       var data = JSON.parse(this.responseText);
-      // list of station number, no.bikes.
-      console.log(data);
+      
+      // loop through all rows and change the colour/icon of the corresponding marker.
       data.forEach(function(row){
         console.log(row);
         station = row[0]
@@ -320,6 +331,8 @@ function Forecast_all() {
  
         marker = allMarkers[station];
 
+        // if bikes available (predicted) =0, <10, >10 use a different icon
+        // Also use a different icon depending on whether colour-blind mode is on.(marker_mode_toggle)
         if (bikes==0) {
           if (marker_mode_toggle==true){
             marker.icon.url = "../static/images/markers/letter_x.png"
@@ -359,6 +372,7 @@ function Forecast_all() {
     }
   };
 
+  // error checking
   if (day=='default'){
     $("#forecasts_message").text("* The above fields are required.");
     $("#forecasts_message").css("display","block");
@@ -387,31 +401,45 @@ function Forecast_all() {
     $("#forecasts_message").text("");
   }
 
+  // send request
   xmlhttp.open("GET", "/model_all_stations?Day="+day+"&Time="+hour);
   xmlhttp.send();
 }
 
+// initialise the main map
 var map;
 function initMap() {
+
+    // initial config.
     directionsService = new google.maps.DirectionsService();
     directionsDisplay = new google.maps.DirectionsRenderer();
     infowindow = new google.maps.InfoWindow();
     geocoder = new google.maps.Geocoder;
+
+    // set map center point
     var latlng = new google.maps.LatLng(53.34481, -6.266209);
+
+    // create map instance 
     map = new google.maps.Map(document.getElementById('map'), {
         zoom: 13.5,
         center: latlng,
         mapTypeId: 'terrain'
     });
     directionsDisplay.setMap(map);
+
+    // show markers on map at location where there are stations.
     showStationMarkers();
 }
 
-// for street view
+// Adding a street view window to the infoBox popup when a marker is clicked.
 var panorama;
 var street_view_on=0;
 function initStreetMap(position) {
+  
+  // function will also be used to move the center of the map so add this check to enuse it is only initialised once. 
   if (street_view_on==0) {
+
+    // initialise street view object
     panorama = new google.maps.StreetViewPanorama(
       document.getElementById('street-view'),
       {
@@ -419,7 +447,6 @@ function initStreetMap(position) {
         pov: {heading: 165, pitch: 0},
         zoom: 1
     });
-    // panorama.setVisible(false);
   }
   panorama.setPosition(position);
   panorama.setVisible(true);
@@ -427,13 +454,20 @@ function initStreetMap(position) {
 
 var allMarkers = [];
 //Write in pins - source: Slides "WebDev"
- function showStationMarkers(data) {
+function showStationMarkers(data) {
   var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+  
+  // loop through a local geojson file containing station coords and gen markers on map.
   $.getJSON('../static/localjson.json', null, function(data) {
     data = data["features"]
+
+    // calling a list of relevant data from backend. 
     rackdata = fulllookup();
+
     for (x in data){
       var y = data[x].properties.number
+
+        // setting marker properties/attributes
         allMarkers[y] = new google.maps.Marker({
         position : {lat : data[x]["geometry"]["coordinates"]["1"],
         lng : data[x]["geometry"]["coordinates"]["0"]},
@@ -445,7 +479,9 @@ var allMarkers = [];
         avstands: rackdata[y].stands
       });
 
+      // loop through markers and set an icon based on the value of bikes available. 
       for (p in allMarkers){
+
           if (rackdata[p].bikes == 0){
             allMarkers[p].icon.url = "../static/images/markers/red-dot.png"
           }
@@ -457,10 +493,13 @@ var allMarkers = [];
           }
       } 
 
+      // add a listener to the markers to execute on click
       allMarkers[y].addListener("click", function() {
         
         var stationname = this["name"];
         var stationnumber = this["number"];
+
+        //changing properites of windo,w, resizing map and adding info window. 
         $("#infoboxcontent").html(table_info_content);
         $("#map").css("width","65%");
         $("#infobox").css("width","35%");
@@ -470,13 +509,16 @@ var allMarkers = [];
         $("#avstands").text("Loading...");
         $("#menu_item_1").text("Close");
         map.panBy(0, 0);
+
+        // setting information window content
         document.getElementById("avstands").innerHTML = rackdata[stationnumber].stands
         document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
         document.getElementById("status").innerHTML = rackdata[stationnumber].status
       
-        // set street view window
+        // set street view window to position of clicked marker
         initStreetMap(this.position);
 
+        // used for routing to position clicked from current location.
         var destination = this.position.lat() +"," +this.position.lng();
         getPosition(destination);
 
@@ -485,15 +527,18 @@ var allMarkers = [];
   });
 }
 
+// update weather panel on main window
 function weather_update() {
 
   xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
     if (this.readyState == 4 && this.status == 200) {
       
+      // parsing json
       var data = JSON.parse(this.responseText)[0];
       var last_update_time = new Date(data[14] * 1000);
 
+      // changing the attributes/content of the weather panel.
       $("#weathericon").attr("class", JSON.parse(this.responseText)[0][5]);
       $("#Conditions").text(data[12]);
       $('#Temperature').text("");
@@ -506,11 +551,15 @@ function weather_update() {
       var hours = ((last_update_time.getHours()<10) ? "0" : "") + last_update_time.getHours();
       var minutes = ((last_update_time.getMinutes()<10) ? "0" : "") + last_update_time.getMinutes();  
 
+      // setting updated time.
       $("#UpdateTime").text(hours + ":" + minutes);
 
+      // set weather icon
       SkyCon();
     }
   };
+
+  // call to backend to retireve weahter info
   xmlhttp.open("GET", "/get_weather_update", true);
   xmlhttp.send();
 
@@ -571,6 +620,7 @@ function standinfo(stand) {
 var marker_mode_toggle = false;
 function toggle_marker_mode(){
 
+  // if colout blind mode is selected then change the icons from colour based to shape bsaed. 
   if (marker_mode_toggle == false){   
     marker_mode_toggle = true;
       //If not toggled, will change map markers to visual counterparts
@@ -593,7 +643,8 @@ function toggle_marker_mode(){
       }
     };
   }else{
-      
+    
+  // turning off colour-blind mode and reseting the markers
     marker_mode_toggle = false;
     for (p in allMarkers){
       if (allMarkers[p].avbikes == 0){
@@ -615,12 +666,15 @@ function toggle_marker_mode(){
   }
 }
 
+// routing from your location to the clicked station
 function calcRoute(start, end) {
   var request = {
     origin: start,
     destination: end,
     travelMode: 'WALKING'
   };
+
+  // using google routing api to get path.
   directionsService.route(request, function(result, status) {
     if (status == 'OK') {
       directionsDisplay.setDirections(result);
@@ -628,6 +682,7 @@ function calcRoute(start, end) {
   });
 }
 
+// getting your location
 function getPosition(ending) {
   navigator.geolocation.getCurrentPosition(
     function success(position) {
@@ -638,6 +693,7 @@ function getPosition(ending) {
   });
 }
 
+// pull block of data about all stations for use above
 function fulllookup(){
   var fullinfo;
   xmlhttp = new XMLHttpRequest();
@@ -659,6 +715,7 @@ function fulllookup(){
   return xmlhttp.onreadystatechange();
 }
 
+// setting the icons for weather panel, drawing an animation on a canvas
 function SkyCon() {
   var i;
   var icons = new Skycons({
@@ -680,6 +737,7 @@ function SkyCon() {
 }
 SkyCon()
 
+// toggle the visibility of empty stations.
 function HideEmptyMarkers(state){
 
   if (state==true) {
@@ -700,6 +758,8 @@ function HideEmptyMarkers(state){
 
 var heatmap_on=0;
 function Makeheatmap(state) {
+
+  // only initialise once. 
   if (state == "on") {
       // create on heatmap
       if (heatmap_on==0) {
@@ -727,6 +787,7 @@ function Makeheatmap(state) {
   }
 }
 
+// return locations of all station in a format useable by the google heatmap tool
 function get_Points(){
   var map_data = [];
 
@@ -751,6 +812,7 @@ function get_Points(){
   return map_data;
 };
 
+// popoulate dropdown options.
 function populate_station_number_dropdown(){
   drpdwn = document.getElementById('station_number_find');
   $.getJSON("../static/localjson.json", function(data){
@@ -765,6 +827,7 @@ function populate_station_number_dropdown(){
   );
 }
 
+// popoulate dropdown options.
 function populate_station_name_dropdown(){
 
   name_drpdwn = document.getElementById('station_name_find');
@@ -800,6 +863,7 @@ function split_window_info(stationname, stationnumber) {
   standinfo(stationnumber);
 }
 
+// find and center station number
 function find_by_number(){
   // find station by number from localjson
 
@@ -826,6 +890,7 @@ function find_by_number(){
 
           if (station_number == sn) {
 
+            // center map on the position of the selected station. 
             map.panTo(new google.maps.LatLng(lat, lng));
             map.setZoom(17);
 
@@ -841,6 +906,7 @@ function find_by_number(){
   }
 }
 
+// find and center station name
 function find_by_name() {
 
   sname = document.getElementById("station_name_find").value;
@@ -863,6 +929,8 @@ function find_by_name() {
 
             sn.value=station_number;
             $("station_number_find").text(station_number);
+
+            // use station number to centre map on top of the selected station.
             find_by_number();
 
           }
@@ -872,6 +940,7 @@ function find_by_name() {
   }
 }
 
+// use lat and lng values of station locations and your location to find closest station (straight line distance)
 function find_nearest_station() {
   
   var minlat, minlng;
@@ -915,6 +984,7 @@ function find_nearest_station() {
   });
 }
 
+// function for hiding menu
 var arrow_direction=0;
 function flip_menu() {
   if (arrow_direction==0){
@@ -939,6 +1009,7 @@ function flip_menu() {
   }
 }
 
+// populate dropdown options
 function populate_forecast_options() {
 
   drpdwn = document.getElementById('station_number_find');
@@ -968,6 +1039,7 @@ function populate_forecast_options() {
   };
 }
 
+// populate dropdown options
 function populate_graph_options() {
   drpdwn = document.getElementById('station_number_find');
   name_drpdwn = document.getElementById('station_name_find');
@@ -993,12 +1065,11 @@ function populate_graph_options() {
 function get_chart_data() {
             
   var Days = parseFloat(document.getElementById("graph_days").value);
-
-  // var resultion = document.getElementById("graph_resolution").value; // NOTE: THIS NEED TO BE ADDED TO THE CHART AS A BUTTON!
   var station = document.getElementById("station_number_find").value;
   var plot_type =  document.getElementById("chart_type").value;
   var g_vars = document.getElementById("graph_variable").value;
 
+  // create request to backend to pull the last x days bikes infomration to plot. 
   xmlhttp = new XMLHttpRequest();
   xmlhttp.onreadystatechange = function () {
       if (this.readyState == 4 && this.status == 200) {
@@ -1016,6 +1087,7 @@ function get_chart_data() {
             var aBTS = [['TimeStamp','AvailableBikes']];
             var MultiPlot=[['TimeStamp','AvailableBikes','AvailableStands']];
 
+            // generating arrays of the correct format for google charts api from response. 
             for (var i=0; i<As.length; i++){
               AStand = Math.round(parseFloat(Ab[i]));
               ABikes = Math.round(parseFloat(As[i]));
@@ -1047,8 +1119,7 @@ function get_chart_data() {
           // Set a callback to run when the Google Visualization API is loaded.
           google.charts.setOnLoadCallback(drawChart);
 
-          // Callback that creates and populates a data table,
-          // instantiates the pie chart, passes in the data and
+          // Callback that creates and populates a data table, and
           // draws it.
           function drawChart() {
 
@@ -1223,6 +1294,7 @@ function get_chart_data() {
   xmlhttp.send();
 }
 
+// change the available chart types base on whether its prediction informatin or past information. 
 function chart_type_predictions() {
   var Days = document.getElementById("graph_days").value;
 

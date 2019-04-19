@@ -47,6 +47,7 @@
           
           <div style="clear:both"></div>
           
+          <!-- Menu options -->
           <div class="dropdown-content">
             <a href="#" id="menu_item_1" onclick="clickHandler(1)">Find Station</a>
             <a href="#" id="menu_item_2" onclick="clickHandler(2)">Forecasts</a>
@@ -155,12 +156,14 @@
         <ul id="toggle_list">
           <li>
             Colour-blind Mode:
+            <!-- Using a checkbox to allow toggling of colout-blind-mode -->
             <label class="switch" id="toggle_markers_switch" onchange="toggle_marker_mode();">
                 <input type="checkbox">
                 <span class="slider"></span>
             </label>
           </li>
           <li>
+            <!-- Using a checkbox to allow toggling of empty station makers -->
             Hide Currently Empty:
             <label class="switch" id="toggle_hide_empty_switch">
                 <input type="checkbox" id="check_toggle_empty">
@@ -168,6 +171,7 @@
             </label>
           </li>
           <li>
+            <!-- Using a checkbox to allow toggling of heatmap -->
             Heatmap:
             <label class="switch" id="toggle_heatmap_switch">
                 <input type="checkbox" id="heatmap_toggle">
