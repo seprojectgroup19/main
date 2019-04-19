@@ -608,7 +608,7 @@ def model_all_stations():
         predictions = model.predict(modeldata)
 
         # convert predictions to list.
-        predicted_bikes = predictions.tolist()
+        predicted_bikes = predictions.tolist()[0]
 
         # Add prediction to dictionary for returning.
         predicted_available_bikes[station_number] = predicted_bikes

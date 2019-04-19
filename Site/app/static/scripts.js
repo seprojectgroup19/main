@@ -9,50 +9,52 @@ var map_center = {
 var zoom_level = 13.5;
 
 var table_info_content = `
+  
   <table id="information-table">
-      <thead>
-          <h2 id="station">Dublin Bikes</h2>
-          <hr style="width: 40%">
-      </thead>
-      <tbody>
-        <tr>
-          <td colspan="3">
-            <h3>
-              Status:
-            </h3>
-          </td>
-          <td>
-            <p id="status">
-              Open
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3">
-            <h3>
-              Available Bikes:
-            </h3>
-          </td>
-          <td>
-            <p id ="avbikes">
-              Loading...
-            </p>
-          </td>
-        </tr>
-        <tr>
-          <td colspan="3">
-            <h3>
-              Available Stands
-            </h3>
-          </td>
-          <td>
-            <p id ="avstands">
-              Loading...
-            </p>
-          </td>
-        </tr>
-      </tbody>
-      </table>
+    <thead>
+        <h2 id="station">Dublin Bikes</h2>
+        <hr style="width: 40%">
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="3">
+          <h3>
+            Status:
+          </h3>
+        </td>
+        <td>
+          <p id="status">
+            Open
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <h3>
+            Available Bikes:
+          </h3>
+        </td>
+        <td>
+          <p id ="avbikes">
+            Loading...
+          </p>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <h3>
+            Available Stands
+          </h3>
+        </td>
+        <td>
+          <p id ="avstands">
+            Loading...
+          </p>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="street-view"></div>
   `;
 
 var find_station_inner_html = `
@@ -222,6 +224,7 @@ var Forecast_content_inner_html = `
         <td id="avail_s_forecast"></td>
       </tr>
     </table>
+    <button id="submit_all" onclick="Forecast_all()">Apply to Map</button>
   </div>
 </div>
 `;
@@ -243,9 +246,10 @@ function Forecast() {
       var nstands = Math.round(parseFloat(data[1]));
 
       $("#Forecast_Content").css("display","block");
+      $("#submit_all").css("display","block");
       $("#avail_b_forecast").text(nbikes);
       $("#avail_s_forecast").text(nstands - nbikes);
-      console.log(data);
+      
     }
   };
 
@@ -291,6 +295,102 @@ function Forecast() {
   xmlhttp.send();
   }
 
+function Forecast_all() {
+
+  // send the day and time. 
+  var day = document.getElementById("time_pred").value;
+  var hour = document.getElementById("hour_forecast_options").value;
+  var test=true;
+
+  // recenter map
+  map.panTo(new google.maps.LatLng(53.34481, -6.266209));
+  map.setZoom(13.6);
+
+  xmlhttp = new XMLHttpRequest();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      
+      var data = JSON.parse(this.responseText);
+      // list of station number, no.bikes.
+      console.log(data);
+      data.forEach(function(row){
+        console.log(row);
+        station = row[0]
+        bikes = row[1]
+ 
+        marker = allMarkers[station];
+
+        if (bikes==0) {
+          if (marker_mode_toggle==true){
+            marker.icon.url = "../static/images/markers/letter_x.png"
+            marker.setMap(null);
+            marker.setMap(map);
+          } 
+          else {
+            marker.icon.url = "../static/images/markers/red-dot.png";
+            marker.setMap(null);
+            marker.setMap(map);
+          }
+        }
+        else if (bikes < 10) {
+          if (marker_mode_toggle==true){
+            marker.icon.url = "../static/images/markers/number_1.png"
+            marker.setMap(null);
+            marker.setMap(map);
+          } 
+          else {
+            marker.icon.url = "../static/images/markers/orange-dot.png";
+            marker.setMap(null);
+            marker.setMap(map);
+          }
+        } else {
+          if (marker_mode_toggle==true){
+            marker.icon.url = "../static/images/markers/number_10.png"
+            marker.setMap(null);
+            marker.setMap(map);
+          } 
+          else {
+            marker.icon.url = "../static/images/markers/green-dot.png";
+            marker.setMap(null);
+            marker.setMap(map);
+          }
+        }
+      });
+    }
+  };
+
+  if (day=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#time_pred").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#time_pred").css("color","black");
+  }
+
+  if (hour=='default'){
+    $("#forecasts_message").text("* The above fields are required.");
+    $("#forecasts_message").css("display","block");
+    $("#hour_forecast_options").css('color','red');
+    test=false;
+  } 
+  else {
+    $("#hour_forecast_options").css("color","black");
+  }
+
+  // check that the inputs are valid.
+  if (!test) 
+    return
+  else {
+    $("#forecasts_message").css("display","none");
+    $("#forecasts_message").text("");
+  }
+
+  xmlhttp.open("GET", "/model_all_stations?Day="+day+"&Time="+hour);
+  xmlhttp.send();
+}
+
 var map;
 function initMap() {
     directionsService = new google.maps.DirectionsService();
@@ -307,6 +407,24 @@ function initMap() {
     showStationMarkers();
 }
 
+// for street view
+var panorama;
+var street_view_on=0;
+function initStreetMap(position) {
+  if (street_view_on==0) {
+    panorama = new google.maps.StreetViewPanorama(
+      document.getElementById('street-view'),
+      {
+        position: position,
+        pov: {heading: 165, pitch: 0},
+        zoom: 1
+    });
+    // panorama.setVisible(false);
+  }
+  panorama.setPosition(position);
+  panorama.setVisible(true);
+}
+
 var allMarkers = [];
 //Write in pins - source: Slides "WebDev"
  function showStationMarkers(data) {
@@ -316,7 +434,7 @@ var allMarkers = [];
     rackdata = fulllookup();
     for (x in data){
       var y = data[x].properties.number
-      allMarkers[y] = new google.maps.Marker({
+        allMarkers[y] = new google.maps.Marker({
         position : {lat : data[x]["geometry"]["coordinates"]["1"],
         lng : data[x]["geometry"]["coordinates"]["0"]},
         map : map,
@@ -340,6 +458,7 @@ var allMarkers = [];
       } 
 
       allMarkers[y].addListener("click", function() {
+        
         var stationname = this["name"];
         var stationnumber = this["number"];
         $("#infoboxcontent").html(table_info_content);
@@ -355,6 +474,9 @@ var allMarkers = [];
         document.getElementById("avbikes").innerHTML = rackdata[stationnumber].bikes
         document.getElementById("status").innerHTML = rackdata[stationnumber].status
       
+        // set street view window
+        initStreetMap(this.position);
+
         var destination = this.position.lat() +"," +this.position.lng();
         getPosition(destination);
 
@@ -448,52 +570,49 @@ function standinfo(stand) {
 //Function updates marker mode - Different visuals for accessibility
 var marker_mode_toggle = false;
 function toggle_marker_mode(){
-    if (marker_mode_toggle == false){
-        
-        marker_mode_toggle = true;
-            //If not toggled, will change map markers to visual counterparts
-                for (p in allMarkers){
-            if (allMarkers[p].avbikes == 0){
-                allMarkers[p].icon.url = "../static/images/markers/letter_x.png"
-                allMarkers[p].setMap(null);
-                allMarkers[p].setMap(map);
-            }
-            else if (allMarkers[p].avbikes < 10){
-                allMarkers[p].icon.url = "../static/images/markers/number_1.png"
-                allMarkers[p].setMap(null);
-                allMarkers[p].setMap(map);
-            }
-            else{
-                allMarkers[p].icon.url = "../static/images/markers/number_10.png"
-                allMarkers[p].setMap(null);
-                allMarkers[p].setMap(map);
-            }
-        };
-    }else{
-        
-        marker_mode_toggle = false;
-        for (p in allMarkers){
-            if (allMarkers[p].avbikes == 0){
-                allMarkers[p].icon.url = "../static/images/markers/red-dot.png";
-                allMarkers[p].setMap(null);
-                allMarkers[p].setMap(map);
-            }
-            else if (allMarkers[p].avbikes < 10){
-                allMarkers[p].icon.url = "../static/images/markers/orange-dot.png";
-                allMarkers[p].setMap(null);
-                allMarkers[p].setMap(map);
-            }
-            else{
-                allMarkers[p].icon.url = "../static/images/markers/green-dot.png";
-                allMarkers[p].setMap(null);
-                allMarkers[p].setMap(map);
-            }
-        };
 
-
-    }
-
-
+  if (marker_mode_toggle == false){   
+    marker_mode_toggle = true;
+      //If not toggled, will change map markers to visual counterparts
+          for (p in allMarkers){
+            
+      if (allMarkers[p].avbikes == 0){
+          allMarkers[p].icon.url = "../static/images/markers/letter_x.png"
+          allMarkers[p].setMap(null);
+          allMarkers[p].setMap(map);
+      }
+      else if (allMarkers[p].avbikes < 10){
+          allMarkers[p].icon.url = "../static/images/markers/number_1.png"
+          allMarkers[p].setMap(null);
+          allMarkers[p].setMap(map);
+      }
+      else{
+          allMarkers[p].icon.url = "../static/images/markers/number_10.png"
+          allMarkers[p].setMap(null);
+          allMarkers[p].setMap(map);
+      }
+    };
+  }else{
+      
+    marker_mode_toggle = false;
+    for (p in allMarkers){
+      if (allMarkers[p].avbikes == 0){
+          allMarkers[p].icon.url = "../static/images/markers/red-dot.png";
+          allMarkers[p].setMap(null);
+          allMarkers[p].setMap(map);
+      }
+      else if (allMarkers[p].avbikes < 10){
+          allMarkers[p].icon.url = "../static/images/markers/orange-dot.png";
+          allMarkers[p].setMap(null);
+          allMarkers[p].setMap(map);
+      }
+      else{
+          allMarkers[p].icon.url = "../static/images/markers/green-dot.png";
+          allMarkers[p].setMap(null);
+          allMarkers[p].setMap(map);
+      }
+    };
+  }
 }
 
 function calcRoute(start, end) {
@@ -564,7 +683,7 @@ SkyCon()
 function HideEmptyMarkers(state){
 
   if (state==true) {
-    console.log("hide");
+    
     allMarkers.forEach(function(marker){
       if (marker.avbikes == 0) {
         marker.setMap(null);
@@ -572,7 +691,7 @@ function HideEmptyMarkers(state){
     });
   }
   else{
-    console.log("show");
+    
     allMarkers.forEach(function(marker){
       marker.setMap(map);
     });
@@ -1128,6 +1247,7 @@ function chart_type_predictions() {
   }
 }
 
+
 $(document).ready(function(){
   $('#heatmap_toggle').click(function(){
     if($(this).prop("checked") == true){
@@ -1149,3 +1269,4 @@ $(document).ready(function(){
     }
   });
 });
+

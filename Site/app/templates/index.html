@@ -23,6 +23,9 @@
           <img src="../static/images/Dublin_Bikes_logo.jpg">
         </h1>
         <hr style="width: 20%;margin-top:0%;margin-bottom: 0%">
+        <div>
+          <button type="button" onclick="initMap()" id="reset_map_button">Reset Map</button>
+        </div>
       </header>
       <div style="clear:both;"></div>
 
@@ -151,14 +154,14 @@
         <!-- Place Toggle Options Here -->
         <ul id="toggle_list">
           <li>
-            Marker Visibility Mode:
+            Colour-blind Mode:
             <label class="switch" id="toggle_markers_switch" onchange="toggle_marker_mode();">
                 <input type="checkbox">
                 <span class="slider"></span>
             </label>
           </li>
           <li>
-            Hide Empty:
+            Hide Currently Empty:
             <label class="switch" id="toggle_hide_empty_switch">
                 <input type="checkbox" id="check_toggle_empty">
                 <span class="slider"></span> 
@@ -170,7 +173,7 @@
                 <input type="checkbox" id="heatmap_toggle">
                 <span class="slider"></span>
             </label>
-          </li>
+          </li>          
         </ul>
       </footer>
 

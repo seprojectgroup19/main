@@ -17,6 +17,15 @@ div.google-visualization-tooltip { pointer-events: none; }
     font-family: Arial
 }
 
+#street-view {
+    height:400px;
+    width:100%px;
+    display:block;
+    position:relative;
+    margin:auto;
+    z-index:1;
+}
+
 #footerbox {
     height: 1%;
     width: 100%;
@@ -171,6 +180,22 @@ select {
 #submit {
 
     display: block;
+    text-align: center;
+    cursor: pointer;
+    color: #084c55;
+    background-color: whitesmoke;
+    padding: 14px 28px;
+    border-radius:5px;
+    font-size: 18px;
+    margin: auto;
+    margin-top:20px;
+    font-weight:3em;
+    border: none;
+}
+
+#submit_all {
+
+    display: none;
     text-align: center;
     cursor: pointer;
     color: #084c55;
@@ -358,6 +383,19 @@ select {
     max-width: 150px;
 }
 
+#reset_map_button {
+    width:100px;
+    height:30px;
+    border-radius:5px;
+    border-color:black;
+    background-color:white;
+    color: #084c55;
+    position:relative;
+    float:right;
+    margin-right:100px;
+    overflow:hidden;
+}
+
 #chart_div {
     padding-top:25px;
     cursor: poniter;
@@ -367,10 +405,6 @@ select {
     border-width: 2px; */
     width:98%;
     margin:auto;
-}
-
-#street-view {
-    height: 100%;
 }
 
 html, body {
